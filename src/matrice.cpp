@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iomanip>
 
-#include "../include/matrice.h"
+#include "matrice.h"
 
 
 Image readByteFile(const char * filename, Image a)
