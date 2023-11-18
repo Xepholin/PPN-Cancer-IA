@@ -1,14 +1,21 @@
-#include "matrice.h"
+#include "image.h"
 
 int main()
 {
-    Image a1{};
+    std::unique_ptr<Image> result = pngData("../assets/input.png");
 
-    const char* filename = "../assets/input.ppm";
-    a1 = readByteFile(filename, a1);
-    
-    std::cout << a1.r << std::endl;
-
+    if (result)
+    {
+        Image a = *result;
+        
+        std::cout << a.r << std::endl;
+        std::cout << a.g << std::endl;
+        std::cout << a.b << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error reading PNG file." << std::endl;
+    }
 
     return 0;
 }
