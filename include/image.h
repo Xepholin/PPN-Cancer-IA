@@ -1,5 +1,5 @@
-#ifndef MATRICE_H
-#define MATRICE_H
+#ifndef IMAGE_H
+#define IMAGE_H
 
 #include <stdint.h>
 
