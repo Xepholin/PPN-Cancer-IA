@@ -156,3 +156,64 @@ Image readByteFile(const char * filename, Image a)
     file.close();
     return a;
 }
+
+void Image::toGrayscale()
+{
+    int height = 50;
+    int width = 50;
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            uint8_t red = r(y, x);
+            uint8_t green = g(y, x);
+            uint8_t blue = b(y, x);
+
+            uint8_t gray = static_cast<uint8_t>(0.299 * red + 0.587 * green + 0.114 * blue);
+
+            r(y, x) = gray;
+            g(y, x) = gray;
+            b(y, x) = gray;
+        }
+    }
+}
+
+void Image::saveToPNG(const char* outputPath) {
+    int width = 50;
+    int height = 50;
+    FILE* fp = fopen(outputPath, "wb");
+    if (!fp) throw std::runtime_error("Error opening output file");
+
+    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png) throw std::runtime_error("Error creating PNG write struct");
+
+    png_infop info = png_create_info_struct(png);
+    if (!info) {
+        png_destroy_write_struct(&png, (png_infopp)NULL);
+        throw std::runtime_error("Error creating PNG info struct");
+    }
+
+    if (setjmp(png_jmpbuf(png))) {
+        png_destroy_write_struct(&png, &info);
+        fclose(fp);
+        throw std::runtime_error("Error during PNG creation");
+    }
+
+    png_init_io(png, fp);
+
+
+    png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
+        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+    std::vector<png_bytep> row_pointers(height);
+    for (int y = 0; y < height; y++) {
+        row_pointers[y] = reinterpret_cast<png_bytep>(&r(y, 0));
+    }
+
+    png_set_rows(png, info, row_pointers.data());
+    png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
+
+
+    png_destroy_write_struct(&png, &info);
+    fclose(fp);
+}

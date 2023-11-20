@@ -7,10 +7,12 @@ int main()
     if (result)
     {
         Image a = *result;
-        
-        std::cout << a.r << std::endl;
-        std::cout << a.g << std::endl;
-        std::cout << a.b << std::endl;
+
+        // Convert the image to grayscale
+        a.toGrayscale();
+        a.saveToPNG("../assets/output.png");
+        std::cout << "Grayscale Image:" << std::endl;
+        std::cout << a.r << std::endl; // Now all channels will be the same
     }
     else
     {
