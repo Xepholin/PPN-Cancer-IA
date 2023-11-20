@@ -14,9 +14,12 @@ public:
     xt::xarray<uint8_t> r{xt::empty<uint8_t>({50, 50})};
     xt::xarray<uint8_t> g{xt::empty<uint8_t>({50, 50})};
     xt::xarray<uint8_t> b{xt::empty<uint8_t>({50, 50})};
+    void toGrayscale();
+    void saveToPNG(const char* outputPath);
 };
 
 std::unique_ptr<Image> pngData(const char* filename);
 Image readByteFile(const char * filename, Image a);
+
 
 #endif
