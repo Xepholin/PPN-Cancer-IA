@@ -1,4 +1,4 @@
-#include "image.h"
+#include "../include/image.h"
 
 int main()
 {
@@ -9,8 +9,9 @@ int main()
         Image a = *result;
 
         // Convert the image to grayscale
-        a.toGrayscale();
-        a.saveToPNG("../assets/output.png");
+        auto grayMatrice = toGrayScale(a);
+
+        saveGrayToPNG("../assets/output.png",grayMatrice);
         std::cout << "Grayscale Image:" << std::endl;
         std::cout << a.r << std::endl; // Now all channels will be the same
     }
