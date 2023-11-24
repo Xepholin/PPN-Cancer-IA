@@ -21,13 +21,16 @@ public:
 
 
 // Convert rgb image -> grayImage (matrice)
-xt::xarray<uint8_t> toGrayScale(Image a);
+xt::xarray<float> toGrayScale(Image a);
 
 void saveGrayToPNG(const char* outputPath, xt::xarray<uint8_t> grayMatrice);
  
 std::unique_ptr<Image> pngData(const char* filename);
 
 Image readByteFile(const char * filename, Image a);
+
+void saveEdgetoPBM(const char* outputPath, xt::xarray<bool> boolMatrice ) ;
+
 
 
 #endif

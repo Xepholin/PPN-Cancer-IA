@@ -7,10 +7,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCE_FILES
     src/main.cpp
     src/image.cpp
+    src/convolution.cpp
 )
 
 set(HEADER_FILES
     include/image.h
+    include/convolution.h
 )
 
 add_executable(main.exe ${SOURCE_FILES})

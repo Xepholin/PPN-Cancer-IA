@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "convolution.h"
+#include "../include/convolution.h"
 
 // Algo in-place : inverse les lignes i et n-i-1 d'une matrice carrée
 void reverseRows(xt::xarray<float> &matrix)
@@ -63,37 +63,31 @@ float prodConvolution(xt::xarray<float> input, xt::xarray<float> kernel)
     return output;
 }
 
-// Algo in-place : pivote une matrice carrée à 180 degrés
+
 xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float> &kernel)
 {
     //
-    int sizeKernel = kernel.shape()[0];
-
+    int sizeKernelX = kernel.shape()[0];
+    int sizeKernelY = kernel.shape()[0];
     int padding = 0;
     int stride = 1;
 
-    int sizeNewMatrice = (matrice.shape()[0] - sizeKernel + 2 * padding) / stride + 1;
+    int sizeNewMatriceX = (matrice.shape()[0] - sizeKernelX + 2 * padding) / stride + 1;
+    int sizeNewMatriceY = (matrice.shape()[1] - sizeKernelY + 2 * padding) / stride + 1;
 
-    xt::xarray<float> convolvedMatrice{xt::empty<uint8_t>({sizeNewMatrice, sizeNewMatrice})};
+    xt::xarray<float> convolvedMatrice{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
 
-    int i = 0;
-    int j = 0;
-
-    while (i < sizeNewMatrice)
+    for(int i = 0 ; i < sizeNewMatriceX;++i)
     {
-
-        while (j < sizeNewMatrice)
+        for(int j = 0 ; j < sizeNewMatriceY ;++j)
         {    
-            xt::xrange<int> rows(i, i + sizeKernel);
-            xt::xrange<int> cols(j, j + sizeKernel);
+            xt::xrange<int> rows(i, i + sizeKernelX);
+            xt::xrange<int> cols(j, j + sizeKernelY);
 
             auto a = xt::view(matrice, rows, cols);
             convolvedMatrice(i, j) = prodConvolution(a, kernel);
 
-            ++j;
         }
-        j = 0;
-        ++i;
     }
 
     return convolvedMatrice;
