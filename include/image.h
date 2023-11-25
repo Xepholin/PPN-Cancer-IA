@@ -18,19 +18,24 @@ public:
     xt::xarray<uint8_t> b{xt::empty<uint8_t>({SIZE_MATRICE, SIZE_MATRICE})};
     void saveToPNG(const char* outputPath);
 };
-
-
-// Convert rgb image -> grayImage (matrice)
-xt::xarray<float> toGrayScale(Image a);
-
-void saveGrayToPNG(const char* outputPath, xt::xarray<uint8_t> grayMatrice);
  
 std::unique_ptr<Image> pngData(const char* filename);
 
 Image readByteFile(const char * filename, Image a);
 
-void saveEdgetoPBM(const char* outputPath, xt::xarray<bool> boolMatrice ) ;
+// Convert rgb image -> grayImage (matrice)
+xt::xarray<float> toGrayScale(Image a);
 
+xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice);
 
+void saveGrayToPNG(const char* outputPath, xt::xarray<uint8_t> grayMatrice);
+
+void saveEdgetoPBM(const char* outputPath, xt::xarray<bool> boolMatrice);
+
+// convert les binaires en 0 ou 1, puis écrit dans le csv
+void saveToCSV(const char *outputPath, const char *folderPath);
+
+// écrit directement dans le csv sans convert
+void saveToCSV2(const char *outputPath, const char *folderPath);
 
 #endif

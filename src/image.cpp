@@ -8,7 +8,56 @@
 #include <fstream>
 #include <iomanip>
 
-#include "../include/image.h"
+#include <dirent.h>
+
+#include "image.h"
+#include "convolution.h"
+
+void Image::saveToPNG(const char *outputPath)
+{
+
+    int width = 50;
+    int height = 50;
+
+    FILE *fp = fopen(outputPath, "wb");
+    if (!fp)
+        throw std::runtime_error("Error opening output file");
+
+    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png)
+        throw std::runtime_error("Error creating PNG write struct");
+
+    png_infop info = png_create_info_struct(png);
+    if (!info)
+    {
+        png_destroy_write_struct(&png, (png_infopp)NULL);
+        throw std::runtime_error("Error creating PNG info struct");
+    }
+
+    if (setjmp(png_jmpbuf(png)))
+    {
+        png_destroy_write_struct(&png, &info);
+        fclose(fp);
+        throw std::runtime_error("Error during PNG creation");
+    }
+
+    png_init_io(png, fp);
+
+    png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+    std::vector<png_bytep> row_pointers(height);
+    for (int y = 0; y < SIZE_MATRICE; y++)
+    {
+        row_pointers[y] = reinterpret_cast<png_bytep>(&r(y, 0));
+    }
+
+    png_set_rows(png, info, row_pointers.data());
+    png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
+
+    png_destroy_write_struct(&png, &info);
+    fclose(fp);
+}
 
 std::unique_ptr<Image> pngData(const char *filename)
 {
@@ -187,50 +236,25 @@ xt::xarray<float> toGrayScale(Image a)
     return grayMatrice;
 }
 
-void Image::saveToPNG(const char *outputPath)
-{
+xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
+    xt::xarray<float> sobX{{-1, 0, 1},
+                               {-2, 0, 2},
+                               {-1, 0, 1}};
 
-    int width = 50;
-    int height = 50;
+        xt::xarray<float> sobY{{-1, -2, -1},
+                               {0, 0, 0},
+                               {1, 2, 1}};
 
-    FILE *fp = fopen(outputPath, "wb");
-    if (!fp)
-        throw std::runtime_error("Error opening output file");
 
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!png)
-        throw std::runtime_error("Error creating PNG write struct");
 
-    png_infop info = png_create_info_struct(png);
-    if (!info)
-    {
-        png_destroy_write_struct(&png, (png_infopp)NULL);
-        throw std::runtime_error("Error creating PNG info struct");
-    }
+        auto gx = matrixConvolution(grayMatrice, sobX);
+        auto gy = matrixConvolution(grayMatrice, sobY);
 
-    if (setjmp(png_jmpbuf(png)))
-    {
-        png_destroy_write_struct(&png, &info);
-        fclose(fp);
-        throw std::runtime_error("Error during PNG creation");
-    }
+        xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
 
-    png_init_io(png, fp);
+        xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
 
-    png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
-                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
-    std::vector<png_bytep> row_pointers(height);
-    for (int y = 0; y < SIZE_MATRICE; y++)
-    {
-        row_pointers[y] = reinterpret_cast<png_bytep>(&r(y, 0));
-    }
-
-    png_set_rows(png, info, row_pointers.data());
-    png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
-
-    png_destroy_write_struct(&png, &info);
-    fclose(fp);
+        return boolG;
 }
 
 void saveGrayToPNG(const char *outputPath, xt::xarray<uint8_t> grayMatrice)
@@ -310,5 +334,132 @@ void saveEdgetoPBM(const char *outputPath, const xt::xarray<bool> boolMatrix)
         }
     }
 
+    outputFile.close();
+}
+
+void saveToCSV(const char *outputPath, const char *folderPath) {
+    const int width = 48;
+    const int height = 48;
+    const int rowSize = 6;
+    const int headerSize = 9;
+
+    std::ofstream outputFile(outputPath);
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
+        return;
+    }
+
+    DIR* dir = opendir(folderPath);
+    if (dir == nullptr) {
+        std::cerr << "Erreur lors de l'ouverture du répertoire : " << folderPath << std::endl;
+        return;
+    }
+
+    dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_REG &&
+            std::strstr(entry->d_name, ".pbm") != nullptr) {
+
+            std::ifstream inputFile(folderPath + std::string("/") + entry->d_name, std::ios::binary);
+            if (inputFile.is_open()) {
+                std::string line;
+
+                // saute 9 caractères (header .pbm)
+                inputFile.seekg(headerSize);
+
+                outputFile << "{";
+                outputFile << std::endl;
+
+                for (int i = 0; i < height; ++i) {
+                    for (int j = 0; j < rowSize; ++j) {
+                        unsigned char byte;
+                        inputFile.read(reinterpret_cast<char*>(&byte), sizeof(byte));
+
+                        for (int k = 7; k >= 0 && j * 8 + 7 - k < width; --k) {
+                            int pixelValue = (byte >> k) & 1;
+                            // écriture du pixel
+                            outputFile << pixelValue;
+
+                            if (j * 8 + 7 - k < width - 1) {
+                                outputFile << ",";
+                            }
+
+                            if ((j * 8 + 7 - k) % 48 == 47) {
+                                outputFile << std::endl;
+                            }
+                        }
+                    }
+                }
+
+                outputFile << "}";
+                outputFile << std::endl;
+
+                inputFile.close();
+            } else {
+                std::cerr << "Erreur lors de l'ouverture du fichier : " << entry->d_name << std::endl;
+            }
+        }
+    }
+
+    closedir(dir);
+    outputFile.close();
+}
+
+void saveToCSV2(const char *outputPath, const char *folderPath) {
+    const int width = 48;
+    const int height = 48;
+    const int rowSize = 6;
+    const int headerSize = 9;
+
+    std::ofstream outputFile(outputPath, std::ios::binary);
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
+        return;
+    }
+
+    DIR* dir = opendir(folderPath);
+    if (dir == nullptr) {
+        std::cerr << "Erreur lors de l'ouverture du répertoire : " << folderPath << std::endl;
+        return;
+    }
+
+    dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_REG &&
+            std::strstr(entry->d_name, ".pbm") != nullptr) {
+
+            std::ifstream inputFile(folderPath + std::string("/") + entry->d_name, std::ios::binary);
+            if (inputFile.is_open()) {
+                std::string line;
+
+                inputFile.seekg(headerSize);
+
+                outputFile << "{";
+                outputFile << std::endl;
+
+                for (int i = 0; i < height; ++i) {
+                    for (int j = 0; j < rowSize; ++j) {
+                        unsigned char byte;
+                        inputFile.read(reinterpret_cast<char*>(&byte), sizeof(byte));
+
+                        outputFile.write(reinterpret_cast<const char*>(&byte), sizeof(byte));
+                    }
+
+                    outputFile << std::endl;
+                }
+                
+                outputFile << "}";
+                outputFile << std::endl;
+                
+                inputFile.close();
+            } else {
+                std::cerr << "Erreur lors de l'ouverture du fichier : " << entry->d_name << std::endl;
+            }
+        }
+    }
+
+    closedir(dir);
     outputFile.close();
 }
