@@ -9,6 +9,10 @@
 #include <iomanip>
 
 #include <dirent.h>
+#include <stack>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <filesystem>
 
 #include "image.h"
 #include "convolution.h"
@@ -337,47 +341,137 @@ void saveEdgetoPBM(const char *outputPath, const xt::xarray<bool> boolMatrix)
     outputFile.close();
 }
 
-void generateAllPBM(const char *folderConvPath, const char *folderOutput) {
-    DIR* dir = opendir(folderConvPath);
-    if (dir == nullptr)
-    {
-        std::cerr << "Erreur lors de l'ouverture du répertoire : " << folderConvPath << std::endl;
-        return;
-    }
+void generateAllPBM(const char *folderConvPath, const char *folderOutput)
+{
+    std::stack<std::pair<std::string, std::string>> directories;    //stockage des dossiers entrés / sortis
+    directories.push({folderConvPath, folderOutput});
 
-    dirent* entry;
-    while ((entry = readdir(dir)) != nullptr)
+    while (!directories.empty())
     {
-        // Use std::string to concatenate paths
-        std::string filePath = std::string(folderConvPath) + "/" + entry->d_name;
+        auto [currentInputDir, currentOutputDir] = directories.top();
+        directories.pop();
 
-        // Check if it's a regular file and ends with ".png"
-        if (entry->d_type == DT_REG && std::strstr(entry->d_name, ".png") != nullptr)
+        if (mkdir(currentOutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 && errno != EEXIST) {
+            std::cerr << "Erreur lors de la création du dossier : " << folderConvPath << std::endl;
+            return;
+        }
+
+        DIR *dir;
+        struct dirent *entry;
+
+        if ((dir = opendir(currentInputDir.c_str())) == nullptr)
         {
-            std::ifstream inputFile(filePath, std::ios::binary);
-            if (inputFile.is_open())
-            {
-                // Pass the char* to the pngData function
-                char* charFilePath = const_cast<char*>(filePath.c_str());
-                std::unique_ptr<Image> result = pngData(charFilePath);
+            std::cerr << "Erreur lors de l'ouverture du répertoire : " << folderConvPath << std::endl;
+            return;
+        }
+        else
+        {
+            while ((entry = readdir(dir)) != nullptr) {
+                std::string inputFullPath = currentInputDir + "/" + entry->d_name;
+                std::string outputFullPath = currentOutputDir + "/" + entry->d_name;
 
-                if (result)
+                // ignore "." et ".." pour éviter les boucle infinies
+                if (entry->d_type == DT_DIR && std::string(entry->d_name) != "." && std::string(entry->d_name) != "..")
                 {
-                    Image image = *result;
+                    directories.push({inputFullPath, outputFullPath});
+                }
 
-                    auto grayMatrice = toGrayScale(image);
-                    xt::xarray<bool> boolG = toSobel(grayMatrice);
+                // Vérif pour un fichier .png
+                else if (entry->d_type == DT_REG && std::strstr(entry->d_name, ".png") != nullptr)
+                {
+                    std::ifstream inputFile(inputFullPath, std::ios::binary);
+                    
+                    if (inputFile.is_open())
+                    {
+                        // Pass the char* to the pngData function
+                        char* charFilePath = const_cast<char*>(inputFullPath.c_str());
+                        std::unique_ptr<Image> result = pngData(charFilePath);
 
-                    std::string outputFilePath = std::string(folderOutput) + "/" + entry->d_name + ".pbm";
-                    saveEdgetoPBM(outputFilePath.c_str(), boolG);
+                        if (result)
+                        {
+                            Image image = *result;
+
+                            auto grayMatrice = toGrayScale(image);
+                            xt::xarray<bool> boolG = toSobel(grayMatrice);
+
+                            std::string outputFilePath = outputFullPath;
+                            outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
+
+                            saveEdgetoPBM(outputFilePath.c_str(), boolG);
+                        }
+                    }
+                    else
+                    {
+                        std::cerr << "Erreur lors de l'ouverture du fichier : " << inputFullPath << std::endl;
+                    }
                 }
             }
-            else
+
+            closedir(dir); // Close the directory after processing
+        }
+    }
+}
+
+void generateAllPBM2(const char *folderConvPath, const char *folderOutput)
+{
+    std::stack<std::pair<std::string, std::string>> directories;
+    directories.push({folderConvPath, folderOutput});
+
+    while (!directories.empty())
+    {
+        auto [currentInputDir, currentOutputDir] = directories.top();
+        directories.pop();
+
+        try
+        {
+            std::filesystem::create_directories(currentOutputDir);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error creating directory: " << folderConvPath << std::endl;
+            return;
+        }
+
+        for (const auto &entry : std::filesystem::directory_iterator(currentInputDir))
+        {
+            std::string inputFullPath = entry.path().string();
+            std::string outputFullPath = currentOutputDir + "/" + entry.path().filename().string();
+
+            // ignore "." and ".." to avoid infinite loops
+            if (entry.is_directory())
             {
-                std::cerr << "Erreur lors de l'ouverture du fichier : " << filePath << std::endl;
+                directories.push({inputFullPath, outputFullPath});
+            }
+            // Check for a .png file
+            else if (entry.is_regular_file() && entry.path().extension() == ".png")
+            {
+                std::ifstream inputFile(inputFullPath, std::ios::binary);
+
+                if (inputFile.is_open())
+                {
+                    // Pass the char* to the pngData function
+                    char *charFilePath = const_cast<char *>(inputFullPath.c_str());
+                    auto result = pngData(charFilePath);
+
+                    if (result)
+                    {
+                        Image image = *result;
+
+                        auto grayMatrice = toGrayScale(image);
+                        xt::xarray<bool> boolG = toSobel(grayMatrice);
+
+                        // Remove the ".png" extension and append ".pbm"
+                        std::string outputFilePath = outputFullPath;
+                        outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
+
+                        saveEdgetoPBM(outputFilePath.c_str(), boolG);
+                    }
+                }
+                else
+                {
+                    std::cerr << "Error opening file: " << inputFullPath << std::endl;
+                }
             }
         }
     }
-
-    closedir(dir); // Close the directory after processing
 }

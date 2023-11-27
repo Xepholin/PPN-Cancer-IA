@@ -34,4 +34,7 @@ void saveEdgetoPBM(const char* outputPath, xt::xarray<bool> boolMatrice);
 
 void generateAllPBM(const char *folderConvPath, const char *folderOutput);
 
+// Avec C++17
+void generateAllPBM2(const char *folderConvPath, const char *folderOutput);
+
 #endif

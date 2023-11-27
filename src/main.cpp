@@ -11,7 +11,7 @@ int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    generateAllPBM("../assets/breast/train/0", "../assets/PBM/breast/train/0");
+    generateAllPBM2("../assets/breast/", "../assets/PBM/");
 
     auto stop = std::chrono::high_resolution_clock::now();
 
