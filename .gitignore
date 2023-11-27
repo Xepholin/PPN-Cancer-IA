@@ -1,5 +1,7 @@
 .vscode
 assets/edge detector differrent gray
+assets/breast
+assets/PBM
 
 CMakeLists.txt.user
 CMakeCache.txt
