@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../include/convolution.h"
+#include "convolution.h"
 
 // Algo in-place : inverse les lignes i et n-i-1 d'une matrice carrée
 void reverseRows(xt::xarray<float> &matrix)
