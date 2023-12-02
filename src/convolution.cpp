@@ -43,12 +43,11 @@ void rotateMatrix(xt::xarray<float> &kernel)
     }
 }
 
-// Renvoie le produit de convolution entre deux matrices de taille nxn
-float prodConvolution(xt::xarray<float> input, xt::xarray<float> kernel)
+// Renvoie le produit de la correlation croisée entre entre deux matrices de taille nxn
+float prodCrossCorelation(xt::xarray<float> input, xt::xarray<float> kernel)
 {
     int n = input.shape()[0];
     float output = 0;
-    rotateMatrix(kernel);
 
     auto d = input * kernel;
 
@@ -63,10 +62,10 @@ float prodConvolution(xt::xarray<float> input, xt::xarray<float> kernel)
     return output;
 }
 
-
-xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float> &kernel)
+// Effectue l'opération de crossCorrelation
+xt::xarray<float> crossCorrelation(xt::xarray<float> &matrice, xt::xarray<float> &kernel)
 {
-    //
+
     int sizeKernelX = kernel.shape()[0];
     int sizeKernelY = kernel.shape()[0];
     int padding = 0;
@@ -75,7 +74,7 @@ xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float
     int sizeNewMatriceX = (matrice.shape()[0] - sizeKernelX + 2 * padding) / stride + 1;
     int sizeNewMatriceY = (matrice.shape()[1] - sizeKernelY + 2 * padding) / stride + 1;
 
-    xt::xarray<float> convolvedMatrice{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
+    xt::xarray<float> crossCorrelationMatrice{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
 
     for(int i = 0 ; i < sizeNewMatriceX;++i)
     {
@@ -85,10 +84,16 @@ xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float
             xt::xrange<int> cols(j, j + sizeKernelY);
 
             auto a = xt::view(matrice, rows, cols);
-            convolvedMatrice(i, j) = prodConvolution(a, kernel);
+            crossCorrelationMatrice(i, j) = prodCrossCorelation(a, kernel);
 
         }
     }
 
-    return convolvedMatrice;
+    return crossCorrelationMatrice;
+}
+
+xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float> &kernel)
+{
+    rotateMatrix(kernel);
+    return crossCorrelation(matrice,kernel);
 }
