@@ -9,8 +9,6 @@
 
 #include "network.h"
 
-int SIZE_MATRICE = 48; 
-
 xt::xarray<bool> importPBM(const char *path)
 {
     const int width = 48;
@@ -25,7 +23,7 @@ xt::xarray<bool> importPBM(const char *path)
         perror("Erreur lors de l'ouverture du fichier.");
     }
 
-    xt::xarray<bool> PBM{xt::empty<bool>({SIZE_MATRICE, SIZE_MATRICE})};
+    xt::xarray<bool> PBM{xt::empty<bool>({POST_SIZE_MATRIX, POST_SIZE_MATRIX})};
 
     // saute 9 caractères (header .pbm)
     image.seekg(headerSize);
@@ -56,7 +54,7 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
     directory.push({path});
 
     // Define a placeholder for your result (modify as needed)
-    xt::xarray<bool> result{xt::empty<bool>({nbPBM, SIZE_MATRICE, SIZE_MATRICE})};
+    xt::xarray<bool> result{xt::empty<bool>({nbPBM, POST_SIZE_MATRIX, POST_SIZE_MATRIX})};
 
     int position = 0;
 

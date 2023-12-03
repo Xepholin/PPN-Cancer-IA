@@ -7,6 +7,8 @@
 #include <xtensor/xio.hpp>
 #include <xtensor/xview.hpp>
 
+#define POST_SIZE_MATRIX 48
+
 xt::xarray<bool> importPBM(const char *path);
 xt::xarray<bool> importAllPBM(const char *path, int nbPBM);
 

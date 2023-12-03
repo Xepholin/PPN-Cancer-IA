@@ -50,7 +50,7 @@ void Image::saveToPNG(const char *outputPath)
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
     std::vector<png_bytep> row_pointers(height);
-    for (int y = 0; y < SIZE_MATRICE; y++)
+    for (int y = 0; y < PRE_SIZE_MATRIX; y++)
     {
         row_pointers[y] = reinterpret_cast<png_bytep>(&r(y, 0));
     }
@@ -220,11 +220,11 @@ Image readByteFile(const char *filename, Image a)
 
 xt::xarray<float> toGrayScale(Image a)
 {
-    xt::xarray<float> grayMatrice{xt::empty<uint8_t>({SIZE_MATRICE, SIZE_MATRICE})};
+    xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
 
-    for (int y = 0; y < SIZE_MATRICE; ++y)
+    for (int y = 0; y < PRE_SIZE_MATRIX; ++y)
     {
-        for (int x = 0; x < SIZE_MATRICE; ++x)
+        for (int x = 0; x < PRE_SIZE_MATRIX; ++x)
         {
             uint8_t red = a.r(y, x);
             uint8_t green = a.g(y, x);
