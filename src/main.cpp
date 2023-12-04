@@ -1,36 +1,25 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <bitset>
-#include <cstring>
 
 #include "image.h"
 #include "convolution.h"
 #include "network.h"
 
+#include "tools.h"
+
 int main()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    int inputHeight = 3;
+    int inputWidth = 3;
+    int inputDepth = 3;
 
-    generateAllPBM2("../assets/breast", "../assets/PBM");
+    int kernelSize = 2;
 
-    auto stop = std::chrono::high_resolution_clock::now();
+    Convolution conv(inputHeight, inputWidth, inputDepth, kernelSize, 64);  // Assuming RGB images with a 3x3 kernel and 64 filters
 
-    // en millisecondes
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << conv.input << std::endl;
 
-    std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
-
-    start = std::chrono::high_resolution_clock::now();
-
-    auto tensor = importAllPBM("../assets/PBM", 3500);
-
-    stop = std::chrono::high_resolution_clock::now();
-
-    // en millisecondes
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-
-    std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
+    conv.forward(xt::xarray<float>({{1, 1, 1}, {1, 1, 1}}));
+    conv.backward(xt::xarray<float>({{1, 1, 1}, {1, 1, 1}}));
 
     return 0;
 }

@@ -9,12 +9,14 @@ set(SOURCE_FILES
     src/image.cpp
     src/convolution.cpp
     src/network.cpp
+    src/tools.cpp
 )
 
 set(HEADER_FILES
     include/image.h
     include/convolution.h
     include/network.h
+    include/tools.h
 )
 
 add_executable(main.exe ${SOURCE_FILES})
