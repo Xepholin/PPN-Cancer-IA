@@ -1,12 +1,17 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include <vector>
+#include <tuple>
+
 #include <xtensor/xarray.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xview.hpp>
 #include <xtensor/xrandom.hpp>
 
+// ILayer(xt::xarray<float> input, xt::xarray<float> output)
 class ILayer {
+
     public:
         xt::xarray<float> input;
         xt::xarray<float> output;
@@ -14,46 +19,80 @@ class ILayer {
         virtual void forward(xt::xarray<float> input);
 
         virtual void backward(xt::xarray<float> gradient);
+
+        virtual float pooling(xt::xarray<float> matrix);
+
+        virtual xt::xarray<float> poolingMatrice(xt::xarray<float> matrix);
+
+        virtual float activation(xt::xarray<float> matrix);
 };
 
-class Convolution : public ILayer   {
+// Pooling(int size, int stride, int padding, Pooling::PoolingType type)
+struct Pooling  {
+    
+    enum PoolingType {
+            NO_TYPE,
+            MAX,    
+            MIN,  
+            AVG
+    };
+
+    int size = 1;
+    int stride = 1;
+    int padding = 0;
+    PoolingType type = NO_TYPE;
+};
+
+// ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, Pooling pool)
+class ConvolutionLayer : public ILayer   {
+    
     public:
         int depth = 0;
 
-        int inputHeight = 0;
-        int inputWidth = 0;
-        int inputDepth = 0;
+        //Height - Width - Depth
+        std::tuple<int, int, int> inputShape{0, 0, 0};
+        std::tuple<int, int, int> outputShape{0, 0, 0};
 
-        int outputHeight = 0;
-        int outputWidth = 0;
-        int outputDepth = 0;
+        // Height - Width - Depth - Stride - Padding
+        std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
 
-        int kernelHeight = 0;
-        int kernelWidth = 0;
+        xt::xarray<float> filters;
 
-        xt::xarray<float> biases;
-        xt::xarray<float> kernels;
+        Pooling pool;
 
-        Convolution(int inputHeight, int inputWidth, int inputDepth, int kernelSize, int depth)   {
-            this->depth = depth;
-            this->inputHeight = inputHeight;
-            this->inputWidth = inputWidth;
-            this->inputDepth = inputDepth;
+        int bias = 1;
+        
+        ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, Pooling pool)   {
 
-            this->outputHeight = inputHeight - kernelSize + 1;
-            this->outputWidth = inputWidth - kernelSize + 1;
-            this->outputDepth = depth;
+            this->depth = depth;    // Nombre d'image dans la couche actuelle      
+            this->inputShape = inputShape;
+            this->filtersShape = filtersShape;
+         
+            int inputHeight = std::get<0>(inputShape);
+            int inputWidth = std::get<1>(inputShape);
+            int inputDepth = std::get<2>(inputShape);
 
-            this->kernelHeight = kernelSize;
-            this->kernelWidth = kernelSize;
 
-            biases = xt::ones<int>({kernelHeight, kernelWidth});
-            kernels = xt::random::randn<float>({depth, kernelHeight, kernelWidth});
+            int filtersHeight = std::get<0>(filtersShape);
+            int filtersWidth = std::get<1>(filtersShape);
+            int filtersDepth = std::get<2>(filtersShape);
+
+            this->outputShape = std::tuple<int, int, int>(inputHeight - filtersHeight + 1, inputWidth - filtersWidth + 1, filtersDepth * depth);
+
+            this->pool = pool;
+
+            filters = xt::random::rand<float>({depth, filtersDepth, filtersHeight, filtersWidth}, 0, 1);        
         }
 
         void forward(xt::xarray<float> input) override;
 
-        virtual void backward(xt::xarray<float> gradient) override;
+        void backward(xt::xarray<float> gradient) override;
+
+        xt::xarray<float> poolingMatrice(xt::xarray<float> matrix) override;
+
+        float pooling(xt::xarray<float> matrix) override;
+        
+        float activation(xt::xarray<float> matrix) override;
 
 };
 

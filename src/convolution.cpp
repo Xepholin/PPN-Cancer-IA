@@ -97,3 +97,22 @@ xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float
     rotateMatrix(kernel);
     return crossCorrelation(matrice,kernel);
 }
+
+
+xt::xarray<float> padMatrice(xt::xarray<float>  matrice, int padding , int stride , int kernelX, int kernelY){
+
+    int sizeNewMatriceX = (matrice.shape()[0] - kernelX + 2 * padding) / stride + 1;
+    int sizeNewMatriceY = (matrice.shape()[1] - kernelY + 2 * padding) / stride + 1;
+
+    xt::xarray<float> paddedMatrice{xt::empty<uint8_t>({sizeNewMatriceX+1, sizeNewMatriceY+1})};
+
+    for (int i = 0; i < matrice.shape()[0]; i++)
+    {
+        for (int j = 0; j < matrice.shape()[1]; j++)
+        {
+            paddedMatrice(i+padding, j+padding) = matrice(i, j);
+        }
+    }
+
+    return paddedMatrice;
+}
