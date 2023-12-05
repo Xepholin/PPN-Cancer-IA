@@ -8,6 +8,7 @@
 #include <xtensor/xio.hpp>
 #include <xtensor/xview.hpp>
 #include <xtensor/xrandom.hpp>
+#include <convolution.h>
 
 // ILayer(xt::xarray<float> input, xt::xarray<float> output)
 class ILayer {
