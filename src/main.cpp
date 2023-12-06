@@ -1,36 +1,38 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <bitset>
-#include <cstring>
+#include <tuple>
 
 #include "image.h"
 #include "convolution.h"
 #include "network.h"
 
+#include "tools.h"
+
 int main()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    Pooling pool{3, 3, 0, Pooling::PoolingType::AVG};
 
-    generateAllPBM2("../assets/breast", "../assets/PBM");
+    std::tuple<int, int, int> inputShape{4, 4, 3};
+    std::tuple<int, int, int, int, int> filtersShape{2, 2, 4, 1, 0};
 
-    auto stop = std::chrono::high_resolution_clock::now();
+    ConvolutionLayer conv(6, inputShape, filtersShape, pool);
 
-    // en millisecondes
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    // std::cout << conv.filters << std::endl;
 
-    std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
+    conv.forward(xt::xarray<float>({{1, 1, 1}, {1, 1, 1}}));
+    conv.backward(xt::xarray<float>({{1, 1, 1}, {1, 1, 1}}));
 
-    start = std::chrono::high_resolution_clock::now();
+    xt::xarray<float> test{{1, 2, 3, 1, 2, 3},
+                           {4, 5, 6, 4, 5, 6},
+                           {7, 8, 9, 7, 8, 9},
+                           {1, 2, 3, 1, 2, 3},
+                           {4, 5, 6, 4, 5, 6},
+                           {7, 8, 9, 7, 8, 9}};
 
-    auto tensor = importAllPBM("../assets/PBM", 3500);
+    auto a = conv.poolingMatrice(test);
 
-    stop = std::chrono::high_resolution_clock::now();
-
-    // en millisecondes
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-
-    std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
+    std::cout << test << std::endl;
+    std::cout << "Pooled Matrice avec size  " <<  pool.size << "et stride  " <<  pool.stride<< std::endl;
+    std::cout << a << std::endl;
 
     return 0;
 }

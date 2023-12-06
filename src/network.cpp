@@ -1,88 +1,125 @@
 #include <iostream>
-#include <fstream>
-
-#include <dirent.h>
-#include <stack>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <filesystem>
 
 #include "network.h"
 
-xt::xarray<bool> importPBM(const char *path)
+void ILayer::forward(xt::xarray<float> input)
 {
-    const int width = 48;
-    const int height = 48;
-    const int rowSize = 6;
-    const int headerSize = 9;
-    int pixelValue = 0;
-
-    std::ifstream image(path, std::ios::binary);
-
-    if (!image.is_open()) {
-        perror("Erreur lors de l'ouverture du fichier.");
-    }
-
-    xt::xarray<bool> PBM{xt::empty<bool>({POST_SIZE_MATRIX, POST_SIZE_MATRIX})};
-
-    // saute 9 caractères (header .pbm)
-    image.seekg(headerSize);
-
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < rowSize; ++j) {
-            unsigned char byte;
-            image.read(reinterpret_cast<char*>(&byte), sizeof(byte));
-
-            int count = 0;
-            for (int k = 7; k >= 0 && j * 8 + 7 - k < width; --k) {
-                pixelValue = (byte >> k) & 1;
-
-                PBM(i, j * 8 + 7 - k) = pixelValue;
-                count++;
-            }
-        }
-    }
-
-    image.close();
-
-    return PBM;
+    std::cout << "ILayer forward" << std::endl;
 }
 
-xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
+void ILayer::backward(xt::xarray<float> gradient)
 {
-    std::stack<std::string> directory;
-    directory.push({path});
+    std::cout << "ILayer backward" << std::endl;
+}
 
-    // Define a placeholder for your result (modify as needed)
-    xt::xarray<bool> result{xt::empty<bool>({nbPBM, POST_SIZE_MATRIX, POST_SIZE_MATRIX})};
+float ILayer::pooling(xt::xarray<float> matrix)
+{
+    std::cout << "Ici ca pool ILayer" << std::endl;
+    return 0.0;
+}
 
-    int position = 0;
+xt::xarray<float> ILayer::poolingMatrice(xt::xarray<float> matrix)
+{
+    std::cout << "Ici ca poolMatrice ILayer" << std::endl;
+    return matrix;
+}
 
-    while (!directory.empty())
+float ILayer::activation(xt::xarray<float> matrix)
+{
+    std::cout << "Ici ca active ILayer" << std::endl;
+    return 0.0;
+}
+
+//
+
+void ConvolutionLayer::forward(xt::xarray<float> input)
+{
+    std::cout << "Convolution forward" << std::endl;
+}
+
+void ConvolutionLayer::backward(xt::xarray<float> gradient)
+{
+    std::cout << "Convolution backward" << std::endl;
+}
+
+xt::xarray<float> ConvolutionLayer::poolingMatrice(xt::xarray<float> matrix)
+{
+
+    int padding = this->pool.padding;
+    int stride = this->pool.stride;
+    int sizePooling = this->pool.size;
+
+    int sizeNewMatriceX = (matrix.shape()[0] - sizePooling + 2 * padding) / stride + 1;
+    int sizeNewMatriceY = (matrix.shape()[1] - sizePooling + 2 * padding) / stride + 1;
+
+    if (this->pool.padding > 0)
     {
-        auto currentDir = directory.top();
-        directory.pop();
+        matrix = padMatrice(matrix, padding);
+    }
 
-        for (const auto &entry : std::filesystem::directory_iterator(currentDir))
+    xt::xarray<float> pooledMatrix{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
+
+    int incr = stride - 1;
+
+    for (int i = 0; i < sizeNewMatriceX; ++i)
+    {
+
+        for (int j = 0; j < sizeNewMatriceY; ++j)
         {
-            std::string inputFullPath = entry.path().string();
+            xt::xrange<int> rows(i + i * incr, i + i * incr + sizePooling);
+            xt::xrange<int> cols(j + j * incr, j + j * incr + sizePooling);
 
-            // ignore "." and ".." to avoid infinite loops
-            if (entry.is_directory())
-            {
-                directory.push(inputFullPath);
-            }
-            // Check for a .png file
-            else if (entry.is_regular_file() && entry.path().extension() == ".pbm")
-            {
-                xt::xarray<bool> newPBM = importPBM(inputFullPath.c_str());
-                xt::view(result, xt::range(position, position + 1), xt::all(), xt::all()) = newPBM;
+            auto a = xt::view(matrix, rows, cols);
 
-                position++;
-            }
+            // std::cout << "Mat travail" << std::endl;
+            // std::cout << a << std::endl;
+
+            pooledMatrix(i, j) = this->pooling(a);
         }
+    }
+
+    return pooledMatrix;
+}
+
+float ConvolutionLayer::pooling(xt::xarray<float> matrix)
+{
+
+    float result = -1.0; // Default value if an invalid poolingType is provided
+
+    switch (this->pool.type)
+    {
+    case Pooling::PoolingType::NO_TYPE:
+    {
+        result = 0.0;
+        break;
+    }
+    case Pooling::PoolingType::MIN:
+    {
+        result = *std::min_element(matrix.begin(), matrix.end());
+        break;
+    }
+    case Pooling::PoolingType::MAX:
+    {
+        result = *std::max_element(matrix.begin(), matrix.end());
+        break;
+    }
+    case Pooling::PoolingType::AVG:
+    {
+        result = xt::sum(matrix)() / static_cast<float>(matrix.size());
+        break;
+    }
+
+    default:
+    {
+        break;
+    }
     }
 
     return result;
 }
 
+float ConvolutionLayer::activation(xt::xarray<float> matrix)
+{
+    std::cout << "Ici ca active ConvolutionLayer" << std::endl;
+    return 0.0;
+}
