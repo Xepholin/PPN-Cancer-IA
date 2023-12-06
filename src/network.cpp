@@ -116,12 +116,12 @@ float PoolingLayer::pooling(xt::xarray<float> matrix)
 
 void ActivationLayer::forward(xt::xarray<float> input)
 {
-    std::cout << "Pooling forward" << std::endl;
+    std::cout << "Activation forward" << std::endl;
 }
 
 void ActivationLayer::backward(xt::xarray<float> gradient)
 {
-    std::cout << "Pooling backward" << std::endl;
+    std::cout << "Activation backward" << std::endl;
 }
 
 float ActivationLayer::activation(xt::xarray<float> matrix)

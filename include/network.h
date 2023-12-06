@@ -22,51 +22,6 @@ class ILayer {
         virtual void backward(xt::xarray<float> gradient);
 };
 
-// ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, Pooling pool)
-class ConvolutionLayer : public ILayer   {
-    
-    public:
-        int depth = 0;
-
-        //Height - Width - Depth
-        std::tuple<int, int, int> inputShape{0, 0, 0};
-        std::tuple<int, int, int> outputShape{0, 0, 0};
-
-        // Height - Width - Depth - Stride - Padding
-        std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
-
-        xt::xarray<float> filters;
-
-        int bias = 1;
-    
-        ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)   {
-
-            this->depth = depth;    // Nombre d'image dans la couche actuelle      
-            this->inputShape = inputShape;
-            this->filtersShape = filtersShape;
-         
-            int inputHeight = std::get<0>(inputShape);
-            int inputWidth = std::get<1>(inputShape);
-            int inputDepth = std::get<2>(inputShape);
-
-
-            int filtersHeight = std::get<0>(filtersShape);
-            int filtersWidth = std::get<1>(filtersShape);
-            int filtersDepth = std::get<2>(filtersShape);
-
-            this->outputShape = std::tuple<int, int, int>(inputHeight - filtersHeight + 1, inputWidth - filtersWidth + 1, filtersDepth * depth);
-
-            filters = xt::random::rand<float>({depth, filtersDepth, filtersHeight, filtersWidth}, 0, 1);        
-        }
-
-        ~ConvolutionLayer() = default;
-
-        void forward(xt::xarray<float> input) override;
-
-        void backward(xt::xarray<float> gradient) override;
-
-};
-
 // Pooling(int size, int stride, int padding, Pooling::PoolingType type)
 class PoolingLayer : public ILayer   {
     
@@ -105,11 +60,63 @@ class PoolingLayer : public ILayer   {
 class ActivationLayer : public ILayer   {
     
     public:
+    
         void forward(xt::xarray<float> input) override;
 
         void backward(xt::xarray<float> gradient) override;
 
-        float activation(xt::xarray<float> matrix);
+        virtual float activation(xt::xarray<float> matrix);
+};
+
+// ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, PoolingLayer pool)
+class ConvolutionLayer : public ILayer   {
+    
+    public:
+        int depth = 0;
+
+        //Height - Width - Depth
+        std::tuple<int, int, int> inputShape{0, 0, 0};
+        std::tuple<int, int, int> outputShape{0, 0, 0};
+
+        // Height - Width - Depth - Stride - Padding
+        std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
+
+        xt::xarray<float> filters;
+
+        int bias = 1;
+
+        PoolingLayer pooling{0, 0, 0, PoolingLayer::PoolingType::NO_TYPE};
+        ActivationLayer activation;
+    
+        ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, ActivationLayer activation, PoolingLayer pooling)   {
+
+            this->depth = depth;    // Nombre d'image dans la couche actuelle      
+            this->inputShape = inputShape;
+            this->filtersShape = filtersShape;
+         
+            int inputHeight = std::get<0>(inputShape);
+            int inputWidth = std::get<1>(inputShape);
+            int inputDepth = std::get<2>(inputShape);
+
+
+            int filtersHeight = std::get<0>(filtersShape);
+            int filtersWidth = std::get<1>(filtersShape);
+            int filtersDepth = std::get<2>(filtersShape);
+
+            this->outputShape = std::tuple<int, int, int>(inputHeight - filtersHeight + 1, inputWidth - filtersWidth + 1, filtersDepth * depth);
+
+            filters = xt::random::rand<float>({depth, filtersDepth, filtersHeight, filtersWidth}, 0, 1);  
+
+            this->pooling = pooling;
+            this->activation = activation;      
+        }
+
+        ~ConvolutionLayer() = default;
+
+        void forward(xt::xarray<float> input) override;
+
+        void backward(xt::xarray<float> gradient) override;
+
 };
 
 #endif

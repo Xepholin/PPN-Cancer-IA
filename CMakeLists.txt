@@ -10,6 +10,7 @@ set(SOURCE_FILES
     src/convolution.cpp
     src/network.cpp
     src/tools.cpp
+    src/activations.cpp
 )
 
 set(HEADER_FILES
@@ -17,6 +18,7 @@ set(HEADER_FILES
     include/convolution.h
     include/network.h
     include/tools.h
+    include/activations.h
 )
 
 add_executable(main.exe ${SOURCE_FILES})
