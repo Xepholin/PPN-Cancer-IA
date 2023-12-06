@@ -250,8 +250,8 @@ xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
 
 
 
-        auto gx = matrixConvolution(grayMatrice, sobX);
-        auto gy = matrixConvolution(grayMatrice, sobY);
+        auto gx = matrixConvolution(grayMatrice, sobX, 0, 1);
+        auto gy = matrixConvolution(grayMatrice, sobY, 0, 1);
 
         xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
 

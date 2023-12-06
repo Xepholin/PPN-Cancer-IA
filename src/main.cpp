@@ -14,7 +14,7 @@ int main()
     std::tuple<int, int, int> inputShape{4, 4, 3};
     std::tuple<int, int, int, int, int> filtersShape{2, 2, 4, 1, 0};
 
-    ConvolutionLayer conv(6, inputShape, filtersShape, pool); // Assuming RGB images with a 3x3 kernel and 64 filters
+    ConvolutionLayer conv(6, inputShape, filtersShape, pool);
 
     // std::cout << conv.filters << std::endl;
 
