@@ -12,24 +12,6 @@ void ILayer::backward(xt::xarray<float> gradient)
     std::cout << "ILayer backward" << std::endl;
 }
 
-float ILayer::pooling(xt::xarray<float> matrix)
-{
-    std::cout << "Ici ca pool ILayer" << std::endl;
-    return 0.0;
-}
-
-xt::xarray<float> ILayer::poolingMatrice(xt::xarray<float> matrix)
-{
-    std::cout << "Ici ca poolMatrice ILayer" << std::endl;
-    return matrix;
-}
-
-float ILayer::activation(xt::xarray<float> matrix)
-{
-    std::cout << "Ici ca active ILayer" << std::endl;
-    return 0.0;
-}
-
 //
 
 void ConvolutionLayer::forward(xt::xarray<float> input)
@@ -42,17 +24,29 @@ void ConvolutionLayer::backward(xt::xarray<float> gradient)
     std::cout << "Convolution backward" << std::endl;
 }
 
-xt::xarray<float> ConvolutionLayer::poolingMatrice(xt::xarray<float> matrix)
+//
+
+void PoolingLayer::forward(xt::xarray<float> input)
+{
+    std::cout << "Pooling forward" << std::endl;
+}
+
+void PoolingLayer::backward(xt::xarray<float> gradient)
+{
+    std::cout << "Pooling backward" << std::endl;
+}
+
+xt::xarray<float> PoolingLayer::poolingMatrice(xt::xarray<float> matrix)
 {
 
-    int padding = this->pool.padding;
-    int stride = this->pool.stride;
-    int sizePooling = this->pool.size;
+    int padding = this->padding;
+    int stride = this->stride;
+    int sizePooling = this->size;
 
     int sizeNewMatriceX = (matrix.shape()[0] - sizePooling + 2 * padding) / stride + 1;
     int sizeNewMatriceY = (matrix.shape()[1] - sizePooling + 2 * padding) / stride + 1;
 
-    if (this->pool.padding > 0)
+    if (this->padding > 0)
     {
         matrix = padMatrice(matrix, padding);
     }
@@ -81,29 +75,29 @@ xt::xarray<float> ConvolutionLayer::poolingMatrice(xt::xarray<float> matrix)
     return pooledMatrix;
 }
 
-float ConvolutionLayer::pooling(xt::xarray<float> matrix)
+float PoolingLayer::pooling(xt::xarray<float> matrix)
 {
 
     float result = -1.0; // Default value if an invalid poolingType is provided
 
-    switch (this->pool.type)
+    switch (this->type)
     {
-    case Pooling::PoolingType::NO_TYPE:
+    case PoolingLayer::PoolingType::NO_TYPE:
     {
         result = 0.0;
         break;
     }
-    case Pooling::PoolingType::MIN:
+    case PoolingLayer::PoolingType::MIN:
     {
         result = *std::min_element(matrix.begin(), matrix.end());
         break;
     }
-    case Pooling::PoolingType::MAX:
+    case PoolingLayer::PoolingType::MAX:
     {
         result = *std::max_element(matrix.begin(), matrix.end());
         break;
     }
-    case Pooling::PoolingType::AVG:
+    case PoolingLayer::PoolingType::AVG:
     {
         result = xt::sum(matrix)() / static_cast<float>(matrix.size());
         break;
@@ -118,7 +112,19 @@ float ConvolutionLayer::pooling(xt::xarray<float> matrix)
     return result;
 }
 
-float ConvolutionLayer::activation(xt::xarray<float> matrix)
+//
+
+void ActivationLayer::forward(xt::xarray<float> input)
+{
+    std::cout << "Pooling forward" << std::endl;
+}
+
+void ActivationLayer::backward(xt::xarray<float> gradient)
+{
+    std::cout << "Pooling backward" << std::endl;
+}
+
+float ActivationLayer::activation(xt::xarray<float> matrix)
 {
     std::cout << "Ici ca active ConvolutionLayer" << std::endl;
     return 0.0;
