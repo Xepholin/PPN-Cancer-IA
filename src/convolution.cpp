@@ -63,7 +63,7 @@ float prodCrossCorelation(xt::xarray<float> input, xt::xarray<float> kernel)
 }
 
 // Effectue l'opération de crossCorrelation
-xt::xarray<float> crossCorrelation(xt::xarray<float> &matrice, xt::xarray<float> &kernel, int padding, int stride)
+xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> kernel, int stride, int padding)
 {
 
     int sizeKernelX = kernel.shape()[0];
@@ -90,10 +90,10 @@ xt::xarray<float> crossCorrelation(xt::xarray<float> &matrice, xt::xarray<float>
     return crossCorrelationMatrice;
 }
 
-xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float> &kernel, int padding, int stride)
+xt::xarray<float> matrixConvolution(xt::xarray<float> matrice, xt::xarray<float> kernel, int stride, int padding)
 {
     rotateMatrix(kernel);
-    return crossCorrelation(matrice, kernel, padding, stride);
+    return crossCorrelation(matrice, kernel, stride, padding );
 }
 
 

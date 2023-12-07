@@ -16,13 +16,12 @@ void reverseArray(xt::xarray<float> &arr, int k);
 float prodConvolution(xt::xarray<float> input, xt::xarray<float> kernel);
 
 // Algo in-place : fais la convolution d'une matrice par un kernel
-xt::xarray<float> matrixConvolution(xt::xarray<float> &matrice, xt::xarray<float> &kernel, int padding, int stride);
+xt::xarray<float> matrixConvolution(xt::xarray<float> matrice, xt::xarray<float> kernel, int stride, int padding);
 
 // Effectue l'opération de crossCorrelation
-xt::xarray<float> crossCorrelation(xt::xarray<float> &matrice, xt::xarray<float> &kernel, int padding, int stride);
+xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> kernel, int stride, int padding);
 
-//Aggrandis une matrice sur les côtés
-xt::xarray<float> padMatrice(xt::xarray<float>  matrice, int padding );
-
+// Aggrandis une matrice sur les côtés
+xt::xarray<float> padMatrice(xt::xarray<float> matrice, int padding);
 
 #endif
