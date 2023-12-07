@@ -17,6 +17,17 @@ void ILayer::backward(xt::xarray<float> gradient)
 void ConvolutionLayer::forward(xt::xarray<float> input)
 {
     std::cout << "Convolution forward" << std::endl;
+    for(int i = 0; i < this->filters.shape()[0] ; ++i){
+
+        for(int j = 0; j < this->filters.shape()[1]; ++j){       
+            auto tmpMat = xt::view(input, j);  
+            auto tmpFilter = xt::view(this->filters, i,j);  
+            auto convolution_result = matrixConvolution(tmpMat, tmpFilter, std::get<3>(this->filtersShape) ,std::get<4>(this->filtersShape) );
+
+            xt::view(output, i) = convolution_result;   
+        }
+
+    }
 }
 
 void ConvolutionLayer::backward(xt::xarray<float> gradient)

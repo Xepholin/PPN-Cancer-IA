@@ -83,6 +83,7 @@ class ConvolutionLayer : public ILayer   {
         // Depth - Height - Width - Stride - Padding
         std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
 
+        // nbFilter - Depth - Height - Width - 
         xt::xarray<float> filters;
 
         int bias = 1;
@@ -113,7 +114,7 @@ class ConvolutionLayer : public ILayer   {
             this->input = xt::empty<float>({inputDepth, inputHeight,inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
 
-            filters = xt::random::rand<float>({depth, filtersDepth, filtersHeight, filtersWidth}, 0, 1);  
+            filters = xt::random::rand<float>({filtersDepth, depth , filtersHeight, filtersWidth}, 0, 1);  
 
             this->pooling = pooling;
             this->activation = activation;      
