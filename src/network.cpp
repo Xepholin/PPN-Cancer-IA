@@ -12,10 +12,13 @@ void ILayer::backward(xt::xarray<float> gradient)
     std::cout << "ILayer backward" << std::endl;
 }
 
+
 //
 
 void ConvolutionLayer::forward(xt::xarray<float> input)
 {
+    this->input = input;
+
     std::cout << "Convolution forward" << std::endl;
     for(int i = 0; i < this->filters.shape()[0] ; ++i){
 
@@ -26,7 +29,6 @@ void ConvolutionLayer::forward(xt::xarray<float> input)
 
             xt::view(output, i) = convolution_result;   
         }
-
     }
 }
 
@@ -40,6 +42,16 @@ void ConvolutionLayer::backward(xt::xarray<float> gradient)
 void PoolingLayer::forward(xt::xarray<float> input)
 {
     std::cout << "Pooling forward" << std::endl;
+
+    this->input = input;
+
+    for(int i = 0; i < this->output.shape()[0] ; ++i){
+
+        auto tmpMat = xt::view(input, i);  
+        auto convolution_result = poolingMatrice(tmpMat);
+        xt::view(output, i) = convolution_result;   
+
+    }
 }
 
 void PoolingLayer::backward(xt::xarray<float> gradient)
@@ -54,8 +66,8 @@ xt::xarray<float> PoolingLayer::poolingMatrice(xt::xarray<float> matrix)
     int stride = this->stride;
     int sizePooling = this->size;
 
-    int sizeNewMatriceX = (matrix.shape()[0] - sizePooling + 2 * padding) / stride + 1;
-    int sizeNewMatriceY = (matrix.shape()[1] - sizePooling + 2 * padding) / stride + 1;
+    int sizeNewMatriceX = std::get<1>(this->outputShape);
+    int sizeNewMatriceY = std::get<2>(this->outputShape);
 
     if (this->padding > 0)
     {
@@ -75,9 +87,6 @@ xt::xarray<float> PoolingLayer::poolingMatrice(xt::xarray<float> matrix)
             xt::xrange<int> cols(j + j * incr, j + j * incr + sizePooling);
 
             auto a = xt::view(matrix, rows, cols);
-
-            // std::cout << "Mat travail" << std::endl;
-            // std::cout << a << std::endl;
 
             pooledMatrix(i, j) = this->pooling(a);
         }
@@ -139,4 +148,24 @@ xt::xarray<float> ActivationLayer::activation(xt::xarray<float> matrix)
 {
     std::cout << "Ici ca active ConvolutionLayer" << std::endl;
     return 0.0;
+}
+
+//
+
+void DenseLayer::forward(xt::xarray<float> input)   {
+    std::cout << "forward Dense" << std::endl;
+
+    this->input = input;
+
+    for(int i = 0; i < this->weights.shape()[0] ; ++i){
+
+        for(int j = 0; j < this->weights.shape()[1]; ++j){       
+
+            // xt::view(output, i) = ;
+        }
+    }
+}
+
+void DenseLayer::backward(xt::xarray<float> gradient)   {
+    std::cout << "backward Dense" << std::endl;
 }
