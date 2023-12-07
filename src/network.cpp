@@ -124,7 +124,7 @@ void ActivationLayer::backward(xt::xarray<float> gradient)
     std::cout << "Activation backward" << std::endl;
 }
 
-float ActivationLayer::activation(xt::xarray<float> matrix)
+xt::xarray<float> ActivationLayer::activation(xt::xarray<float> matrix)
 {
     std::cout << "Ici ca active ConvolutionLayer" << std::endl;
     return 0.0;

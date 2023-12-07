@@ -8,7 +8,9 @@
 #include <xtensor/xio.hpp>
 #include <xtensor/xview.hpp>
 #include <xtensor/xrandom.hpp>
-#include <convolution.h>
+
+#include "convolution.h"
+#include "tools.h"
 
 // ILayer(xt::xarray<float> input, xt::xarray<float> output)
 class ILayer {
@@ -65,7 +67,7 @@ class ActivationLayer : public ILayer   {
 
         void backward(xt::xarray<float> gradient) override;
 
-        virtual float activation(xt::xarray<float> matrix);
+        virtual xt::xarray<float> activation(xt::xarray<float> matrix);
 };
 
 // ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, PoolingLayer pool)
@@ -74,11 +76,11 @@ class ConvolutionLayer : public ILayer   {
     public:
         int depth = 0;
 
-        //Height - Width - Depth
+        //Depth - Height - Width
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
 
-        // Height - Width - Depth - Stride - Padding
+        // Depth - Height - Width - Stride - Padding
         std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
 
         xt::xarray<float> filters;
@@ -93,17 +95,23 @@ class ConvolutionLayer : public ILayer   {
             this->depth = depth;    // Nombre d'image dans la couche actuelle      
             this->inputShape = inputShape;
             this->filtersShape = filtersShape;
-         
-            int inputHeight = std::get<0>(inputShape);
-            int inputWidth = std::get<1>(inputShape);
-            int inputDepth = std::get<2>(inputShape);
 
+            int inputDepth = std::get<0>(inputShape);
+            int inputHeight = std::get<1>(inputShape);
+            int inputWidth = std::get<2>(inputShape);
 
-            int filtersHeight = std::get<0>(filtersShape);
-            int filtersWidth = std::get<1>(filtersShape);
-            int filtersDepth = std::get<2>(filtersShape);
+            int filtersDepth = std::get<0>(filtersShape);
+            int filtersHeight = std::get<1>(filtersShape);
+            int filtersWidth = std::get<2>(filtersShape);
+            int filtersStride = std::get<3>(filtersShape);
+            int filtersPadding = std::get<4>(filtersShape);
 
-            this->outputShape = std::tuple<int, int, int>(inputHeight - filtersHeight + 1, inputWidth - filtersWidth + 1, filtersDepth * depth);
+            int outputHeight = (inputHeight - filtersHeight + 2*filtersPadding)/ filtersStride + 1 ;
+            int outputWidth = (inputWidth - filtersWidth + 2*filtersPadding)/ filtersStride + 1 ;
+
+            this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
+            this->input = xt::empty<float>({inputDepth, inputHeight,inputWidth});
+            this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
 
             filters = xt::random::rand<float>({depth, filtersDepth, filtersHeight, filtersWidth}, 0, 1);  
 

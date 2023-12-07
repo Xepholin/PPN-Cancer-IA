@@ -5,12 +5,16 @@
 
 class ReLu : public ActivationLayer {
     public:
-        
-        void forward(xt::xarray<float> input) override;
 
+        ReLu()  {
+            
+        }
+
+        void forward(xt::xarray<float> input) override;
+        
         void backward(xt::xarray<float> gradient) override;
 
-        float activation(xt::xarray<float> matrix) override;
+        xt::xarray<float> activation(xt::xarray<float> matrix) override;
 };
 
 #endif
