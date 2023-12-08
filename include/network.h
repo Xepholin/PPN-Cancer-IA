@@ -13,179 +13,199 @@
 #include "tools.h"
 
 // ILayer(xt::xarray<float> input, xt::xarray<float> output)
-class ILayer {
+class ILayer
+{
 
-    public:
-        xt::xarray<float> input;
-        xt::xarray<float> output;
+public:
+    xt::xarray<float> input;
+    xt::xarray<float> output;
 
-        virtual void forward(xt::xarray<float> input);
+    virtual void forward(xt::xarray<float> input);
 
-        virtual void backward(xt::xarray<float> gradient);
+    virtual void backward(xt::xarray<float> gradient);
 };
 
 // ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)
-class ConvolutionLayer : public ILayer   {
-    
-    public:
-        int depth = 0;
+class ConvolutionLayer : public ILayer
+{
 
-        //Depth - Height - Width
-        std::tuple<int, int, int> inputShape{0, 0, 0};
-        std::tuple<int, int, int> outputShape{0, 0, 0};
+public:
+    int depth = 0;
 
-        // Depth - Height - Width - Stride - Padding
-        std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
+    // Depth - Height - Width
+    std::tuple<int, int, int> inputShape{0, 0, 0};
+    std::tuple<int, int, int> outputShape{0, 0, 0};
 
-        // nbFilter - Depth - Height - Width - 
-        xt::xarray<float> filters;
+    // Depth - Height - Width - Stride - Padding
+    std::tuple<int, int, int, int, int> filtersShape{0, 0, 0, 0, 0};
 
-        int bias = 1;
-    
-        ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)   {
+    // nbFilter - Depth - Height - Width -
+    xt::xarray<float> filters;
 
-            this->depth = depth;    // Nombre d'image dans la couche actuelle      
-            this->inputShape = inputShape;
-            this->filtersShape = filtersShape;
+    int bias = 1;
 
-            int inputDepth = std::get<0>(inputShape);
-            int inputHeight = std::get<1>(inputShape);
-            int inputWidth = std::get<2>(inputShape);
+    ConvolutionLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)
+    {
 
-            int filtersDepth = std::get<0>(filtersShape);
-            int filtersHeight = std::get<1>(filtersShape);
-            int filtersWidth = std::get<2>(filtersShape);
-            int filtersStride = std::get<3>(filtersShape);
-            int filtersPadding = std::get<4>(filtersShape);
+        this->depth = depth; // Nombre d'image dans la couche actuelle
+        this->inputShape = inputShape;
+        this->filtersShape = filtersShape;
 
-            int outputHeight = (inputHeight - filtersHeight + 2 * filtersPadding) / filtersStride + 1 ;
-            int outputWidth = (inputWidth - filtersWidth + 2 * filtersPadding) / filtersStride + 1 ;
+        int inputDepth = std::get<0>(inputShape);
+        int inputHeight = std::get<1>(inputShape);
+        int inputWidth = std::get<2>(inputShape);
 
-            this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
-            this->input = xt::empty<float>({inputDepth, inputHeight,inputWidth});
-            this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
+        int filtersDepth = std::get<0>(filtersShape);
+        int filtersHeight = std::get<1>(filtersShape);
+        int filtersWidth = std::get<2>(filtersShape);
+        int filtersStride = std::get<3>(filtersShape);
+        int filtersPadding = std::get<4>(filtersShape);
 
-            filters = xt::random::rand<float>({filtersDepth, depth , filtersHeight, filtersWidth}, 0, 1);     
-        }
+        int outputHeight = (inputHeight - filtersHeight + 2 * filtersPadding) / filtersStride + 1;
+        int outputWidth = (inputWidth - filtersWidth + 2 * filtersPadding) / filtersStride + 1;
 
-        ~ConvolutionLayer() = default;
+        this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
+        this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
+        this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
 
-        void forward(xt::xarray<float> input) override;
+        filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
+    }
 
-        void backward(xt::xarray<float> gradient) override;
+    ~ConvolutionLayer() = default;
 
+    void forward(xt::xarray<float> input) override;
+
+    void backward(xt::xarray<float> gradient) override;
 };
 
 // Pooling(std::tuple<int, int, int> inputShape, int size, int stride, int padding, Pooling::PoolingType type)
-class PoolingLayer : public ILayer   {
-    
-    public:
-        enum PoolingType {
-                NO_TYPE,
-                MAX,    
-                MIN,  
-                AVG
-        };
+class PoolingLayer : public ILayer
+{
 
-        std::tuple<int, int, int> inputShape{0, 0, 0};
-        std::tuple<int, int, int> outputShape{0, 0, 0};
+public:
+    enum PoolingType
+    {
+        NO_TYPE,
+        MAX,
+        MIN,
+        AVG
+    };
 
-        int size = 1;
-        int stride = 1;
-        int padding = 0;
-        PoolingType type = NO_TYPE;
+    std::tuple<int, int, int> inputShape{0, 0, 0};
+    std::tuple<int, int, int> outputShape{0, 0, 0};
 
-        PoolingLayer(std::tuple<int, int, int> inputShape, int size, int stride, int padding, PoolingType type)  {
-            this->inputShape = inputShape;
+    int size = 1;
+    int stride = 1;
+    int padding = 0;
+    PoolingType type = NO_TYPE;
 
-            int depth = std::get<0>(inputShape);
-            int height = std::get<1>(inputShape);
-            int width = std::get<2>(inputShape);
+    PoolingLayer(std::tuple<int, int, int> inputShape, int size, int stride, int padding, PoolingType type)
+    {
+        this->inputShape = inputShape;
 
-            int outputHeight = (height - size + 2 * padding) / stride + 1;
-            int outputWidth = (width - size + 2 * padding) / stride + 1;
+        int depth = std::get<0>(inputShape);
+        int height = std::get<1>(inputShape);
+        int width = std::get<2>(inputShape);
 
-            this->outputShape = std::tuple<int, int, int>(depth, outputHeight, outputWidth);
+        int outputHeight = (height - size + 2 * padding) / stride + 1;
+        int outputWidth = (width - size + 2 * padding) / stride + 1;
 
-            this->output = xt::empty<float>({depth, outputHeight, outputWidth});
+        this->outputShape = std::tuple<int, int, int>(depth, outputHeight, outputWidth);
 
-            this->size = size;
-            this->stride = stride;
-            this->padding = padding;
-            this->type = type;
-        }
+        this->output = xt::empty<float>({depth, outputHeight, outputWidth});
 
-        ~PoolingLayer() = default;
+        this->size = size;
+        this->stride = stride;
+        this->padding = padding;
+        this->type = type;
+    }
 
-        void forward(xt::xarray<float> input) override;
+    ~PoolingLayer() = default;
 
-        void backward(xt::xarray<float> gradient) override;
+    void forward(xt::xarray<float> input) override;
 
-        float pooling(xt::xarray<float> matrix);
+    void backward(xt::xarray<float> gradient) override;
 
-        xt::xarray<float> poolingMatrice(xt::xarray<float> matrix);
+    float pooling(xt::xarray<float> matrix);
+
+    xt::xarray<float> poolingMatrice(xt::xarray<float> matrix);
 };
 
 // Activation()
-class ActivationLayer : public ILayer   {
-    
-    public:
-    
-        void forward(xt::xarray<float> input) override;
+class ActivationLayer : public ILayer
+{
 
-        void backward(xt::xarray<float> gradient) override;
+public:
+    void forward(xt::xarray<float> input) override;
 
-        virtual xt::xarray<float> activation(xt::xarray<float> matrix);
+    void backward(xt::xarray<float> gradient) override;
+
+    xt::xarray<float> activation(xt::xarray<float> matrix);
 };
 
 // DenseLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
-class DenseLayer : public ILayer    {
-    public:
-        int depth = 0;
+class DenseLayer : public ILayer
+{
+public:
+    int depth = 0;
 
-        //Depth - Height - Width
-        std::tuple<int, int, int> inputShape{0, 0, 0};
-        std::tuple<int, int, int> outputShape{0, 0, 0};
+    // 1 x Longueur
+    int inputShape = 0;
+    int outputShape = 0;
 
-        // Depth - Height - Width - Stride - Padding
-        std::tuple<int, int, int, int, int> weightsShape{0, 0, 0, 0, 0};
+    // Height -Width
+    std::tuple<int, int> weightsShape{0, 0};
 
-        // nbFilter - Depth - Height - Width - 
-        xt::xarray<float> weights;
+    // Height -Width
+    xt::xarray<float> weights;
+    xt::xarray<float> tmpWeights;
 
-        int bias = 1;
-    
-        DenseLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)   {
+    // 1D
+    xt::xarray<float> input;
+    xt::xarray<float> output;
 
-            this->depth = depth;    // Nombre d'image dans la couche actuelle      
-            this->inputShape = inputShape;
-            this->weightsShape = weightsShape;
+    int bias = 1;
 
-            int inputDepth = std::get<0>(inputShape);
-            int inputHeight = std::get<1>(inputShape);
-            int inputWidth = std::get<2>(inputShape);
+    DenseLayer(int inputShape, int outputShape)
+    {
 
-            int weightsDepth = std::get<0>(weightsShape);
-            int weightsHeight = std::get<1>(weightsShape);
-            int weightsWidth = std::get<2>(weightsShape);
-            int weightsStride = std::get<3>(weightsShape);
-            int weightsPadding = std::get<4>(weightsShape);
+        this->inputShape = inputShape;
+        this->outputShape = outputShape;
+        this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
 
-            int outputHeight = (inputHeight - weightsHeight + 2 * weightsPadding) / weightsStride + 1 ;
-            int outputWidth = (inputWidth - weightsWidth + 2 * weightsPadding) / weightsStride + 1 ;
+        this->output = xt::empty<float>({outputShape});
+        this->input = xt::empty<float>({inputShape});
 
-            this->outputShape = std::tuple<int, int, int>(weightsDepth, outputHeight, outputWidth);
-            this->input = xt::empty<float>({inputDepth, inputHeight,inputWidth});
-            this->output = xt::empty<float>({weightsDepth, outputHeight, outputWidth});
+        weights = xt::random::rand<float>({inputShape, outputShape}, 0, 1);
+    }
 
-            weights = xt::random::rand<float>({weightsDepth, depth , weightsHeight, weightsWidth}, 0, 1);     
-        }
+    ~DenseLayer() = default;
 
-        ~DenseLayer() = default;
+    void forward(xt::xarray<float> input) override;
 
-        void forward(xt::xarray<float> input) override;
+    void backward(/*xt::xarray<float> gradient, */
+                  xt::xarray<float> target,
+                  xt::xarray<float> outputL,
+                  xt::xarray<float> weights2,
+                  xt::xarray<float> weights1,
+                  xt::xarray<float> layerBefore,
+                  float tauxApprentissage);
 
-        void backward(xt::xarray<float> gradient) override;
+    void backward(
+        xt::xarray<float> target,
+        xt::xarray<float> outputL,
+        xt::xarray<float> weightsL,
+        float tauxApprentissage);
+
+    void backwardHiddenLayer(
+        xt::xarray<float> target,
+        xt::xarray<float> output,
+        xt::xarray<float> weights,
+        float tauxApprentissage);
+
+        void dropout(u_int8_t dropRate);
 };
+
+xt::xarray<float> flatten(xt::xarray<float> input);
 
 #endif
