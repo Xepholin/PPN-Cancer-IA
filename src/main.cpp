@@ -13,6 +13,7 @@
 #include "convolution.h"
 #include "activation.h"
 #include "relu.h"
+#include "softmax.h"
 #include "pooling.h"
 #include "dense.h"
 
@@ -20,13 +21,16 @@
 
 int main()
 {
-    // xt::xarray<float> input = xt::random::randint({3,3,3}, 0, 10);
-    // auto input2 = input;
-    // // xt::xarray<float> input = xt::random::randint({2,3, 5, 5}, -10, 10);  
+    // xt::xarray<float> input = xt::random::rand<float>({1, 100}, 5, 10);
+
+    // Softmax1D soft{(int)input.size()};
+
     // std::cout << input << '\n' << std::endl;
-    // // std::cout << xt::where(input <= 0, 0.0, input) << std::endl;
-    
-    // std::cout << input << '\n' << std::endl;
+
+    // soft.forward(input);
+
+    // std::cout << soft.output << std::endl;
+
 
     CNN();
 

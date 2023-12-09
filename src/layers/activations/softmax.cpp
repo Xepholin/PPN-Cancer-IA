@@ -1,9 +1,9 @@
 #include <iostream>
-
-#include "softmax.h"
 #include <cmath>
 
-void Softmax::forward(xt::xarray<float> input)
+#include "softmax.h"
+
+void Softmax1D::forward(xt::xarray<float> input)
 {
     this->input = input;
 
@@ -21,7 +21,7 @@ void Softmax::forward(xt::xarray<float> input)
               << "          v" << std::endl;
 }
 
-void Softmax::backward(xt::xarray<float> gradient)
+void Softmax1D::backward(xt::xarray<float> gradient)
 {
     std::cout << "Softmax backward" << std::endl;
 }

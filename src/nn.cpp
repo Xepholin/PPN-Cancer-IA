@@ -9,6 +9,7 @@
 #include "convolution.h"
 #include "activation.h"
 #include "relu.h"
+#include "softmax.h"
 #include "pooling.h"
 #include "dense.h"
 
@@ -21,7 +22,7 @@ void CNN()
     int fil2 = 64;
     int fil3 = 128;
     
-    xt::xarray<float> input = xt::random::randint({1,48, 48},0,2);  
+    xt::xarray<float> input = xt::random::randint({1,48, 48},0,1);  
 
     // ------------------------------------------------------------------------------
 
@@ -64,40 +65,45 @@ void CNN()
     // ------------------------------------------------------------------------------
 
     xt::xarray<float> flatted = flatten(relu3d_3.output);
+    int flattedSize = flatted.size();
     
     // ------------------------------------------------------------------------------
 
-    Dense dense1{4096, 2048};
+    Dense dense1{flattedSize, 2048};
 
     dense1.forward(flatted);
 
-    ReLu1D relu1D1{dense1.inputShape, dense1.outputShape};
+    ReLu1D relu1D_1{dense1.outputShape};
 
-    relu1D1.forward(dense1.output);
+    relu1D_1.forward(dense1.output);
 
     dense1.dropout(50);
 
     // ------------------------------------------------------------------------------
 
-    Dense dense2{2048, 1048};
+    Dense dense2{relu1D_1.outputShape, 2048};
 
-    dense2.forward(relu1D1.output);
+    dense2.forward(relu1D_1.output);
 
-    ReLu1D relu1D2{dense2.inputShape, dense2.outputShape};
+    ReLu1D relu1D_2{dense2.outputShape};
 
-    relu1D2.forward(dense2.output);
+    relu1D_2.forward(dense2.output);
 
     dense2.dropout(50);
 
     // ------------------------------------------------------------------------------
+    
+    Dense dense3{relu1D_2.outputShape, 2};
 
-    Dense dense3{1048, 2};
+    dense3.forward(relu1D_2.output);
 
-    dense3.forward(relu1D2.output);
+    Softmax1D soft_1{dense3.outputShape};
+
+    soft_1.forward(dense3.output);
 
     // ------------------------------------------------------------------------------
 
     std::cout << "\nPrédiction\n" << "---------------" << std::endl;
 
-    std::cout << dense3.output << std::endl;
+    std::cout << soft_1.output << std::endl;
 }
