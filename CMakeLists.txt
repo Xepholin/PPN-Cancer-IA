@@ -16,6 +16,7 @@ set(SOURCE_FILES
     src/layers/pooling.cpp
     src/layers/dense.cpp
     src/layers/activations/relu.cpp
+    src/layers/activations/softmax.cpp
 )
 
 set(HEADER_FILES
@@ -29,6 +30,7 @@ set(HEADER_FILES
     include/layers/pooling.h
     include/layers/dense.h
     include/layers/activations/relu.h
+    include/layers/activations/softmax.h
 )
 
 add_executable(main.exe ${SOURCE_FILES})
