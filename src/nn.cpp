@@ -97,6 +97,8 @@ void CNN()
 
     dense3.forward(relu1D_2.output);
 
+    std::cout << dense3.output << std::endl;
+
     Softmax1D soft_1{dense3.outputShape};
 
     soft_1.forward(dense3.output);
