@@ -7,24 +7,42 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCE_FILES
     src/main.cpp
     src/image.cpp
-    src/convolution.cpp
-    src/network.cpp
     src/tools.cpp
-    src/activations.cpp
+    src/conv_op.cpp
+    src/nn.cpp
+    src/layer.cpp
+    src/layers/convolution.cpp
+    src/layers/activation.cpp
+    src/layers/pooling.cpp
+    src/layers/dense.cpp
+    src/layers/activations/relu.cpp
 )
 
 set(HEADER_FILES
     include/image.h
-    include/convolution.h
-    include/network.h
     include/tools.h
-    include/activations.h
+    include/conv_op.h
+    include/nn.h
+    include/layer.h
+    include/layers/convolution.h
+    include/layers/activation.h
+    include/layers/pooling.h
+    include/layers/dense.h
+    include/layers/activations/relu.h
 )
 
 add_executable(main.exe ${SOURCE_FILES})
 
 target_include_directories(main.exe PRIVATE
     "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_include_directories(main.exe PRIVATE
+    "${PROJECT_SOURCE_DIR}/include/layers"
+)
+
+target_include_directories(main.exe PRIVATE
+    "${PROJECT_SOURCE_DIR}/include/layers/activations"
 )
 
 find_package(PNG REQUIRED)

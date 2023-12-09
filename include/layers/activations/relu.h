@@ -1,16 +1,15 @@
-#ifndef ACTIVATIONS_H
-#define ACTIVATIONS_H
+#ifndef RELU_H
+#define RELU_H
 
-#include "network.h"
-#include <xtensor/xrandom.hpp>
+#include "activation.h"
 
-class ReLu3D : public ActivationLayer {
+class ReLu3D : public Activation {
     public:
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
         
-        xt::xarray<float> beta;
-        xt::xarray<float> gamma;
+        float beta = 0;
+        float gamma = 1;
         
         ReLu3D(std::tuple<int, int, int> inputShape)  {
             this->inputShape = inputShape;
@@ -22,10 +21,6 @@ class ReLu3D : public ActivationLayer {
 
             this->output = xt::empty<float>({depth, height, width});
 
-            // this->beta  = xt::random::rand<float>({1, output.size()}, 0, 1); 
-            // this->gamma = xt::random::rand<float>({1, output.size()}, 0, 1); 
-
-
         }
 
         void forward(xt::xarray<float> input) override;
@@ -35,7 +30,7 @@ class ReLu3D : public ActivationLayer {
         void batchNorm();
 };
 
-class ReLu1D : public ActivationLayer {
+class ReLu1D : public Activation {
       public:
         int depth = 0;
 
@@ -49,8 +44,8 @@ class ReLu1D : public ActivationLayer {
         // Depth - Height  
         xt::xarray<float> weights;
 
-        xt::xarray<float> beta;
-        xt::xarray<float> gamma;
+        float beta = 0;
+        float gamma = 1;
     
         ReLu1D(int inputShape, int outputShape)   {
 
@@ -61,10 +56,7 @@ class ReLu1D : public ActivationLayer {
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 
-            weights = xt::random::rand<float>({inputShape, outputShape}, 0, 1);  
-
-            this->beta = xt::random::rand<float>({1, outputShape}, 0, 1);
-            this->gamma = xt::random::rand<float>({1, outputShape}, 0, 1);   
+            weights = xt::random::rand<float>({inputShape, outputShape}, 0, 1);   
         }
 
         ~ReLu1D() = default;

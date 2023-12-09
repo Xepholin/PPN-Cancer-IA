@@ -1,9 +1,7 @@
-#ifndef CONVOLUTION_H
-#define CONVOLUTION_H
+#ifndef CONV_OP_H
+#define CONV_OP_H
 
 #include <xtensor/xarray.hpp>
-#include <xtensor/xio.hpp>
-#include <xtensor/xrandom.hpp>
 
 // Algo in-place : pivote une matrice carrée à 180 degrés
 void rotateMatrix(xt::xarray<float> &kernel);

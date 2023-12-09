@@ -1,13 +1,13 @@
-#include "activations.h"
 #include <iostream>
 
-#include <xtensor/xarray.hpp>
-#include <xtensor/xio.hpp>
-#include <xtensor/xrandom.hpp>
+#include "relu.h"
 
 void ReLu3D::forward(xt::xarray<float> input)
 {
     this->output = xt::where(input <= 0, 0.0, input);
+
+    std::cout << "          | ReLu\n"
+              << "          v" << std::endl;
 }
 
 void ReLu3D::backward(xt::xarray<float> gradient)
@@ -30,8 +30,10 @@ void ReLu3D::batchNorm()
 
 void ReLu1D::forward(xt::xarray<float> input)
 {
-    std::cout << "ReLu forward" << std::endl;
     this->output = xt::where(input <= 0, 0.0, input);
+
+    std::cout << "          | ReLu\n"
+              << "          v" << std::endl;
 }
 
 void ReLu1D::backward(xt::xarray<float> gradient)
