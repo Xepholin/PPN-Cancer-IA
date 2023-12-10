@@ -26,6 +26,9 @@ class Dense
 
         int bias = 1;
 
+        float beta = 0.0;
+        float gamma = 1.0;
+
         Dense(int inputShape, int outputShape)
         {
 
@@ -36,7 +39,9 @@ class Dense
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 
-            weights = xt::random::rand<float>({inputShape, outputShape}, 0, 1);
+            // weights = kernelsGaussianDistro(1, 1, inputShape, outputShape);
+
+            weights = xt::random::randn<float>({inputShape, outputShape});
             drop = xt::empty<bool>({inputShape, outputShape});
         }
 

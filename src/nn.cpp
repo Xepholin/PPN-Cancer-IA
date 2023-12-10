@@ -22,7 +22,7 @@ void CNN()
     int fil2 = 64;
     int fil3 = 128;
     
-    xt::xarray<float> input = xt::random::randint({1,48, 48},0,1);  
+    xt::xarray<float> input = xt::random::randint({1, 48, 48}, 0, 1);  
 
     // ------------------------------------------------------------------------------
 
@@ -97,9 +97,7 @@ void CNN()
 
     dense3.forward(relu1D_2.output);
 
-    std::cout << dense3.output << std::endl;
-
-    Softmax2D soft_1{dense3.outputShape};
+    Softmax1D soft_1{dense3.outputShape};
 
     soft_1.forward(dense3.output);
 

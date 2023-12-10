@@ -4,6 +4,7 @@
 
 #include "convolution.h"
 #include "conv_op.h"
+#include "tools.h"
 
 void Convolution::forward(xt::xarray<float> input)
 {
@@ -21,6 +22,8 @@ void Convolution::forward(xt::xarray<float> input)
             xt::view(output, i) = convolution_result;
         }
     }
+
+    this->output = batchNorm(this->output, this->beta, this->gamma);
 
     std::cout << "Convolution with " <<
     this->filters.shape()[2] << "x" << this->filters.shape()[3] << " kernel" <<

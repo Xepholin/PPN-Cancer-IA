@@ -1,6 +1,8 @@
 #include <random>
 #include <xtensor/xrandom.hpp>
 
+#include <cmath>
+
 #include "tools.h"
 
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width)
@@ -35,6 +37,23 @@ xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, in
     
     return kernels;
 
+}
+
+xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma)
+{
+    
+    xt::xarray<float> batched = input;
+
+    float mean = xt::mean(batched)();
+    float square = std::sqrt(xt::variance(batched)() + 1e-6);
+
+    batched = batched - mean;
+    batched = batched / square;
+
+    batched *= gamma;
+    batched += beta;
+
+    return batched;
 }
 
 xt::xarray<float> flatten(xt::xarray<float> input)

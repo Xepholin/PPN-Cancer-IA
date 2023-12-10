@@ -20,7 +20,7 @@
 
 int main()
 {
-    // xt::xarray<float> input = xt::random::rand<float>({1, 100}, 5, 10);
+    // xt::xarray<float> input = xt::random::randn<float>({1, 100});
 
     // Softmax1D soft{(int)input.size()};
 
@@ -29,7 +29,6 @@ int main()
     // soft.forward(input);
 
     // std::cout << soft.output << std::endl;
-
 
     CNN();
 

@@ -30,6 +30,9 @@ class Convolution
 
         int bias = 1;
 
+        float beta = 0.0;
+        float gamma = 1.0;
+
         Convolution(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)
         {
 
@@ -54,7 +57,9 @@ class Convolution
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
 
-            filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
+            // filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
+
+            filters = xt::random::randn<float>({filtersDepth, depth, filtersHeight, filtersWidth});
         }
 
         ~Convolution() = default;

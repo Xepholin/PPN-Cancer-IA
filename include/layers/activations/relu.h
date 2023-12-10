@@ -30,8 +30,6 @@ class ReLu3D : public Activation
         void forward(xt::xarray<float> input) override;
         
         void backward() override;
-
-        void batchNorm();
         
 };
 

@@ -3,7 +3,7 @@
 
 #include "softmax.h"
 
-void Softmax2D::forward(xt::xarray<float> input)
+void Softmax1D::forward(xt::xarray<float> input)
 {
     this->input = input;
 
@@ -21,16 +21,11 @@ void Softmax2D::forward(xt::xarray<float> input)
               << "          v" << std::endl;
 }
 
-void Softmax2D::backward()
-{
-    // Compute the Jacobian matrix of the softmax function
-    auto jacobian = -this->output * xt::transpose(this->output);
-    auto gradient = softmaxGradient();
-    // Compute the gradient of the loss with respect to the softmax input
-    this->input = xt::sum(gradient * jacobian, {-1});
+void Softmax1D::backward()  {
+    std::cout << "backward softmax" << std::endl;
 }
 
-xt::xarray<float> Softmax2D::softmaxGradient()
+xt::xarray<float> Softmax1D::softmaxGradient()
 {
 
     int num_classes = this->output.shape()[0];

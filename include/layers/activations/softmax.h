@@ -3,7 +3,7 @@
 
 #include "activation.h"
 
-class Softmax2D : public Activation
+class Softmax1D : public Activation
 {
 public:
 
@@ -16,7 +16,7 @@ public:
     float beta = 0;
     float gamma = 1;
 
-    Softmax2D(int inputShape)
+    Softmax1D(int inputShape)
     {
 
         this->inputShape = inputShape;
@@ -26,7 +26,7 @@ public:
         this->input = xt::empty<float>({inputShape});
     }
 
-    ~Softmax2D() = default;
+    ~Softmax1D() = default;
 
     void forward(xt::xarray<float> input) override;
 

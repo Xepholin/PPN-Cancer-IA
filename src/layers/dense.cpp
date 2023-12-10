@@ -2,6 +2,7 @@
 #include <random>
 
 #include "dense.h"
+#include "tools.h"
 
 float indicatrice(float x)
 {
@@ -27,6 +28,8 @@ void Dense::forward(xt::xarray<float> input)
             output(j) += this->weights(i, j) * this->input(i);
         }
     }
+
+    this->output = batchNorm(this->output, this->beta, this->gamma);
 
     std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
               << "\n          |\n          v" << std::endl;
