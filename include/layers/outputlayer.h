@@ -1,16 +1,18 @@
-#ifndef DENSE_H
-#define DENSE_H
+#ifndef OUTPUTLAYER_H
+#define OUTPUTLAYER_H
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
 
-// Dense(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
-class Dense
+// outputLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
+class outputLayer
 {
     public:
 
         xt::xarray<float> input;
         xt::xarray<float> output;
+
+        int depth = 0;
 
         // 1 x Longueur
         int inputShape = 0;
@@ -26,7 +28,7 @@ class Dense
 
         int bias = 1;
 
-        Dense(int inputShape, int outputShape)
+        outputLayer(int inputShape, int outputShape)
         {
 
             this->inputShape = inputShape;
@@ -40,7 +42,7 @@ class Dense
             drop = xt::empty<bool>({inputShape, outputShape});
         }
 
-        ~Dense() = default;
+        ~outputLayer() = default;
 
         void forward(xt::xarray<float> input);
 
@@ -48,7 +50,6 @@ class Dense
             xt::xarray<float> target,
             float tauxApprentissage);
 
-        void dropout(uint8_t dropRate);
 };
 
 #endif

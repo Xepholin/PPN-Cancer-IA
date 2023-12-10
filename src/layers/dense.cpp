@@ -3,23 +3,6 @@
 
 #include "dense.h"
 
-void Dense::forward(xt::xarray<float> input)
-{
-    this->input = input;
-
-    for (int i = 0; i < this->weights.shape()[0]; ++i)
-    {
-        for (int j = 0; j < this->weights.shape()[1]; ++j)
-        {
-            output(j) += this->weights(i, j) * this->input(i);
-        }
-    }
-
-    std::cout << "Dense: " <<
-    this->output.shape()[0] << " fully connected neurons" <<
-    "\n          |\n          v" << std::endl;
-}
-
 float indicatrice(float x)
 {
     if (x > 0)
@@ -29,77 +12,61 @@ float indicatrice(float x)
     return 0;
 }
 
-float lossFunction(xt::xarray<float> outputL,
-                   xt::xarray<float> target)
+void Dense::forward(xt::xarray<float> input)
 {
-    float err = 0.0;
-    for (int i = 0; i < outputL.size(); ++i)
+    this->input = input;
+
+    for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
-        err += 0.5 * ((outputL(i) - target(i)) * (outputL(i) - target(i)));
+        for (int j = 0; j < this->weights.shape()[1]; ++j)
+        {
+            if (drop(i, j) & 0)
+            {
+                continue;
+            }
+            output(j) += this->weights(i, j) * this->input(i);
+        }
     }
 
-    return err;
+    std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
+              << "\n          |\n          v" << std::endl;
 }
 
 void Dense::backward(
     xt::xarray<float> target,
-    xt::xarray<float> outputL,
-    xt::xarray<float> weightsL,
     float tauxApprentissage)
 {
     std::cout << "backward Dense" << std::endl;
+    xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[0]});
 
-    // Calcul du gradient de l'erreur selon le poids pour la couche L
-    xt::xarray<float> errL;
-    for (int i = 0; i < outputL.size(); ++i)
-    {
-        float gradient = 0.0;
-        // ligne de la matrice poids ?
-        for (int j = 0; j < weightsL.shape()[0]; ++j)
-        {
-            gradient += 2 * (outputL(i) - target(i)) * indicatrice(outputL(i));
-        }
-        // errL.push_back(gradient);
-    }
-
-    // Mise a jour des poids lie a la couche de sortie
-    for (int i = 0; i < weightsL.shape()[0]; ++i)
-    {
-        for (int j = 0; j < weightsL.shape()[1]; ++j)
-        {
-            weightsL(i, j) -= tauxApprentissage * errL(j) * outputL(j);
-        }
-    }
-}
-
-void Dense::backwardHiddenLayer(
-    xt::xarray<float> target,
-    xt::xarray<float> output,
-    xt::xarray<float> weights,
-    float tauxApprentissage)
-{
-    std::cout << "backward Dense" << std::endl;
     // Calcul du gradient de l'erreur selon les sorties de la couche interne l
-    xt::xarray<float> layerGradient;
-    for (int i = 0; i < weights.shape()[0]; ++i)
+    for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
         float gradient = 0.0;
-        for (int j = 0; i < weights.shape()[1]; ++j)
+        for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
+
+            if(this->drop(i,j) == false){
+                continue;
+            }
+            
             // Quel est la target pour une couche cachee ?
-            // flatten output matrix !
-            gradient += 2 * (output(j) - target(j)) * weights(j, i) * indicatrice(output(j));
+            gradient += 2 * (output(j) - target(j)) * this->weights(j, i) * indicatrice(output(j));
         }
-        // layerGradient.push_back(gradient);
+        layerGradient(i) = gradient;
     }
 
-    // Calcul du gradient de l'erreur selon le poids pour la couche l
+    // Calcul du gradient de l'erreur selon les poids pour la couche l
     xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
         float gradient = 0.0;
         for (int j = 0; j < weights.shape()[1]; ++j)
         {
+
+            if(this->drop(i,j) == false){
+                continue;
+            }
             weightsGradient(i, j) += layerGradient(j) * indicatrice(output(j));
         }
     }
@@ -108,12 +75,19 @@ void Dense::backwardHiddenLayer(
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
         for (int j = 0; j < weights.shape()[1]; ++j)
-        {
-            weights(i, j) -= tauxApprentissage * weightsGradient(i, j) * output(j);
+        {   
+            
+            if(this->drop(i,j) == false){
+                continue;
+            }
+            this->weights(i, j) -= tauxApprentissage * weightsGradient(i, j) * output(j);
         }
     }
 }
-void Dense::dropout(u_int8_t dropRate)
+
+
+
+void Dense::dropout(uint8_t dropRate)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -124,11 +98,15 @@ void Dense::dropout(u_int8_t dropRate)
         {
             if (dropRate <= std::uniform_int_distribution<>(1, 100)(gen))
             {
-                this->weights(i, j) = 0.0;
+                this->drop(i, j) = true;
+            }
+            else
+            {
+                this->drop(i, j) = false;
             }
         }
     }
 
     std::cout << "          | dropout p=" << dropRate
-            << "\n          v" << std::endl;
+              << "\n          v" << std::endl;
 }

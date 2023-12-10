@@ -8,7 +8,6 @@
 #include "image.h"
 #include "tools.h"
 #include "conv_op.h"
-#include "layer.h"
 
 #include "convolution.h"
 #include "activation.h"

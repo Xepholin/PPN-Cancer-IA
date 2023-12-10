@@ -3,9 +3,10 @@
 
 #include "activation.h"
 
-class Softmax1D : public Activation
+class Softmax2D : public Activation
 {
 public:
+
     int depth = 0;
 
     // 1 x Longueur
@@ -15,7 +16,7 @@ public:
     float beta = 0;
     float gamma = 1;
 
-    Softmax1D(int inputShape)
+    Softmax2D(int inputShape)
     {
 
         this->inputShape = inputShape;
@@ -25,11 +26,13 @@ public:
         this->input = xt::empty<float>({inputShape});
     }
 
-    ~Softmax1D() = default;
+    ~Softmax2D() = default;
 
     void forward(xt::xarray<float> input) override;
 
-    void backward(xt::xarray<float> gradient) override;
+    void backward() override;
+
+    xt::xarray<float> softmaxGradient();
 };
 
 #endif

@@ -1,9 +1,12 @@
 #ifndef RELU_H
 #define RELU_H
 
+#include <tuple>
+
 #include "activation.h"
 
-class ReLu3D : public Activation {
+class ReLu3D : public Activation
+{
     public:
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
@@ -26,9 +29,10 @@ class ReLu3D : public Activation {
 
         void forward(xt::xarray<float> input) override;
         
-        void backward(xt::xarray<float> gradient) override;
+        void backward() override;
 
         void batchNorm();
+        
 };
 
 class ReLu1D : public Activation {
@@ -55,7 +59,7 @@ class ReLu1D : public Activation {
 
         void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> gradient) override;
+        void backward() override;
 };
 
 

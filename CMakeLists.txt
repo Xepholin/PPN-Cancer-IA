@@ -10,11 +10,11 @@ set(SOURCE_FILES
     src/tools.cpp
     src/conv_op.cpp
     src/nn.cpp
-    src/layer.cpp
     src/layers/convolution.cpp
     src/layers/activation.cpp
     src/layers/pooling.cpp
     src/layers/dense.cpp
+    src/layers/outputlayer.cpp
     src/layers/activations/relu.cpp
     src/layers/activations/softmax.cpp
 )
@@ -24,10 +24,10 @@ set(HEADER_FILES
     include/tools.h
     include/conv_op.h
     include/nn.h
-    include/layer.h
     include/layers/convolution.h
     include/layers/activation.h
     include/layers/pooling.h
+    include/layers/outputlayer.h
     include/layers/dense.h
     include/layers/activations/relu.h
     include/layers/activations/softmax.h

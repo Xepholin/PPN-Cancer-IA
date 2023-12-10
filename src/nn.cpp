@@ -99,7 +99,7 @@ void CNN()
 
     std::cout << dense3.output << std::endl;
 
-    Softmax1D soft_1{dense3.outputShape};
+    Softmax2D soft_1{dense3.outputShape};
 
     soft_1.forward(dense3.output);
 

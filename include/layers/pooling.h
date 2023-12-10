@@ -1,13 +1,20 @@
 #ifndef POOLING_H
 #define POOLING_H
 
-#include "layer.h"
+#include <tuple>
+
+#include <xtensor/xarray.hpp>
+#include <xtensor/xrandom.hpp>
 
 // Pooling(std::tuple<int, int, int> inputShape, int size, int stride, int padding, Pooling::PoolingType type)
-class Pooling : public ILayer
+class Pooling
 {
 
     public:
+
+        xt::xarray<float> input;
+        xt::xarray<float> output;
+
         enum PoolingType
         {
             NO_TYPE,
@@ -49,9 +56,9 @@ class Pooling : public ILayer
 
         ~Pooling() = default;
 
-        void forward(xt::xarray<float> input) override;
+        void forward(xt::xarray<float> input);
 
-        void backward(xt::xarray<float> gradient) override;
+        void backward(xt::xarray<float> gradient);
 
         float pooling(xt::xarray<float> matrix);
 

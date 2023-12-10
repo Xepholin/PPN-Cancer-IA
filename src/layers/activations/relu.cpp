@@ -10,7 +10,7 @@ void ReLu3D::forward(xt::xarray<float> input)
               << "          v" << std::endl;
 }
 
-void ReLu3D::backward(xt::xarray<float> gradient)
+void ReLu3D::backward()
 {
     std::cout << "ReLu backward" << std::endl;
 }
@@ -36,7 +36,7 @@ void ReLu1D::forward(xt::xarray<float> input)
               << "          v" << std::endl;
 }
 
-void ReLu1D::backward(xt::xarray<float> gradient)
+void ReLu1D::backward()
 {
     std::cout << "ReLu1D backward" << std::endl;
 }
