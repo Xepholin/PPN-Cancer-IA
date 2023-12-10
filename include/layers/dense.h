@@ -53,7 +53,7 @@ class Dense
             xt::xarray<float> target,
             float tauxApprentissage);
 
-        void dropout(uint8_t dropRate);
+        void dropout(uint16_t dropRate);
 };
 
 #endif

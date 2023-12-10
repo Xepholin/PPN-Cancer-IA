@@ -20,7 +20,7 @@
 
 int main()
 {
-    // xt::xarray<float> input = xt::random::randn<float>({1, 100});
+    xt::xarray<float> input = xt::random::randn<float>({1, 5});
 
     // Softmax1D soft{(int)input.size()};
 
@@ -30,7 +30,12 @@ int main()
 
     // std::cout << soft.output << std::endl;
 
-    CNN();
+    xt::xarray<float> image = importPBM("../assets/PBM/8863_idx5_x451_y551_class0.pbm");
+    image.reshape({1, 48, 48});
+
+    std::cout << image << std::endl;
+
+    CNN(image);
 
     return 0;
 }

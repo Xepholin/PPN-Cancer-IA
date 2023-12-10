@@ -90,7 +90,7 @@ void Dense::backward(
 
 
 
-void Dense::dropout(uint8_t dropRate)
+void Dense::dropout(uint16_t dropRate)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -110,6 +110,6 @@ void Dense::dropout(uint8_t dropRate)
         }
     }
 
-    std::cout << "          | dropout p=" << dropRate
+    std::cout << "          | dropout p=" << dropRate << '%'
               << "\n          v" << std::endl;
 }

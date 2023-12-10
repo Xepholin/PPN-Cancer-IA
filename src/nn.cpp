@@ -13,7 +13,7 @@
 #include "pooling.h"
 #include "dense.h"
 
-void CNN()
+void CNN(xt::xarray<float> input)
 {
     
     std::cout << "Convolutional Neural Network\n" << "---------------" << std::endl;
@@ -21,8 +21,6 @@ void CNN()
     int fil1 = 32;
     int fil2 = 64;
     int fil3 = 128;
-    
-    xt::xarray<float> input = xt::random::randint({1, 48, 48}, 0, 1);  
 
     // ------------------------------------------------------------------------------
 
@@ -92,14 +90,38 @@ void CNN()
     dense2.dropout(50);
 
     // ------------------------------------------------------------------------------
-    
-    Dense dense3{relu1D_2.outputShape, 2};
+
+    Dense dense3{relu1D_2.outputShape, 1024};
 
     dense3.forward(relu1D_2.output);
 
-    Softmax1D soft_1{dense3.outputShape};
+    ReLu1D relu1D_3{dense3.outputShape};
 
-    soft_1.forward(dense3.output);
+    relu1D_3.forward(dense3.output);
+
+    dense3.dropout(50);
+
+    // ------------------------------------------------------------------------------
+
+    Dense dense4{relu1D_2.outputShape, 512};
+
+    dense4.forward(relu1D_3.output);
+
+    ReLu1D relu1D_4{dense4.outputShape};
+
+    relu1D_4.forward(dense4.output);
+
+    dense4.dropout(50);
+
+    // ------------------------------------------------------------------------------
+    
+    Dense dense5{relu1D_4.outputShape, 2};
+
+    dense5.forward(relu1D_4.output);
+
+    Softmax1D soft_1{dense5.outputShape};
+
+    soft_1.forward(dense5.output);
 
     // ------------------------------------------------------------------------------
 
