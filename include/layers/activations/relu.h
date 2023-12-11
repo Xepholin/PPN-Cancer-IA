@@ -8,6 +8,7 @@
 class ReLu3D : public Activation
 {
     public:
+    
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
         
@@ -29,7 +30,7 @@ class ReLu3D : public Activation
 
         void forward(xt::xarray<float> input) override;
         
-        void backward() override;
+        void backward(xt::xarray<float> gradient, float learningRate) override;
         
 };
 
@@ -57,7 +58,7 @@ class ReLu1D : public Activation {
 
         void forward(xt::xarray<float> input) override;
 
-        void backward() override;
+        void backward(xt::xarray<float> gradient, float learningRate) override;
 };
 
 

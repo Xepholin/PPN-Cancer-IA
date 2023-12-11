@@ -8,6 +8,7 @@
 #include "image.h"
 #include "tools.h"
 #include "conv_op.h"
+#include "layer.h"
 
 #include "convolution.h"
 #include "activation.h"
@@ -19,23 +20,27 @@
 #include "nn.h"
 
 int main()
-{
-    xt::xarray<float> input = xt::random::randn<float>({1, 5});
+{   
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-    // Softmax1D soft{(int)input.size()};
+    xt::xarray<float> prediction = xt::empty<float>({5, 2});
 
-    // std::cout << input << '\n' << std::endl;
+    for (int i = 0; i < 1; ++i) {
+        xt::xarray<float> input = xt::zeros<float>({1, 48, 48});
 
-    // soft.forward(input);
+        for (int j = 0; j < 48; ++j)
+        {
+            for (int k = 0; k < 48; ++k)
+            {
+                input(j, k) = std::uniform_int_distribution<>(0, 1)(gen);
+            }
+        }
 
-    // std::cout << soft.output << std::endl;
+        xt::view(prediction, i) = CNN2(input);
+    }
 
-    xt::xarray<float> image = importPBM("../assets/PBM/8863_idx5_x451_y551_class0.pbm");
-    image.reshape({1, 48, 48});
-
-    std::cout << image << std::endl;
-
-    CNN(image);
+    std::cout << prediction << std::endl;
 
     return 0;
 }

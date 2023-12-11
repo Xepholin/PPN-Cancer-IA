@@ -1,17 +1,13 @@
 #ifndef DENSE_H
 #define DENSE_H
 
-#include <xtensor/xarray.hpp>
-#include <xtensor/xrandom.hpp>
+#include "layer.h"
 
 // Dense(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
-class Dense
+class Dense : public ILayer
 {
     public:
-
-        xt::xarray<float> input;
-        xt::xarray<float> output;
-
+    
         // 1 x Longueur
         int inputShape = 0;
         int outputShape = 0;
@@ -47,11 +43,11 @@ class Dense
 
         ~Dense() = default;
 
-        void forward(xt::xarray<float> input);
+        void forward(xt::xarray<float> input) override;
 
         void backward(
             xt::xarray<float> target,
-            float tauxApprentissage);
+            float learningRate);
 
         void dropout(uint16_t dropRate);
 };

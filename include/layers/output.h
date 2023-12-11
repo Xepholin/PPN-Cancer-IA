@@ -1,16 +1,12 @@
 #ifndef OUTPUTLAYER_H
 #define OUTPUTLAYER_H
 
-#include <xtensor/xarray.hpp>
-#include <xtensor/xrandom.hpp>
+#include "layer.h"
 
-// outputLayer(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
-class outputLayer
+// Output(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
+class Output : public ILayer
 {
     public:
-
-        xt::xarray<float> input;
-        xt::xarray<float> output;
 
         int depth = 0;
 
@@ -28,7 +24,7 @@ class outputLayer
 
         int bias = 1;
 
-        outputLayer(int inputShape, int outputShape)
+        Output(int inputShape, int outputShape)
         {
 
             this->inputShape = inputShape;
@@ -42,13 +38,13 @@ class outputLayer
             drop = xt::empty<bool>({inputShape, outputShape});
         }
 
-        ~outputLayer() = default;
+        ~Output() = default;
 
-        void forward(xt::xarray<float> input);
+        void forward(xt::xarray<float> input) override;
 
         void backward(
             xt::xarray<float> target,
-            float tauxApprentissage);
+            float learningRate) override;
 
 };
 

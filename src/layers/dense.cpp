@@ -25,19 +25,20 @@ void Dense::forward(xt::xarray<float> input)
             {
                 continue;
             }
+
             output(j) += this->weights(i, j) * this->input(i);
         }
     }
 
     this->output = batchNorm(this->output, this->beta, this->gamma);
 
-    std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
-              << "\n          |\n          v" << std::endl;
+    // std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
+    //           << "\n          |\n          v" << std::endl;
 }
 
 void Dense::backward(
     xt::xarray<float> target,
-    float tauxApprentissage)
+    float learningRate)
 {
     std::cout << "backward Dense" << std::endl;
     xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[0]});
@@ -83,7 +84,7 @@ void Dense::backward(
             if(this->drop(i,j) == false){
                 continue;
             }
-            this->weights(i, j) -= tauxApprentissage * weightsGradient(i, j) * output(j);
+            this->weights(i, j) -= learningRate * weightsGradient(i, j) * output(j);
         }
     }
 }
@@ -110,6 +111,6 @@ void Dense::dropout(uint16_t dropRate)
         }
     }
 
-    std::cout << "          | dropout p=" << dropRate << '%'
-              << "\n          v" << std::endl;
+    // std::cout << "          | dropout p=" << dropRate << '%'
+    //           << "\n          v" << std::endl;
 }

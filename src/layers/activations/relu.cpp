@@ -6,11 +6,11 @@ void ReLu3D::forward(xt::xarray<float> input)
 {
     this->output = xt::where(input <= 0, 0.0, input);
 
-    std::cout << "          | ReLu\n"
-              << "          v" << std::endl;
+    // std::cout << "          | ReLu\n"
+    //           << "          v" << std::endl;
 }
 
-void ReLu3D::backward()
+void ReLu3D::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "ReLu backward" << std::endl;
 }
@@ -19,11 +19,11 @@ void ReLu1D::forward(xt::xarray<float> input)
 {
     this->output = xt::where(input <= 0, 0.0, input);
 
-    std::cout << "          | ReLu\n"
-              << "          v" << std::endl;
+    // std::cout << "          | ReLu\n"
+    //           << "          v" << std::endl;
 }
 
-void ReLu1D::backward()
+void ReLu1D::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "ReLu1D backward" << std::endl;
 }

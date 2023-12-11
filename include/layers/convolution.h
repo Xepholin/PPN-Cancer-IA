@@ -3,19 +3,15 @@
 
 #include <tuple>
 
-#include <xtensor/xarray.hpp>
-#include <xtensor/xrandom.hpp>
-
+#include "layer.h"
 #include "tools.h"
 
 // Convolution(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)
-class Convolution
+class Convolution : public ILayer
 {
 
     public:
-        xt::xarray<float> input;
-        xt::xarray<float> output;
-
+    
         int depth = 0;
 
         // Depth - Height - Width
@@ -64,9 +60,9 @@ class Convolution
 
         ~Convolution() = default;
 
-        void forward(xt::xarray<float> input);
+        void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> gradient);
+        void backward(xt::xarray<float> gradient, float learningRate) override;
 };
 
 #endif

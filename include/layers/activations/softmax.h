@@ -30,7 +30,7 @@ public:
 
     void forward(xt::xarray<float> input) override;
 
-    void backward() override;
+    void backward(xt::xarray<float> gradient, float learningRate) override;
 
     xt::xarray<float> softmaxGradient();
 };

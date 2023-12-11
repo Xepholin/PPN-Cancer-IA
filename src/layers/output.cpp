@@ -1,10 +1,9 @@
 #include <iostream>
 #include <random>
 
-#include "outputlayer.h"
-#include "outputlayer.h"
+#include "output.h"
 
-void outputLayer::forward(xt::xarray<float> input)
+void Output::forward(xt::xarray<float> input)
 {
     this->input = input;
 
@@ -20,6 +19,11 @@ void outputLayer::forward(xt::xarray<float> input)
         }
     }
 
-    std::cout << "outputLayer: " << this->output.shape()[0] << " fully connected neurons"
-              << "\n          |\n          v" << std::endl;
+    // std::cout << "outputLayer: " << this->output.shape()[0] << " fully connected neurons"
+    //           << "\n          |\n          v" << std::endl;
+}
+
+void Output::backward(xt::xarray<float> gradient, float learningRate)
+{
+    std::cout << "backward Output" << std::endl;
 }

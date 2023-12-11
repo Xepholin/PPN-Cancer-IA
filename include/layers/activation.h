@@ -1,21 +1,17 @@
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
 
-#include <xtensor/xarray.hpp>
-#include <xtensor/xio.hpp>
-#include <xtensor/xrandom.hpp>
+#include "layer.h"
 
 // Activation()
-class Activation
+class Activation : public ILayer
 {
 
     public:
-        xt::xarray<float> input;
-        xt::xarray<float> output;
+    
+        void forward(xt::xarray<float> input) override;
 
-        virtual void forward(xt::xarray<float> input);
-
-        virtual void backward();
+        void backward(xt::xarray<float> gradient, float learningRate) override;
 };
 
 #endif

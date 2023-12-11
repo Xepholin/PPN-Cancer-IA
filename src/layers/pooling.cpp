@@ -17,15 +17,15 @@ void Pooling::forward(xt::xarray<float> input)
         xt::view(output, i) = convolution_result;
     }
 
-    std::cout << "Pool with " <<
-    this->size << "x" << this->size << ' ' << this->type << " kernel" << 
-    " + " << this->stride << " stride" <<
-    " + " << this->padding << " pad : " <<
-    this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
-    "\n          |\n          v" << std::endl;
+    // std::cout << "Pool with " <<
+    // this->size << "x" << this->size << ' ' << this->type << " kernel" << 
+    // " + " << this->stride << " stride" <<
+    // " + " << this->padding << " pad : " <<
+    // this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
+    // "\n          |\n          v" << std::endl;
 }
 
-void Pooling::backward(xt::xarray<float> gradient)
+void Pooling::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "Pooling backward" << std::endl;
 }
@@ -73,22 +73,22 @@ float Pooling::pooling(xt::xarray<float> matrix)
 
     switch (this->type)
     {
-        case Pooling::PoolingType::NO_TYPE:
+        case PoolingType::NO_TYPE:
         {
             result = 0.0;
             break;
         }
-        case Pooling::PoolingType::MIN:
+        case PoolingType::MIN:
         {
             result = *std::min_element(matrix.begin(), matrix.end());
             break;
         }
-        case Pooling::PoolingType::MAX:
+        case PoolingType::MAX:
         {
             result = *std::max_element(matrix.begin(), matrix.end());
             break;
         }
-        case Pooling::PoolingType::AVG:
+        case PoolingType::AVG:
         {
             result = xt::sum(matrix)() / static_cast<float>(matrix.size());
             break;
@@ -103,17 +103,17 @@ float Pooling::pooling(xt::xarray<float> matrix)
     return result;
 }
 
-std::ostream& operator<<(std::ostream& out, const Pooling::PoolingType value)
+std::ostream& operator<<(std::ostream& out, const PoolingType value)
 {
     switch (value)
     {
-        case Pooling::NO_TYPE:
+        case PoolingType::NO_TYPE:
             return out << "no_type.";
-        case Pooling::MAX:
+        case PoolingType::MAX:
             return out << "max.";
-        case Pooling::MIN:
+        case PoolingType::MIN:
             return out << "min.";
-        case Pooling::AVG:
+        case PoolingType::AVG:
             return out << "avg.";
         default:
             return out << "unknown type.";

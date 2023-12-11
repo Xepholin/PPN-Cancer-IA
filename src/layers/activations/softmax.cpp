@@ -17,11 +17,11 @@ void Softmax1D::forward(xt::xarray<float> input)
         this->output(i) = exp_xi / expSum;
     }
 
-    std::cout << "          | Softmax\n"
-              << "          v" << std::endl;
+    // std::cout << "          | Softmax\n"
+    //           << "          v" << std::endl;
 }
 
-void Softmax1D::backward()  {
+void Softmax1D::backward(xt::xarray<float> gradient, float learningRate)  {
     std::cout << "backward softmax" << std::endl;
 }
 
