@@ -16,18 +16,21 @@ void Pooling::forward(xt::xarray<float> input)
         auto convolution_result = poolingMatrice(tmpMat);
         xt::view(output, i) = convolution_result;
     }
-
-    // std::cout << "Pool with " <<
-    // this->size << "x" << this->size << ' ' << this->type << " kernel" << 
-    // " + " << this->stride << " stride" <<
-    // " + " << this->padding << " pad : " <<
-    // this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
-    // "\n          |\n          v" << std::endl;
 }
 
 void Pooling::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "Pooling backward" << std::endl;
+}
+
+void Pooling::print() const
+{
+    std::cout << "Pool with " <<
+    this->size << "x" << this->size << ' ' << this->type << " kernel" << 
+    " + " << this->stride << " stride" <<
+    " + " << this->padding << " pad : " <<
+    this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
+    "\n          |\n          v" << std::endl;
 }
 
 xt::xarray<float> Pooling::poolingMatrice(xt::xarray<float> matrix)
@@ -73,22 +76,22 @@ float Pooling::pooling(xt::xarray<float> matrix)
 
     switch (this->type)
     {
-        case PoolingType::NO_TYPE:
+        case PoolingType::POOLING_NO_TYPE:
         {
             result = 0.0;
             break;
         }
-        case PoolingType::MIN:
+        case PoolingType::POOLING_MIN:
         {
             result = *std::min_element(matrix.begin(), matrix.end());
             break;
         }
-        case PoolingType::MAX:
+        case PoolingType::POOLING_MAX:
         {
             result = *std::max_element(matrix.begin(), matrix.end());
             break;
         }
-        case PoolingType::AVG:
+        case PoolingType::POOLING_AVG:
         {
             result = xt::sum(matrix)() / static_cast<float>(matrix.size());
             break;
@@ -107,13 +110,13 @@ std::ostream& operator<<(std::ostream& out, const PoolingType value)
 {
     switch (value)
     {
-        case PoolingType::NO_TYPE:
+        case PoolingType::POOLING_NO_TYPE:
             return out << "no_type.";
-        case PoolingType::MAX:
+        case PoolingType::POOLING_MAX:
             return out << "max.";
-        case PoolingType::MIN:
+        case PoolingType::POOLING_MIN:
             return out << "min.";
-        case PoolingType::AVG:
+        case PoolingType::POOLING_AVG:
             return out << "avg.";
         default:
             return out << "unknown type.";

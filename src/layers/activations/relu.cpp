@@ -2,28 +2,26 @@
 
 #include "relu.h"
 
-void ReLu3D::forward(xt::xarray<float> input)
+void ReLu::forward(xt::xarray<float> input)
 {
     this->output = xt::where(input <= 0, 0.0, input);
-
-    // std::cout << "          | ReLu\n"
-    //           << "          v" << std::endl;
 }
 
-void ReLu3D::backward(xt::xarray<float> gradient, float learningRate)
+void ReLu::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "ReLu backward" << std::endl;
 }
 
-void ReLu1D::forward(xt::xarray<float> input)
-{
-    this->output = xt::where(input <= 0, 0.0, input);
-
-    // std::cout << "          | ReLu\n"
-    //           << "          v" << std::endl;
+float ReLu::prime(float x)   {
+    if (x > 0)
+    {
+        return 1;
+    }
+    return 0;
 }
 
-void ReLu1D::backward(xt::xarray<float> gradient, float learningRate)
+void ReLu::print() const
 {
-    std::cout << "ReLu1D backward" << std::endl;
+    std::cout << "          | ReLu\n"
+              << "          v" << std::endl;
 }

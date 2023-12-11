@@ -11,3 +11,8 @@ void ILayer::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "backward ILayer" << std::endl;
 }
+
+void ILayer::print() const
+{
+    std::cout << "print ILayer" << std::endl; 
+}

@@ -1,27 +1,20 @@
 #include <iostream>
 #include <random>
 
+#include <xtensor/xio.hpp>
+
 #include "dense.h"
 #include "tools.h"
-
-float indicatrice(float x)
-{
-    if (x > 0)
-    {
-        return 1;
-    }
-    return 0;
-}
 
 void Dense::forward(xt::xarray<float> input)
 {
     this->input = input;
 
-    for (int i = 0; i < this->weights.shape()[0]; ++i)
+    for (int j = 0; j < this->weights.shape()[1]; ++j)
     {
-        for (int j = 0; j < this->weights.shape()[1]; ++j)
+        for (int i = 0; i < this->weights.shape()[0]; ++i)
         {
-            if (drop(i, j) & 0)
+            if (drop(i) == true)
             {
                 continue;
             }
@@ -32,12 +25,14 @@ void Dense::forward(xt::xarray<float> input)
 
     this->output = batchNorm(this->output, this->beta, this->gamma);
 
-    // std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
-    //           << "\n          |\n          v" << std::endl;
+    if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
+        this->activation->forward(this->output);
+        this->output = this->activation->output;   
+    }
 }
 
 void Dense::backward(
-    xt::xarray<float> target,
+    float cost,
     float learningRate)
 {
     std::cout << "backward Dense" << std::endl;
@@ -46,16 +41,15 @@ void Dense::backward(
     // Calcul du gradient de l'erreur selon les sorties de la couche interne l
     for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
+        if(this->drop(i) == true)
+        {
+            continue;
+        }
+
         float gradient = 0.0;
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
-
-            if(this->drop(i,j) == false){
-                continue;
-            }
-            
-            // Quel est la target pour une couche cachee ?
-            gradient += 2 * (output(j) - target(j)) * this->weights(j, i) * indicatrice(output(j));
+            gradient += 2 * (cost - output(j)) * this->weights(j, i) * this->activation->prime(output(j));
         }
         layerGradient(i) = gradient;
     }
@@ -64,29 +58,39 @@ void Dense::backward(
     xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
+
+        if(this->drop(i) == true){
+            continue;
+        }
+
         float gradient = 0.0;
         for (int j = 0; j < weights.shape()[1]; ++j)
         {
 
-            if(this->drop(i,j) == false){
-                continue;
-            }
-            weightsGradient(i, j) += layerGradient(j) * indicatrice(output(j));
+            weightsGradient(i, j) += layerGradient(j) * this->activation->prime(output(j));
         }
     }
 
     // Mise a jour des poids lie a la couche l
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
+
+        if(this->drop(i) == true){
+            continue;
+        }
+
         for (int j = 0; j < weights.shape()[1]; ++j)
         {   
             
-            if(this->drop(i,j) == false){
-                continue;
-            }
             this->weights(i, j) -= learningRate * weightsGradient(i, j) * output(j);
         }
     }
+}
+
+void Dense::print() const
+{
+    std::cout << "Dense: " << this->output.shape()[0] << " fully connected neurons"
+              << "\n          |\n          v" << std::endl;
 }
 
 
@@ -98,19 +102,18 @@ void Dense::dropout(uint16_t dropRate)
 
     for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
-        for (int j = 0; j < this->weights.shape()[1]; ++j)
+        if (dropRate <= std::uniform_int_distribution<>(1, 100)(gen))
         {
-            if (dropRate <= std::uniform_int_distribution<>(1, 100)(gen))
-            {
-                this->drop(i, j) = true;
-            }
-            else
-            {
-                this->drop(i, j) = false;
-            }
+            this->drop(i) = true;
+        }
+        else
+        {
+            this->drop(i) = false;
         }
     }
+}
 
-    // std::cout << "          | dropout p=" << dropRate << '%'
-    //           << "\n          v" << std::endl;
+void Dense::printDropout(uint16_t dropRate) const    {
+    std::cout << "          | dropout p=" << dropRate << '%'
+              << "\n          v" << std::endl;
 }

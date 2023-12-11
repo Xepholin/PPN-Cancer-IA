@@ -5,7 +5,7 @@
 
 #include "activation.h"
 
-class ReLu3D : public Activation
+class ReLu : public Activation
 {
     public:
     
@@ -15,7 +15,7 @@ class ReLu3D : public Activation
         float beta = 0;
         float gamma = 1;
         
-        ReLu3D(std::tuple<int, int, int> inputShape)  {
+        ReLu(std::tuple<int, int, int> inputShape)  {
             this->inputShape = inputShape;
             this->outputShape = inputShape;
 
@@ -25,41 +25,18 @@ class ReLu3D : public Activation
 
             this->input = xt::empty<float>({depth, height, width});
             this->output = xt::empty<float>({depth, height, width});
-
         }
 
-        void forward(xt::xarray<float> input) override;
+        ~ReLu() = default;
+
+        virtual void forward(xt::xarray<float> input) override;
         
-        void backward(xt::xarray<float> gradient, float learningRate) override;
+        virtual void backward(xt::xarray<float> gradient, float learningRate) override;
+
+        virtual float prime(float x) override;
+
+        void print() const override;
         
 };
-
-class ReLu1D : public Activation {
-      public:
-        int depth = 0;
-
-        // 1 x Longueur
-        int inputShape = 0;
-        int outputShape = 0;
-
-        float beta = 0;
-        float gamma = 1;
-    
-        ReLu1D(int inputShape)   {
-
-            this->inputShape = inputShape;
-            this->outputShape = inputShape;
-            
-            this->input = xt::empty<float>({inputShape});
-            this->output = xt::empty<float>({outputShape});
-        }
-
-        ~ReLu1D() = default;
-
-        void forward(xt::xarray<float> input) override;
-
-        void backward(xt::xarray<float> gradient, float learningRate) override;
-};
-
 
 #endif

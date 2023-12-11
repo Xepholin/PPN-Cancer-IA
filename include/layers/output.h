@@ -46,6 +46,8 @@ class Output : public ILayer
             xt::xarray<float> target,
             float learningRate) override;
 
+        void print() const override;
+
 };
 
 #endif

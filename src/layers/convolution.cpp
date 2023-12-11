@@ -25,15 +25,22 @@ void Convolution::forward(xt::xarray<float> input)
 
     this->output = batchNorm(this->output, this->beta, this->gamma);
 
-    // std::cout << "Convolution with " <<
-    // this->filters.shape()[2] << "x" << this->filters.shape()[3] << " kernel" <<
-    // " + " << std::get<3>(this->filtersShape) << " stride" <<
-    // " + " << std::get<4>(this->filtersShape) << " pad : " <<
-    // this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
-    // "\n          |\n          v" << std::endl;
+    this->activation->forward(this->output);
+
+    this->output = this->activation->output;
 }
 
 void Convolution::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "Convolution backward" << std::endl;
+}
+
+void Convolution::print() const
+{
+    std::cout << "Convolution with " <<
+    this->filters.shape()[2] << "x" << this->filters.shape()[3] << " kernel" <<
+    " + " << std::get<3>(this->filtersShape) << " stride" <<
+    " + " << std::get<4>(this->filtersShape) << " pad : " <<
+    this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
+    "\n          |\n          v" << std::endl;
 }

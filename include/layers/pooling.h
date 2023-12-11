@@ -7,11 +7,13 @@
 
 enum PoolingType
 {
-    NO_TYPE,
-    MAX,
-    MIN,
-    AVG
+    POOLING_NO_TYPE,
+    POOLING_MAX,
+    POOLING_MIN,
+    POOLING_AVG
 };
+
+std::ostream& operator<<(std::ostream& out, const PoolingType value);
 
 // Pooling(std::tuple<int, int, int> inputShape, int size, int stride, int padding, Pooling::PoolingType type)
 class Pooling : public ILayer
@@ -19,17 +21,17 @@ class Pooling : public ILayer
 
     public:
 
-        friend std::ostream& operator<<(std::ostream& out, const PoolingType value);
-
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
 
         int size = 1;
         int stride = 1;
         int padding = 0;
-        PoolingType type = NO_TYPE;
+        PoolingType type = PoolingType::POOLING_NO_TYPE;
 
-        Pooling(std::tuple<int, int, int> inputShape, int size, int stride, int padding, PoolingType type)
+        Pooling(std::tuple<int, int, int> inputShape,
+                int size, int stride, int padding, 
+                PoolingType poolingType = PoolingType::POOLING_NO_TYPE)
         {
             this->inputShape = inputShape;
 
@@ -47,7 +49,7 @@ class Pooling : public ILayer
             this->size = size;
             this->stride = stride;
             this->padding = padding;
-            this->type = type;
+            this->type = poolingType;
         }
 
         ~Pooling() = default;
@@ -55,6 +57,8 @@ class Pooling : public ILayer
         void forward(xt::xarray<float> input) override;
 
         void backward(xt::xarray<float> gradient, float learningRate) override;
+
+        void print() const override;
 
         float pooling(xt::xarray<float> matrix);
 

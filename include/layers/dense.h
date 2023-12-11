@@ -2,8 +2,11 @@
 #define DENSE_H
 
 #include "layer.h"
+#include "activation.h"
+#include "relu.h"
+#include "softmax.h"
 
-// Dense(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
+// Dense(int inputShape, int outputShape)
 class Dense : public ILayer
 {
     public:
@@ -22,10 +25,13 @@ class Dense : public ILayer
 
         int bias = 1;
 
+        ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
+        Activation *activation;
+
         float beta = 0.0;
         float gamma = 1.0;
 
-        Dense(int inputShape, int outputShape)
+        Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
         {
 
             this->inputShape = inputShape;
@@ -38,18 +44,41 @@ class Dense : public ILayer
             // weights = kernelsGaussianDistro(1, 1, inputShape, outputShape);
 
             weights = xt::random::randn<float>({inputShape, outputShape});
-            drop = xt::empty<bool>({inputShape, outputShape});
+            drop = xt::empty<bool>({inputShape});
+
+            this->activationType = activationType;
+
+            switch (this->activationType)
+            {
+                case ActivationType::ACTIVATION_NO_TYPE:
+                    this->activation = new Activation;
+                    break;
+                case ActivationType::ACTIVATION_RELU:
+                    this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
+                    break;
+                case ActivationType::ACTIVATION_SOFTMAX:
+                    this->activation = new Softmax(std::tuple<int, int ,int>{1, 1, outputShape});
+                    break;
+                default:
+                    perror("Dense Activation Type Error");
+            }
         }
 
-        ~Dense() = default;
+        ~Dense()    {
+            delete this->activation;
+        }
 
-        void forward(xt::xarray<float> input) override;
+        virtual void forward(xt::xarray<float> input) override;
 
-        void backward(
-            xt::xarray<float> target,
+        virtual void backward(
+            float cost,
             float learningRate);
 
+        void print() const override;
+
         void dropout(uint16_t dropRate);
+
+        void printDropout(uint16_t dropRate) const;
 };
 
 #endif

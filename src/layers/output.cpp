@@ -18,12 +18,15 @@ void Output::forward(xt::xarray<float> input)
             output(j) += this->weights(i, j) * this->input(i);
         }
     }
-
-    // std::cout << "outputLayer: " << this->output.shape()[0] << " fully connected neurons"
-    //           << "\n          |\n          v" << std::endl;
 }
 
 void Output::backward(xt::xarray<float> gradient, float learningRate)
 {
     std::cout << "backward Output" << std::endl;
+}
+
+void Output::print() const
+{
+    std::cout << "outputLayer: " << this->output.shape()[0] << " fully connected neurons"
+              << "\n          |\n          v" << std::endl;
 }

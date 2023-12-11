@@ -1,10 +1,13 @@
 #include <iostream>
 #include <cmath>
 
+#include <xtensor/xio.hpp>
+
 #include "softmax.h"
 
-void Softmax1D::forward(xt::xarray<float> input)
+void Softmax::forward(xt::xarray<float> input)
 {
+    
     this->input = input;
 
     float expSum = xt::sum(xt::exp(this->input))();
@@ -16,16 +19,24 @@ void Softmax1D::forward(xt::xarray<float> input)
         float exp_xi = std::exp(this->input(i));
         this->output(i) = exp_xi / expSum;
     }
-
-    // std::cout << "          | Softmax\n"
-    //           << "          v" << std::endl;
 }
 
-void Softmax1D::backward(xt::xarray<float> gradient, float learningRate)  {
+void Softmax::backward(xt::xarray<float> gradient, float learningRate)  {
     std::cout << "backward softmax" << std::endl;
 }
 
-xt::xarray<float> Softmax1D::softmaxGradient()
+float Softmax::prime(float x)   {
+    std::cout << "prime Softmax" << std::endl;
+    return 0.0;
+}
+
+void Softmax::print() const
+{
+    std::cout << "          | Softmax\n"
+              << "          v" << std::endl;
+}
+
+xt::xarray<float> Softmax::softmaxGradient()
 {
 
     int num_classes = this->output.shape()[0];
