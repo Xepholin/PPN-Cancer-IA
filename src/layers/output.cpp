@@ -20,7 +20,7 @@ void Output::forward(xt::xarray<float> input)
     }
 }
 
-void Output::backward(xt::xarray<float> gradient, float learningRate)
+void Output::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "backward Output" << std::endl;
 }

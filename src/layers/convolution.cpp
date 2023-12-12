@@ -30,7 +30,7 @@ void Convolution::forward(xt::xarray<float> input)
     this->output = this->activation->output;
 }
 
-void Convolution::backward(xt::xarray<float> gradient, float learningRate)
+void Convolution::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Convolution backward" << std::endl;
 }

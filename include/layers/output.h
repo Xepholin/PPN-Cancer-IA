@@ -26,7 +26,6 @@ class Output : public ILayer
 
         Output(int inputShape, int outputShape)
         {
-
             this->inputShape = inputShape;
             this->outputShape = outputShape;
             this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
@@ -43,7 +42,7 @@ class Output : public ILayer
         void forward(xt::xarray<float> input) override;
 
         void backward(
-            xt::xarray<float> target,
+            xt::xarray<float> cost,
             float learningRate) override;
 
         void print() const override;

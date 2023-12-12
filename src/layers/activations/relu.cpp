@@ -7,7 +7,7 @@ void ReLu::forward(xt::xarray<float> input)
     this->output = xt::where(input <= 0, 0.0, input);
 }
 
-void ReLu::backward(xt::xarray<float> gradient, float learningRate)
+void ReLu::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "ReLu backward" << std::endl;
 }

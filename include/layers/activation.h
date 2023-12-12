@@ -19,10 +19,13 @@ class Activation : public ILayer
 {
 
     public:
+
+        Activation() = default;
+        ~Activation() = default;
     
         virtual void forward(xt::xarray<float> input) override;
 
-        virtual void backward(xt::xarray<float> gradient, float learningRate) override;
+        virtual void backward(xt::xarray<float> cost, float learningRate) override;
 
         virtual float prime(float x);
 

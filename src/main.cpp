@@ -16,29 +16,36 @@
 #include "softmax.h"
 #include "pooling.h"
 #include "dense.h"
+#include "topo.h"
 
-#include "nn.h"
+#include "network.h"
 
 int main()
 {   
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    xt::xarray<float> images = importAllPBM("../assets/PBM", 3500);
 
-    //xt::xarray<float> input = xt::random::randn<float>({1, 1, 1});
-    xt::xarray<float> input = xt::zeros<float>({1, 1, 100});
+    NeuralNetwork nn;
 
-    srand(time(NULL));
+    nn.add(new Dense{2304, 1024, relu});
+    nn.add(new Dense{1024, 1024, relu});
+    nn.add(new Dense{1024, 1024, relu});
+    nn.add(new Dense{1024, 512, relu});
+    nn.add(new Dense{512, 512, relu});
+    nn.add(new Dense{512, 512, relu});
+    nn.add(new Dense{512, 512, relu});
+    nn.add(new Dense{512, 256, relu});
+    nn.add(new Dense{256, 128, relu});
+    nn.add(new Dense{128, 64, relu});
+    nn.add(new Dense{64, 32, relu});
+    nn.add(new Dense{32, 16, relu});
+    nn.add(new Dense{16, 8, relu});
+    nn.add(new Dense{8, 4, relu});
+    nn.add(new Dense{4, 2, softmax});
 
-    for (int i = 0; i < 100; ++i)    {
-        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        input(i) = r;
+    for (int i = 0; i < images.shape()[0]; ++i)  {
+        xt::xarray<float> image = xt::view(images, i);
+        nn.train(image, 1);
     }
-
-    auto prediction = ANN(input);
-
-    std::cout << prediction << std::endl;
-
-
 
     return 0;
 }

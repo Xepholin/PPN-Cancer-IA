@@ -60,3 +60,14 @@ xt::xarray<float> flatten(xt::xarray<float> input)
 {
     return xt::flatten(input);
 }
+
+float lossFunction(xt::xarray<float> output, u_int8_t trueValue)
+{
+    float err = 0.0;
+    for (int i = 0; i < output.size(); ++i)
+    {
+        err += 0.5 * ((output(i) - trueValue) * (output(i) - trueValue));
+    }
+
+    return err;
+}

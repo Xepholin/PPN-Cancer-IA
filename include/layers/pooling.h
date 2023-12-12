@@ -32,7 +32,7 @@ class Pooling : public ILayer
         Pooling(std::tuple<int, int, int> inputShape,
                 int size, int stride, int padding, 
                 PoolingType poolingType = PoolingType::POOLING_NO_TYPE)
-        {
+        {   
             this->inputShape = inputShape;
 
             int depth = std::get<0>(inputShape);
@@ -56,7 +56,7 @@ class Pooling : public ILayer
 
         void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> gradient, float learningRate) override;
+        void backward(xt::xarray<float> cost, float learningRate) override;
 
         void print() const override;
 

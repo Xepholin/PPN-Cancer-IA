@@ -33,7 +33,6 @@ class Dense : public ILayer
 
         Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
         {
-
             this->inputShape = inputShape;
             this->outputShape = outputShape;
             this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
@@ -43,7 +42,7 @@ class Dense : public ILayer
 
             // weights = kernelsGaussianDistro(1, 1, inputShape, outputShape);
 
-            weights = xt::random::randn<float>({inputShape, outputShape});
+            this->weights = xt::random::randn<float>({inputShape, outputShape});
             drop = xt::empty<bool>({inputShape});
 
             this->activationType = activationType;

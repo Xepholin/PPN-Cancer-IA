@@ -2,6 +2,7 @@
 #define LAYER_H
 
 #include <tuple>
+#include <string>
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
@@ -11,12 +12,13 @@ class ILayer
 {
 
     public:
+
         xt::xarray<float> input;
         xt::xarray<float> output;
 
         virtual void forward(xt::xarray<float> input);
 
-        virtual void backward(xt::xarray<float> gradient, float learningRate);
+        virtual void backward(xt::xarray<float> cost, float learningRate);
 
         virtual void print() const;
 };

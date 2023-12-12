@@ -35,7 +35,6 @@ void Dense::backward(
     float cost,
     float learningRate)
 {
-    std::cout << "backward Dense" << std::endl;
     xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[0]});
 
     // Calcul du gradient de l'erreur selon les sorties de la couche interne l
@@ -64,7 +63,7 @@ void Dense::backward(
         }
 
         float gradient = 0.0;
-        for (int j = 0; j < weights.shape()[1]; ++j)
+        for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
 
             weightsGradient(i, j) += layerGradient(j) * this->activation->prime(output(j));
@@ -79,7 +78,7 @@ void Dense::backward(
             continue;
         }
 
-        for (int j = 0; j < weights.shape()[1]; ++j)
+        for (int j = 0; j < this->weights.shape()[1]; ++j)
         {   
             
             this->weights(i, j) -= learningRate * weightsGradient(i, j) * output(j);
@@ -93,12 +92,18 @@ void Dense::print() const
               << "\n          |\n          v" << std::endl;
 }
 
+void Dense::printDropout(uint16_t dropRate) const    {
+    std::cout << "          | dropout p=" << dropRate << '%'
+              << "\n          v" << std::endl;
+}
+
 
 
 void Dense::dropout(uint16_t dropRate)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
+
 
     for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
@@ -111,9 +116,4 @@ void Dense::dropout(uint16_t dropRate)
             this->drop(i) = false;
         }
     }
-}
-
-void Dense::printDropout(uint16_t dropRate) const    {
-    std::cout << "          | dropout p=" << dropRate << '%'
-              << "\n          v" << std::endl;
 }

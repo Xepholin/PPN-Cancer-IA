@@ -3,9 +3,14 @@
 
 #include <xtensor/xarray.hpp>
 
+#include "dense.h"
+
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width);
 
 xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma);
 
 xt::xarray<float> flatten(xt::xarray<float> input);
+
+float lossFunction(xt::xarray<float> output, u_int8_t trueValue);
+
 #endif

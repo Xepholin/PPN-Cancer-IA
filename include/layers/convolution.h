@@ -9,7 +9,7 @@
 #include "softmax.h"
 #include "tools.h"
 
-// Convolution(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape)
+// Convolution(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, ActivationType), 
 class Convolution : public ILayer
 {
 
@@ -39,7 +39,6 @@ class Convolution : public ILayer
                     std::tuple<int, int, int, int, int> filtersShape, 
                     ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
         {
-
             this->depth = depth; // Nombre d'image dans la couche actuelle
             this->inputShape = inputShape;
             this->filtersShape = filtersShape;
@@ -64,7 +63,7 @@ class Convolution : public ILayer
 
             // filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
 
-            filters = xt::random::randn<float>({filtersDepth, depth, filtersHeight, filtersWidth});
+            this->filters = xt::random::randn<float>({filtersDepth, depth, filtersHeight, filtersWidth});
 
             switch (this->activationType)
             {
@@ -87,7 +86,7 @@ class Convolution : public ILayer
 
         void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> gradient, float learningRate) override;
+        void backward(xt::xarray<float> cost, float learningRate) override;
 
         void print() const override;
 };

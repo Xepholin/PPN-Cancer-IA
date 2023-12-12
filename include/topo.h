@@ -1,5 +1,5 @@
-#ifndef NN_H
-#define NN_H
+#ifndef TOPO_H
+#define TOPO_H
 
 #include <xtensor/xarray.hpp>
 

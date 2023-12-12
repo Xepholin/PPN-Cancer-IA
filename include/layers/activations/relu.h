@@ -8,14 +8,15 @@
 class ReLu : public Activation
 {
     public:
-    
+
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
         
         float beta = 0;
         float gamma = 1;
         
-        ReLu(std::tuple<int, int, int> inputShape)  {
+        ReLu(std::tuple<int, int, int> inputShape)
+        {
             this->inputShape = inputShape;
             this->outputShape = inputShape;
 
@@ -31,7 +32,7 @@ class ReLu : public Activation
 
         virtual void forward(xt::xarray<float> input) override;
         
-        virtual void backward(xt::xarray<float> gradient, float learningRate) override;
+        virtual void backward(xt::xarray<float> cost, float learningRate) override;
 
         virtual float prime(float x) override;
 

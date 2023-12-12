@@ -10,7 +10,8 @@ set(SOURCE_FILES
     src/tools.cpp
     src/conv_op.cpp
     src/layer.cpp
-    src/nn.cpp
+    src/network.cpp
+    src/topo.cpp
     src/layers/convolution.cpp
     src/layers/activation.cpp
     src/layers/pooling.cpp
@@ -25,7 +26,8 @@ set(HEADER_FILES
     include/tools.h
     include/conv_op.h
     include/layer.h
-    include/nn.h
+    include/network.h
+    include/topo.h
     include/layers/convolution.h
     include/layers/activation.h
     include/layers/pooling.h

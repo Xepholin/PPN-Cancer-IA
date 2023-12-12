@@ -18,7 +18,7 @@ void Pooling::forward(xt::xarray<float> input)
     }
 }
 
-void Pooling::backward(xt::xarray<float> gradient, float learningRate)
+void Pooling::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Pooling backward" << std::endl;
 }
