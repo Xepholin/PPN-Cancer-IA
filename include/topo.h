@@ -3,7 +3,11 @@
 
 #include <xtensor/xarray.hpp>
 
+#include <network.h>
+
 xt::xarray<float> CNN(xt::xarray<float> input);
+
+NeuralNetwork CNN2();
 
 xt::xarray<float> ANN(xt::xarray<float> input);
 

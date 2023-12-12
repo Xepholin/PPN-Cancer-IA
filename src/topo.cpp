@@ -13,6 +13,7 @@
 #include "softmax.h"
 #include "pooling.h"
 #include "dense.h"
+#include "topo.h"
 
 xt::xarray<float> CNN(xt::xarray<float> input)
 {
@@ -138,4 +139,59 @@ xt::xarray<float> ANN(xt::xarray<float> input)
     std::cout << topo[topo.size()-1]->output << std::endl;
 
     return topo[topo.size() - 1]->output;
+}
+
+
+
+NeuralNetwork CNN2(){
+
+    NeuralNetwork nn;
+
+    int fil1 = 6;
+    int fil2 = 16;
+    int fil3 = 16;
+
+    std::tuple<int, int, int> conv1_inputShape{1, 48, 48};
+    std::tuple<int, int, int, int, int> conv1_filtersShape{fil1, 6, 6, 1, 0};
+
+    // ------------------------------------------------------------------------------
+    Convolution* conv1 = new Convolution{1, conv1_inputShape, conv1_filtersShape, relu};
+    Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
+    // ------------------------------------------------------------------------------
+    // Changer le stride à 2 => 1024 flatted à 256
+    std::tuple<int, int, int, int, int> conv2_filtersShape{fil2, 5, 5, 1, 0};
+
+    // ------------------------------------------------------sys------------------------
+    Convolution* conv2 =  new Convolution{1, pool_1->outputShape, conv2_filtersShape, relu};
+    Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
+    // ------------------------------------------------------------------------------
+
+    xt::xarray<float> flatted = flatten(pool_2->output);
+    int flattedSize = flatted.size();
+    std::cout << flattedSize << std::endl;
+    std::cout << flattedSize << std::endl;
+    std::cout << flattedSize << std::endl;
+    std::cout << flattedSize << std::endl;
+
+    // ------------------------------------------------------------------------------
+
+    Dense *dense1 = new Dense(flattedSize, 120, relu);
+
+    Dense *dense2 = new Dense(120, 84, relu);
+
+    Dense *dense3 = new Dense(84, 2, softmax);
+
+    // ------------------------------------------------------------------------------
+
+    nn.add(conv1);
+    nn.add(pool_1);
+    nn.add(conv2);
+    nn.add(pool_2);
+    nn.add(dense1);
+    nn.add(dense2);
+    nn.add(dense3);
+
+    return nn;
 }
