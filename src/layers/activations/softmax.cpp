@@ -16,7 +16,7 @@ void Softmax::forward(xt::xarray<float> input)
     {
         // auto exp_xi = std::exp(this->input(i) - maxValue);
         float exp_xi = std::exp(this->input(i));
-        this->output(i) = exp_xi / expSum;
+        this->output(i) = abs(exp_xi / expSum);
     }
 }
 

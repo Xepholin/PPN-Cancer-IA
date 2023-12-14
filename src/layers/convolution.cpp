@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <xtensor/xview.hpp>
+#include <xtensor/xio.hpp>
 
 #include "convolution.h"
 #include "conv_op.h"
@@ -9,6 +10,8 @@
 void Convolution::forward(xt::xarray<float> input)
 {
     this->input = input;
+
+    std::cout << "filtres\n" << this->filters << '\n' << std::endl;
 
     for (int i = 0; i < this->filters.shape()[0]; ++i)
     {

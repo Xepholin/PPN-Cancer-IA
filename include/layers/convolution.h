@@ -39,6 +39,8 @@ class Convolution : public ILayer
                     std::tuple<int, int, int, int, int> filtersShape, 
                     ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
         {
+            this->name = "Convolution";
+
             this->depth = depth; // Nombre d'image dans la couche actuelle
             this->inputShape = inputShape;
             this->filtersShape = filtersShape;

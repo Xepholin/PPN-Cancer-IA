@@ -24,27 +24,13 @@ int main()
 {   
     xt::xarray<float> images = importAllPBM("../assets/PBM", 3500);
 
-    NeuralNetwork nn;
-
-    nn.add(new Dense{2304, 1024, relu});
-    nn.add(new Dense{1024, 1024, relu});
-    nn.add(new Dense{1024, 1024, relu});
-    nn.add(new Dense{1024, 512, relu});
-    nn.add(new Dense{512, 512, relu});
-    nn.add(new Dense{512, 512, relu});
-    nn.add(new Dense{512, 512, relu});
-    nn.add(new Dense{512, 256, relu});
-    nn.add(new Dense{256, 128, relu});
-    nn.add(new Dense{128, 64, relu});
-    nn.add(new Dense{64, 32, relu});
-    nn.add(new Dense{32, 16, relu});
-    nn.add(new Dense{16, 8, relu});
-    nn.add(new Dense{8, 4, relu});
-    nn.add(new Dense{4, 2, softmax});
+    NeuralNetwork nn = CNN2();
 
     for (int i = 0; i < images.shape()[0]; ++i)  {
-        xt::xarray<float> image = xt::view(images, i);
-        nn.train(image, 1);
+        xt::xarray<float> image = xt::empty<float>({1, 48, 48});
+        xt::view(image, 1) = xt::view(images, i);
+        nn.train(image, i&1);
+        break;
     }
 
     return 0;

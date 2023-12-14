@@ -10,23 +10,20 @@ class Softmax : public Activation
 public:
 
     
-    std::tuple<int, int, int> inputShape{0, 0, 0};
-    std::tuple<int, int, int> outputShape{0, 0, 0};
+    int inputShape = 0;
+    int outputShape = 0;
     
     float beta = 0;
     float gamma = 1;
 
-    Softmax(std::tuple<int, int, int> inputShape)
+    Softmax(int inputShape)
     {
+        this->name = "Softmax";
         this->inputShape = inputShape;
         this->outputShape = inputShape;
 
-        int depth = std::get<0>(inputShape);
-        int height = std::get<1>(inputShape);
-        int width = std::get<2>(inputShape);
-
-        this->input = xt::empty<float>({depth, height, width});
-        this->output = xt::empty<float>({depth, height, width});
+        this->input = xt::empty<float>({inputShape});
+        this->output = xt::empty<float>({inputShape});
     }
 
     ~Softmax() = default;

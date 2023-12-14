@@ -4,6 +4,9 @@ project(PPN-CANCER-IA)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Enable debugging information
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 set(SOURCE_FILES
     src/main.cpp
     src/image.cpp

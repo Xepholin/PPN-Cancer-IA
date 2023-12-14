@@ -33,6 +33,7 @@ class Pooling : public ILayer
                 int size, int stride, int padding, 
                 PoolingType poolingType = PoolingType::POOLING_NO_TYPE)
         {   
+            this->name = "Pooling";
             this->inputShape = inputShape;
 
             int depth = std::get<0>(inputShape);

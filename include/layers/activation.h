@@ -12,7 +12,7 @@ enum ActivationType {
 std::ostream& operator<<(std::ostream& out, const ActivationType value);
 
 #define relu ActivationType::ACTIVATION_RELU
-#define softmax ActivationType::ACTIVATION_RELU
+#define softmax ActivationType::ACTIVATION_SOFTMAX
 
 // Activation()
 class Activation : public ILayer
@@ -20,7 +20,10 @@ class Activation : public ILayer
 
     public:
 
-        Activation() = default;
+        Activation()    {
+            this->name = "Activation";
+        }
+
         ~Activation() = default;
     
         virtual void forward(xt::xarray<float> input) override;

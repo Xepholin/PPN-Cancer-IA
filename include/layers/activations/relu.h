@@ -17,6 +17,7 @@ class ReLu : public Activation
         
         ReLu(std::tuple<int, int, int> inputShape)
         {
+            this->name = "ReLu";
             this->inputShape = inputShape;
             this->outputShape = inputShape;
 

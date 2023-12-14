@@ -8,7 +8,8 @@
 
 void Dense::forward(xt::xarray<float> input)
 {
-    this->input = input;
+    this->input = xt::flatten(input);
+    std::cout << "weights\n" << this->weights << '\n' << std::endl;
 
     for (int j = 0; j < this->weights.shape()[1]; ++j)
     {
@@ -22,6 +23,7 @@ void Dense::forward(xt::xarray<float> input)
             output(j) += this->weights(i, j) * this->input(i);
         }
     }
+
 
     this->output = batchNorm(this->output, this->beta, this->gamma);
 

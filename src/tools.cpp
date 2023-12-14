@@ -44,6 +44,7 @@ xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma)
     
     xt::xarray<float> batched = input;
 
+
     float mean = xt::mean(batched)();
     float square = std::sqrt(xt::variance(batched)() + 1e-6);
 

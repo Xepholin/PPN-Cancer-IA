@@ -33,19 +33,27 @@ void NeuralNetwork::dropDense(uint16_t dropRate){
 void NeuralNetwork::train(xt::xarray<float> input, bool trueLabel )
 {
 
+    std::cout << this->nn[0]->name << std::endl;
+    std::cout << "input\n" << input << '\n' << std::endl;
 
     this->nn[0]->forward(input);
 
+    std::cout << "output\n" << this->nn[0]->output << '\n' << std::endl;
+
     for(int i = 1 ; i < this->nn.size() ; ++i)
     {
+        std::cout << this->nn[i]->name << std::endl;
+        std::cout << "input\n" << this->nn[i]->input << '\n' << std::endl;
+
         this->nn[i]->forward(this->nn[i-1]->output);
+
+        std::cout << "output\n" << this->nn[i]->output << '\n' << std::endl;
     }
 
-    
     auto error = lossFunction(this->nn[this->nn.size()-1]->output , trueLabel);
 
     std::cout << "output: " << this->nn[this->nn.size()-1]->output << '\n'
-              << "error: " << error;
+              << "error: " << error << std::endl;
 
     for(int i = 0 ; i < this->nn.size() ; ++i)
     {

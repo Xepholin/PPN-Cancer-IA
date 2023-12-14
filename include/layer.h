@@ -12,6 +12,7 @@ class ILayer
 {
 
     public:
+        std::string name = "ILayer";
 
         xt::xarray<float> input;
         xt::xarray<float> output;

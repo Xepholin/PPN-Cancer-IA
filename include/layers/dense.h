@@ -33,6 +33,8 @@ class Dense : public ILayer
 
         Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
         {
+            this->name = "Dense";
+
             this->inputShape = inputShape;
             this->outputShape = outputShape;
             this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
@@ -40,9 +42,8 @@ class Dense : public ILayer
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 
-            // weights = kernelsGaussianDistro(1, 1, inputShape, outputShape);
 
-            this->weights = xt::random::randn<float>({inputShape, outputShape});
+            this->weights = xt::random::randn<float>({inputShape, outputShape} );
             drop = xt::empty<bool>({inputShape});
 
             this->activationType = activationType;
@@ -56,7 +57,7 @@ class Dense : public ILayer
                     this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
                     break;
                 case ActivationType::ACTIVATION_SOFTMAX:
-                    this->activation = new Softmax(std::tuple<int, int ,int>{1, 1, outputShape});
+                    this->activation = new Softmax(outputShape);
                     break;
                 default:
                     perror("Dense Activation Type Error");
