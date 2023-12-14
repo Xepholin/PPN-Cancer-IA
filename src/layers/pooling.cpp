@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <xtensor/xview.hpp>
-
 #include "pooling.h"
 #include "conv_op.h"
 
@@ -11,9 +9,8 @@ void Pooling::forward(xt::xarray<float> input)
 
     for (int i = 0; i < this->output.shape()[0]; ++i)
     {
-
-        auto tmpMat = xt::view(input, i);
-        auto convolution_result = poolingMatrice(tmpMat);
+        xt::xarray<float> tmpMat = xt::view(input, i);
+        xt::xarray<float> convolution_result = poolingMatrice(tmpMat);
         xt::view(output, i) = convolution_result;
     }
 }
@@ -60,7 +57,7 @@ xt::xarray<float> Pooling::poolingMatrice(xt::xarray<float> matrix)
             xt::xrange<int> rows(i + i * incr, i + i * incr + sizePooling);
             xt::xrange<int> cols(j + j * incr, j + j * incr + sizePooling);
 
-            auto a = xt::view(matrix, rows, cols);
+            xt::xarray<float> a = xt::view(matrix, rows, cols);
 
             pooledMatrix(i, j) = this->pooling(a);
         }

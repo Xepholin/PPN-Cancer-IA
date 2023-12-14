@@ -63,17 +63,16 @@ class Convolution : public ILayer
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
 
-            // filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
-
-            this->filters = xt::random::randn<float>({filtersDepth, depth, filtersHeight, filtersWidth});
-
             switch (this->activationType)
             {
                 case ActivationType::ACTIVATION_NO_TYPE:
+                    this->filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
                     break;
-                case ActivationType::ACTIVATION_RELU:
+                case ActivationType::ACTIVATION_RELU:   {
                     this->activation = new ReLu(outputShape);
+                    this->heWeightsInit();
                     break;
+                }
                 case ActivationType::ACTIVATION_SOFTMAX:
                     perror("Convolution Activation Type Error");
                     break;
@@ -91,6 +90,10 @@ class Convolution : public ILayer
         void backward(xt::xarray<float> cost, float learningRate) override;
 
         void print() const override;
+
+        void heWeightsInit();
+
+        void XGWeightsInit();
 };
 
 #endif

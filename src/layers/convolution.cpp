@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include <xtensor/xview.hpp>
-#include <xtensor/xio.hpp>
-
 #include "convolution.h"
 #include "conv_op.h"
 #include "tools.h"
@@ -10,8 +7,8 @@
 void Convolution::forward(xt::xarray<float> input)
 {
     this->input = input;
-
-    std::cout << "filtres\n" << this->filters << '\n' << std::endl;
+    std::cout << "input\n" << this->input << '\n' << std::endl;
+    std::cout << "filters\n" << this->filters << '\n' << std::endl;
 
     for (int i = 0; i < this->filters.shape()[0]; ++i)
     {
@@ -28,9 +25,12 @@ void Convolution::forward(xt::xarray<float> input)
 
     this->output = batchNorm(this->output, this->beta, this->gamma);
 
-    this->activation->forward(this->output);
+    if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
+        this->activation->forward(this->output);
+        this->output = this->activation->output;
+    }
 
-    this->output = this->activation->output;
+    std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 void Convolution::backward(xt::xarray<float> cost, float learningRate)
@@ -46,4 +46,32 @@ void Convolution::print() const
     " + " << std::get<4>(this->filtersShape) << " pad : " <<
     this->output.shape()[1] << "x" << this->output.shape()[2] << "x" << this->output.shape()[0] <<
     "\n          |\n          v" << std::endl;
+}
+
+void Convolution::heWeightsInit()   {
+    int inputHeight = std::get<1>(this->inputShape);
+    int inputWidth = std::get<2>(this->inputShape);
+
+    int filtersDepth = std::get<0>(this->filtersShape);
+    int filtersHeight = std::get<1>(this->filtersShape);
+    int filtersWidth = std::get<2>(this->filtersShape);
+
+    float std = sqrt(2.0 / (static_cast<float>(filtersDepth) * this->depth * inputHeight * inputWidth));
+    
+    this->filters = xt::random::randn<float>({filtersDepth, depth, 
+                                              filtersHeight, filtersWidth}, 0, std);
+}
+
+void Convolution::XGWeightsInit()   {
+    int inputDepth = std::get<0>(this->inputShape);
+    int inputHeight = std::get<1>(this->inputShape);
+    int inputWidth = std::get<2>(this->inputShape);
+
+    int filtersDepth = std::get<0>(this->filtersShape);
+    int filtersHeight = std::get<1>(this->filtersShape);
+    int filtersWidth = std::get<2>(this->filtersShape);
+
+    float std = sqrt(2.0 / (static_cast<float>(this->input.size()) + this->output.size()));
+    this->filters = xt::random::randn<float>({filtersDepth, depth, 
+                                              filtersHeight, filtersWidth}, 0, std);
 }

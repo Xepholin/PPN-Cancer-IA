@@ -1,18 +1,24 @@
 #include <iostream>
 #include <random>
 
-#include <xtensor/xio.hpp>
-
 #include "dense.h"
 #include "tools.h"
 
 void Dense::forward(xt::xarray<float> input)
-{
-    this->input = xt::flatten(input);
-    std::cout << "weights\n" << this->weights << '\n' << std::endl;
+{   
+    if (this->flatten)  {
+        this->input = xt::flatten(input);
+    }
+    else    {
+        this->input = input;
+    }
 
+    std::cout << "input\n" << this->input << '\n' << std::endl;
+    std::cout << "weights\n" << this->weights << '\n' << std::endl;
+    
     for (int j = 0; j < this->weights.shape()[1]; ++j)
     {
+        float dotResult = 0;
         for (int i = 0; i < this->weights.shape()[0]; ++i)
         {
             if (drop(i) == true)
@@ -20,17 +26,25 @@ void Dense::forward(xt::xarray<float> input)
                 continue;
             }
 
-            output(j) += this->weights(i, j) * this->input(i);
+            dotResult += weights(i, j) * this->input(i);
         }
+        output(j) = dotResult;
     }
 
+    // std::cout << "before batchnorm output\n" << this->output << '\n' << std::endl;
 
-    this->output = batchNorm(this->output, this->beta, this->gamma);
+    if (this->activationType != softmax)    {
+        this->output = batchNorm(this->output, this->beta, this->gamma);
+    }
+
+    // std::cout << "before relu output\n" << this->output << '\n' << std::endl;
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
         this->activation->forward(this->output);
         this->output = this->activation->output;   
     }
+
+    std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 void Dense::backward(
@@ -50,7 +64,7 @@ void Dense::backward(
         float gradient = 0.0;
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
-            gradient += 2 * (cost - output(j)) * this->weights(j, i) * this->activation->prime(output(j));
+            gradient += 2.0 * (cost - output(j)) * this->weights(j, i) * this->activation->prime(output(j));
         }
         layerGradient(i) = gradient;
     }
@@ -118,4 +132,16 @@ void Dense::dropout(uint16_t dropRate)
             this->drop(i) = false;
         }
     }
+}
+
+void Dense::heWeightsInit()    {
+    float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
+
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
+}
+
+void Dense::XGWeightsInit() {
+    float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
+
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
 }

@@ -6,6 +6,9 @@
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
+#include <xtensor/xview.hpp>
+
+#include <xtensor/xio.hpp>
 
 // ILayer(xt::xarray<float> input, xt::xarray<float> output)
 class ILayer

@@ -49,7 +49,7 @@ float prodCrossCorelation(xt::xarray<float> input, xt::xarray<float> kernel)
     int n = input.shape()[0];
     float output = 0;
 
-    auto d = input * kernel;
+    xt::xarray<float> d = input * kernel;
 
     for (int i = 0; i < n; ++i)
     {
@@ -81,7 +81,7 @@ xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> 
             xt::xrange<int> rows(i, i + sizeKernelX);
             xt::xrange<int> cols(j, j + sizeKernelY);
 
-            auto a = xt::view(matrice, rows, cols);
+            xt::xarray<float> a = xt::view(matrice, rows, cols);
             crossCorrelationMatrice(i, j) = prodCrossCorelation(a, kernel);
 
         }

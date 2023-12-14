@@ -41,21 +41,17 @@ xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, in
 
 xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma)
 {
-    
-    xt::xarray<float> batched = input;
 
+    float mean = xt::mean(input)();
+    float variance = xt::variance(input)();
 
-    float mean = xt::mean(batched)();
-    float square = std::sqrt(xt::variance(batched)() + 1e-6);
+    xt::xarray<float> normalized = (input - mean) / std::sqrt(variance + 1e-6);
 
-    batched = batched - mean;
-    batched = batched / square;
+    normalized = gamma * normalized + beta;
 
-    batched *= gamma;
-    batched += beta;
-
-    return batched;
+    return normalized;
 }
+
 
 xt::xarray<float> flatten(xt::xarray<float> input)
 {

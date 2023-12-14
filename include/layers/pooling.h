@@ -45,6 +45,7 @@ class Pooling : public ILayer
 
             this->outputShape = std::tuple<int, int, int>(depth, outputHeight, outputWidth);
 
+            this->input = xt::empty<float>({depth, height, width});
             this->output = xt::empty<float>({depth, outputHeight, outputWidth});
 
             this->size = size;

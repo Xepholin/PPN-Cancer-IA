@@ -5,6 +5,7 @@
 #include "activation.h"
 #include "relu.h"
 #include "softmax.h"
+#include "tools.h"
 
 // Dense(int inputShape, int outputShape)
 class Dense : public ILayer
@@ -31,7 +32,9 @@ class Dense : public ILayer
         float beta = 0.0;
         float gamma = 1.0;
 
-        Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
+        bool flatten = false;
+
+        Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE, bool flatten = false)
         {
             this->name = "Dense";
 
@@ -42,23 +45,29 @@ class Dense : public ILayer
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 
-
-            this->weights = xt::random::randn<float>({inputShape, outputShape} );
             drop = xt::empty<bool>({inputShape});
 
             this->activationType = activationType;
+
+            this->flatten = flatten;
 
             switch (this->activationType)
             {
                 case ActivationType::ACTIVATION_NO_TYPE:
                     this->activation = new Activation;
+                    this->weights = xt::random::randn<float>({inputShape, outputShape});
                     break;
+
                 case ActivationType::ACTIVATION_RELU:
                     this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
+                    this->heWeightsInit();
                     break;
+
                 case ActivationType::ACTIVATION_SOFTMAX:
                     this->activation = new Softmax(outputShape);
+                    this->XGWeightsInit();
                     break;
+                    
                 default:
                     perror("Dense Activation Type Error");
             }
@@ -79,6 +88,10 @@ class Dense : public ILayer
         void dropout(uint16_t dropRate);
 
         void printDropout(uint16_t dropRate) const;
+
+        void heWeightsInit();
+
+        void XGWeightsInit();
 };
 
 #endif
