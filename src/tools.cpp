@@ -58,12 +58,24 @@ xt::xarray<float> flatten(xt::xarray<float> input)
     return xt::flatten(input);
 }
 
-float lossFunction(xt::xarray<float> output, u_int8_t trueValue)
+float MSE(xt::xarray<float> output, u_int8_t trueValue)
 {
     float err = 0.0;
     for (int i = 0; i < output.size(); ++i)
     {
         err += 0.5 * ((output(i) - trueValue) * (output(i) - trueValue));
+    }
+
+    return err;
+}
+
+float crossEntropy(xt::xarray<float> output, xt::xarray<float> trueValue)
+{
+    float err = 0.0;
+    xt::xarray<float> outputLog = xt::log(output);
+    for (int i = 0; i < output.size(); ++i)
+    {
+        err -= trueValue(i) * outputLog(i);
     }
 
     return err;
