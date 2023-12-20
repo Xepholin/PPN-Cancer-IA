@@ -48,6 +48,33 @@ void Softmax::print() const
               << "          v" << std::endl;
 }
 
+xt::xarray<float> Softmax::softmaxJacobien()
+{
+    xt::xarray<float> expOutput = xt::exp(this->output);
+    float sum = xt::sum(expOutput)();
+    xt::xarray<float> jacobien = xt::empty<float> ({this->output.size(), this->output.size()});
+
+
+    for(int i = 0; i < jacobien.shape()[0]; ++i)
+    {
+        for(int j = 0; j < jacobien.shape()[1]; ++j)
+        {
+            if (i == j)
+            {
+                jacobien(i, j) += (expOutput(i)/sum)*(1 - expOutput(j)/sum);
+            }
+
+            else
+            {
+                jacobien(i, j) += -(expOutput(i)/sum)*(expOutput(j)/sum);
+            }
+        }
+    }
+
+    return jacobien;
+}
+
+
 xt::xarray<float> Softmax::softmaxGradient()
 {
 
