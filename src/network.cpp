@@ -39,7 +39,7 @@ void NeuralNetwork::train(xt::xarray<float> input, bool trueLabel )
         this->nn[i]->forward(this->nn[i-1]->output);
     }
 
-    auto error = lossFunction(this->nn[this->nn.size()-1]->output , trueLabel);
+    auto error = crossEntropy(this->nn[this->nn.size()-1]->output , trueLabel);
 
     std::cout << "output: " << this->nn[this->nn.size()-1]->output << '\n'
               << "error: " << error << std::endl;
