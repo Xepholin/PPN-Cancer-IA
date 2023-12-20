@@ -51,6 +51,7 @@ void Dense::backward(
     float cost,
     float learningRate)
 {
+    
     xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[0]});
 
     // Calcul du gradient de l'erreur selon les sorties de la couche interne l
@@ -64,7 +65,7 @@ void Dense::backward(
         float gradient = 0.0;
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
-            gradient += 2.0 * (cost - output(j)) * this->weights(j, i) * this->activation->prime(output(j));
+            gradient +=  2.0*(cost - output(j))* this->weights(i, j) * this->activation->prime(output(j));
         }
         layerGradient(i) = gradient;
     }
@@ -77,8 +78,7 @@ void Dense::backward(
         if(this->drop(i) == true){
             continue;
         }
-
-        float gradient = 0.0;
+        
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
 
@@ -95,12 +95,13 @@ void Dense::backward(
         }
 
         for (int j = 0; j < this->weights.shape()[1]; ++j)
-        {   
-            
-            this->weights(i, j) -= learningRate * weightsGradient(i, j) * output(j);
+        {
+
+            this->weights(i, j) -= learningRate * weightsGradient(i, j) * this->input(i);
         }
     }
 }
+
 
 void Dense::print() const
 {
