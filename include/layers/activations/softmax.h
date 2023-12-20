@@ -36,6 +36,8 @@ public:
 
     void print() const override;
 
+    xt::xarray<float> softmaxJacobien();
+
     xt::xarray<float> softmaxGradient();
 };
 
