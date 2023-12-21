@@ -45,7 +45,7 @@ class Dense : public ILayer
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 
-            drop = xt::empty<bool>({inputShape});
+            drop = xt::zeros<bool>({inputShape});
 
             this->activationType = activationType;
 

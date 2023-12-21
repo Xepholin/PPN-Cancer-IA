@@ -52,24 +52,23 @@ xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma)
     return normalized;
 }
 
-
 xt::xarray<float> flatten(xt::xarray<float> input)
 {
     return xt::flatten(input);
 }
 
-float MSE(xt::xarray<float> output, u_int8_t trueValue)
+float MSE(xt::xarray<float> output, xt::xarray<int> trueValue)
 {
     float err = 0.0;
     for (int i = 0; i < output.size(); ++i)
     {
-        err += 0.5 * ((output(i) - trueValue) * (output(i) - trueValue));
+        err += 0.5 * ((output(i) - trueValue(i)) * (output(i) - trueValue(i)));
     }
 
     return err;
 }
 
-float crossEntropy(xt::xarray<float> output, xt::xarray<float> trueValue)
+float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue)
 {
     float err = 0.0;
     xt::xarray<float> outputLog = xt::log(output);

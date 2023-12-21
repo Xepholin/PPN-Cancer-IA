@@ -243,9 +243,6 @@ NeuralNetwork CNN3(){
 
     Dense *dense3 = new Dense(32, 2, softmax);
 
-    std::cout << dense3->weights << std::endl;
-
-
     // ------------------------------------------------------------------------------
 
     nn.add(conv1);

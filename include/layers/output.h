@@ -17,11 +17,6 @@ class Output : public ILayer
         // Height -Width
         std::tuple<int, int> weightsShape{0, 0};
 
-        // Height -Width
-        xt::xarray<float> weights;
-
-        xt::xarray<bool> drop;
-
         int bias = 1;
 
         Output(int inputShape, int outputShape)
@@ -33,9 +28,6 @@ class Output : public ILayer
 
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
-
-            weights = xt::random::rand<float>({inputShape, outputShape}, 0, 1);
-            drop = xt::empty<bool>({inputShape, outputShape});
         }
 
         ~Output() = default;

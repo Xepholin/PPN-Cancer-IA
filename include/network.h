@@ -19,9 +19,9 @@ class NeuralNetwork
 
         void dropDense(uint16_t dropRate);
 
-        void miniBatch(xt::xarray<float> batch, std::vector<bool> trueLabels, uint16_t dropRate);
+        void miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabels, uint16_t dropRate);
 
-        void train(xt::xarray<float> input, bool trueLabel);
+        void train(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
         void detect( xt::xarray<float> input);
 
