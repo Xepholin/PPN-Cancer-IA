@@ -18,13 +18,9 @@ void Softmax::forward(xt::xarray<float> input)
     }
 }
 
+
 void Softmax::backward(xt::xarray<float> cost, float learningRate)   {
-
-    xt::xarray<float> softmax_grad = softmaxGradient();
-
-    xt::xarray<float> grad_input = cost * softmax_grad;
-
-    this->input -= learningRate * grad_input;
+	std::cout << "backward softmax" << std::endl;
 }
 
 

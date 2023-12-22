@@ -39,7 +39,7 @@ xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, in
 
 }
 
-xt::xarray<float> batchNorm(xt::xarray<float> input)
+xt::xarray<float> instNorm(xt::xarray<float> input)
 {
 
     float mean = xt::mean(input)();

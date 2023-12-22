@@ -1,100 +1,94 @@
 #ifndef OUTPUTLAYER_H
 #define OUTPUTLAYER_H
 
-#include "layer.h"
 #include "activation.h"
+#include "layer.h"
 #include "relu.h"
 #include "softmax.h"
 #include "tools.h"
 
-// Output(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> weightsShape)
-class Output : public ILayer
-{
-    public:
-    
-        // 1 x Longueur
-        int inputShape = 0;
-        int outputShape = 0;
+// Output(int inputShape, int outputShape)
+class Output : public ILayer {
+   public:
+	// 1 x Longueur
+	int inputShape = 0;
+	int outputShape = 0;
 
-        // Height -Width
-        std::tuple<int, int> weightsShape{0, 0};
+	// Height -Width
+	std::tuple<int, int> weightsShape{0, 0};
 
-        // Height -Width
-        xt::xarray<float> weights;
+	// Height -Width
+	xt::xarray<float> weights;
 
-        xt::xarray<bool> drop;
+	xt::xarray<bool> drop;
 
-        int bias = 1;
+	int bias = 1;
 
-        ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
-        Activation *activation;
+	ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
+	Activation *activation;
 
-		bool normalize = false;
+	bool normalize = false;
 
-        bool flatten = false;
+	bool flatten = false;
 
-        Output(int inputShape, int outputShape,
-			  ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-			  bool normalize = false, bool flatten = false)
-        {
-            this->name = "Output";
+	xt::xarray<float> bOutput;
 
-            this->inputShape = inputShape;
-            this->outputShape = outputShape;
-            this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
+	Output(int inputShape, int outputShape,
+		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
+		   bool normalize = false, bool flatten = false) {
+		this->inputShape = inputShape;
+		this->outputShape = outputShape;
+		this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
 
-            this->output = xt::empty<float>({outputShape});
-            this->input = xt::empty<float>({inputShape});
+		this->input = xt::empty<float>({inputShape});
+		this->output = xt::empty<float>({outputShape});
+		this->bOutput = xt::empty<float>({outputShape});
 
-            drop = xt::zeros<bool>({inputShape});
+		drop = xt::zeros<bool>({inputShape});
 
-            this->activationType = activationType;
+		this->activationType = activationType;
 
-			this->normalize = normalize;
+		this->normalize = normalize;
 
-            this->flatten = flatten;
+		this->flatten = flatten;
 
-            switch (this->activationType)
-            {
-                case ActivationType::ACTIVATION_NO_TYPE:
-                    this->activation = new Activation;
-                    this->weights = xt::random::randn<float>({inputShape, outputShape});
-                    break;
+		switch (this->activationType) {
+			case ActivationType::ACTIVATION_NO_TYPE:
+				this->activation = new Activation;
+				this->weights = xt::random::randn<float>({inputShape, outputShape});
+				break;
 
-                case ActivationType::ACTIVATION_RELU:
-                    this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
-                    this->heWeightsInit();
-                    break;
+			case ActivationType::ACTIVATION_RELU:
+				this->activation = new ReLu(std::tuple<int, int, int>{1, 1, outputShape});
+				this->heWeightsInit();
+				break;
 
-                case ActivationType::ACTIVATION_SOFTMAX:
-                    this->activation = new Softmax(outputShape);
-                    this->XGWeightsInit();
-                    break;
-                    
-                default:
-                    perror("Dense Activation Type Error");
-            }
-        }
+			case ActivationType::ACTIVATION_SOFTMAX:
+				this->activation = new Softmax(outputShape);
+				this->XGWeightsInit();
+				break;
 
-        ~Output()    {
-            delete this->activation;
-        }
+			default:
+				perror("Dense Activation Type Error");
+		}
+	}
 
-        virtual void forward(xt::xarray<float> input) override;
+	~Output() {
+		delete this->activation;
+	}
 
-        virtual void backward(
-            float cost,
-            float learningRate);
+	virtual void forward(xt::xarray<float> input) override;
 
-        void print() const override;
+	virtual void backward(
+		float cost,
+		float learningRate, 
+        xt::xarray<int> trueLabel);
 
-        void dropout(uint16_t dropRate);
+	void print() const override;
 
-        void printDropout(uint16_t dropRate) const;
+	void heWeightsInit();
 
-        void heWeightsInit();
-
-        void XGWeightsInit();
+	void XGWeightsInit();
 };
 
 #endif

@@ -13,11 +13,11 @@ void ReLu::backward(xt::xarray<float> cost, float learningRate)
 }
 
 float ReLu::prime(float x)   {
-    if (x > 0)
+    if (x >= 0.0)
     {
-        return 1;
+        return 1.0;
     }
-    return 0;
+    return 0.0;
 }
 
 void ReLu::print() const

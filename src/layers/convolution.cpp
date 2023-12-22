@@ -7,8 +7,8 @@
 void Convolution::forward(xt::xarray<float> input)
 {
     this->input = input;
-    std::cout << "input\n" << this->input << '\n' << std::endl;
-    std::cout << "filters\n" << this->filters << '\n' << std::endl;
+    // std::cout << "input\n" << this->input << '\n' << std::endl;
+    // std::cout << "filters\n" << this->filters << '\n' << std::endl;
 
     for (int i = 0; i < this->filters.shape()[0]; ++i)
     {
@@ -25,7 +25,7 @@ void Convolution::forward(xt::xarray<float> input)
 
 	if (this->normalize)
 	{
-		this->output = batchNorm(this->output);
+		this->output = instNorm(this->output);
 	}
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
@@ -33,7 +33,7 @@ void Convolution::forward(xt::xarray<float> input)
         this->output = this->activation->output;
     }
 
-    std::cout << "output\n" << this->output << '\n' << std::endl;
+    // std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 void Convolution::backward(xt::xarray<float> cost, float learningRate)

@@ -7,8 +7,8 @@
 
 NeuralNetwork CNN();
 
-NeuralNetwork CNN2();
+NeuralNetwork CNN2(std::tuple<int, int, int> inputShape);
 
-NeuralNetwork CNN3();
+NeuralNetwork CNN3(std::tuple<int, int, int> inputShape);
 
 #endif
