@@ -29,12 +29,13 @@ class Dense : public ILayer
         ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
         Activation *activation;
 
-        float beta = 0.0;
-        float gamma = 1.0;
+		bool normalize = false;
 
         bool flatten = false;
 
-        Dense(int inputShape, int outputShape, ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE, bool flatten = false)
+        Dense(int inputShape, int outputShape,
+			  ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
+			  bool normalize = false, bool flatten = false)
         {
             this->name = "Dense";
 
@@ -48,6 +49,8 @@ class Dense : public ILayer
             drop = xt::zeros<bool>({inputShape});
 
             this->activationType = activationType;
+
+			this->normalize = normalize;
 
             this->flatten = flatten;
 

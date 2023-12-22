@@ -12,9 +12,6 @@ public:
     
     int inputShape = 0;
     int outputShape = 0;
-    
-    float beta = 0;
-    float gamma = 1;
 
     Softmax(int inputShape)
     {

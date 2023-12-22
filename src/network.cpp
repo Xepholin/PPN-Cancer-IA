@@ -41,8 +41,8 @@ void NeuralNetwork::train(xt::xarray<float> input, xt::xarray<int> trueLabel)
 
     float error = MSE(this->nn[this->nn.size()-1]->output , trueLabel);
 
-    std::cout << "output: " << this->nn[this->nn.size()-1]->output << '\n'
-              << "error: " << error << std::endl;
+    // std::cout << "output: " << this->nn[this->nn.size()-1]->output << '\n'
+    //           << "error: " << error << std::endl;
 
     for(int i = 0 ; i < this->nn.size(); ++i)
     {

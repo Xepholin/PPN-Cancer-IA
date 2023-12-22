@@ -13,8 +13,8 @@ void Dense::forward(xt::xarray<float> input)
         this->input = input;
     }
 
-    std::cout << "input\n" << this->input << '\n' << std::endl;
-    std::cout << "weights\n" << this->weights << '\n' << std::endl;
+    // std::cout << "input\n" << this->input << '\n' << std::endl;
+    // std::cout << "weights\n" << this->weights << '\n' << std::endl;
     
     for (int j = 0; j < this->weights.shape()[1]; ++j)
     {
@@ -35,9 +35,9 @@ void Dense::forward(xt::xarray<float> input)
 	// std::cout << "before output\n" << this->output << '\n' << std::endl;
     // std::cout << "before batchnorm output\n" << this->output << '\n' << std::endl;
 
-    if (this->activationType != softmax && this->activationType != ACTIVATION_NO_TYPE)
+    if (this->normalize)
 	{
-        this->output = batchNorm(this->output, this->beta, this->gamma);
+        this->output = batchNorm(this->output);
     }
 
     // std::cout << "before relu output\n" << this->output << '\n' << std::endl;
@@ -47,7 +47,7 @@ void Dense::forward(xt::xarray<float> input)
         this->output = this->activation->output;
     }
 
-	std::cout << "output\n" << this->output << '\n' << std::endl;
+	// std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 void Dense::backward(
@@ -73,7 +73,7 @@ void Dense::backward(
         layerGradient(i) = gradient;
     }
 
-	// std::cout << "layerGradient\n" << layerGradient << '\n' << std::endl;
+	std::cout << "layerGradient\n" << layerGradient << '\n' << std::endl;
 
     // Calcul du gradient de l'erreur selon les poids pour la couche l
     xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
@@ -86,12 +86,10 @@ void Dense::backward(
 
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
-            weightsGradient(i, j) += layerGradient(j) * this->activation->prime(output(j));
+            weightsGradient(i, j) = layerGradient(j) * this->activation->prime(output(j));
+            
         }
     }
-
-	// std::cout << "row\n" << this->weights.shape()[0] << '\n' << std::endl;
-	// std::cout << "column\n" << this->weights.shape()[1] << '\n' << std::endl;
 
 	// std::cout << "weightsGradient\n" << weightsGradient << '\n' << std::endl;
 	// std::cout << "old weights\n" << this->weights << '\n' << std::endl;
@@ -148,11 +146,11 @@ void Dense::dropout(uint16_t dropRate)
 void Dense::heWeightsInit()    {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
 
 void Dense::XGWeightsInit() {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
