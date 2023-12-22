@@ -93,7 +93,7 @@ NeuralNetwork CNN3(std::tuple<int, int, int> inputShape){
     int fil2 = 16;
     int fil3 = 16;
 
-    std::tuple<int, int, int, int, int> conv1_filtersShape{fil1, 6, 6, 2, 0};
+    std::tuple<int, int, int, int, int> conv1_filtersShape{fil1, 6, 6, 1, 0};
 
     // ------------------------------------------------------------------------------
     Convolution* conv1 = new Convolution{1, inputShape, conv1_filtersShape, relu, true};
@@ -106,6 +106,7 @@ NeuralNetwork CNN3(std::tuple<int, int, int> inputShape){
     // ------------------------------------------------------sys------------------------
     Convolution* conv2 =  new Convolution{1, pool_1->outputShape, conv2_filtersShape, relu, true};
     Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
 
     // ------------------------------------------------------------------------------
 

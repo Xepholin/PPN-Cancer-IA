@@ -36,6 +36,7 @@ class Output : public ILayer {
 	Output(int inputShape, int outputShape,
 		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
 		   bool normalize = false, bool flatten = false) {
+		this->name = "Output";
 		this->inputShape = inputShape;
 		this->outputShape = outputShape;
 		this->weightsShape = std::tuple<int, int>{inputShape, outputShape};

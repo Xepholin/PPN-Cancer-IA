@@ -31,7 +31,7 @@ void Output::forward(xt::xarray<float> input)
 
     if (this->normalize)
 	{
-        this->output = instNorm(this->input);
+        this->output = normalized(this->input);
     }
 
 	this->bOutput = this->output;

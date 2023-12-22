@@ -21,25 +21,15 @@
 int main() {
 	xt::random::seed(time(nullptr));
 	xt::xarray<float> images = importAllPBM("../assets/PBM", 1);
-	NeuralNetwork nn = CNN3({1, 48, 48});
+	NeuralNetwork nn = CNN2({1, 48, 48});
 
-	xt::xarray<int> label{0, 1};
+	xt::xarray<int> label{1, 0};
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 	xt::view(image, 1) = xt::view(images, 0);
 
 	for (int i = 0; i < 100000; ++i) {
 		nn.dropDense(50);
 		nn.train(image, label);
-		if ((i % 1000)==0) {
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-			std::cout << i << std::endl;
-		}
 	}
 
 	// std::cout << conv1->filters << '\n' << std::endl;

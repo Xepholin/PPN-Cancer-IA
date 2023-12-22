@@ -25,7 +25,7 @@ void Convolution::forward(xt::xarray<float> input)
 
 	if (this->normalize)
 	{
-		this->output = instNorm(this->output);
+		this->output = normalized(this->output);
 	}
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {

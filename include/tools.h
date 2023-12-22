@@ -5,7 +5,7 @@
 
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width);
 
-xt::xarray<float> instNorm(xt::xarray<float> input);
+xt::xarray<float> normalized(xt::xarray<float> input);
 
 xt::xarray<float> flatten(xt::xarray<float> input);
 

@@ -28,10 +28,10 @@ void Dense::forward(xt::xarray<float> input) {
 		this->output(j) = dotResult;
 	}
 
-	// std::cout << "before instNorm output\n" << this->output << '\n' << std::endl;
+	// std::cout << "before normalized output\n" << this->output << '\n' << std::endl;
 
 	if (this->normalize) {
-		this->output = instNorm(this->output);
+		this->output = normalized(this->output);
 	}
 
 	// std::cout << "before relu output\n" << this->output << '\n' << std::endl;
@@ -54,7 +54,7 @@ void Dense::backward(
 		float gradient = 0.0;
 
 		for (int j = 0; j < this->inputShape; ++j) {
-			gradient += 2.0 * (cost - output(i)) * this->weights(i, j) * this->activation->prime(output(i));
+			gradient += (cost - output(i)) * this->weights(i, j) * this->activation->prime(output(i));
 
 		}
 		layerGradient(i) = gradient;

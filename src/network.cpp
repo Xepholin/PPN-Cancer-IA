@@ -19,10 +19,8 @@ void NeuralNetwork::miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabel
 
 void NeuralNetwork::dropDense(uint16_t dropRate) {
 	for (int i = 0; i < this->nn.size(); ++i) {
-		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))	// le sheitan
-		{
+		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
 			dense->dropout(dropRate);
-			
 		}
 	}
 }
@@ -36,8 +34,8 @@ void NeuralNetwork::train(xt::xarray<float> input, xt::xarray<int> trueLabel) {
 
 	float error = MSE(this->nn[this->nn.size() - 1]->output, trueLabel);
 
-	std::cout << "output: " << this->nn[this->nn.size() - 1]->output << '\n'
-			  << "error: " << error << std::endl;
+	// std::cout << "output: " << this->nn[this->nn.size() - 1]->output << '\n'
+	std::cout << error << std::endl;
 
 	for (int i = 0; i < this->nn.size(); ++i) {
 		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
