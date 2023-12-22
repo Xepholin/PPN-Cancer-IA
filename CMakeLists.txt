@@ -12,14 +12,14 @@ set(SOURCE_FILES
     src/image.cpp
     src/tools.cpp
     src/conv_op.cpp
-    src/layer.cpp
     src/network.cpp
     src/topo.cpp
+	src/layers/layer.cpp
     src/layers/convolution.cpp
-    src/layers/activation.cpp
     src/layers/pooling.cpp
     src/layers/dense.cpp
     src/layers/output.cpp
+	src/layers/activations/activation.cpp
     src/layers/activations/relu.cpp
     src/layers/activations/softmax.cpp
 )
@@ -28,14 +28,14 @@ set(HEADER_FILES
     include/image.h
     include/tools.h
     include/conv_op.h
-    include/layer.h
     include/network.h
     include/topo.h
+	include/layers/layer.h
     include/layers/convolution.h
-    include/layers/activation.h
     include/layers/pooling.h
     include/layers/output.h
     include/layers/dense.h
+	include/layers/activations/activation.h
     include/layers/activations/relu.h
     include/layers/activations/softmax.h
 )

@@ -1,5 +1,6 @@
 #include <xtensor/xview.hpp>
 #include <xtensor/xrandom.hpp>
+#include <xtensor/xio.hpp>
 
 #include "conv_op.h"
 

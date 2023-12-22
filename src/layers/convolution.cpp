@@ -15,15 +15,18 @@ void Convolution::forward(xt::xarray<float> input)
 
         for (int j = 0; j < this->filters.shape()[1]; ++j)
         {
-            auto tmpMat = xt::view(input, j);
-            auto tmpFilter = xt::view(this->filters, i, j);
-            auto convolution_result = matrixConvolution(tmpMat, tmpFilter, std::get<3>(this->filtersShape), std::get<4>(this->filtersShape));
+            xt::xarray<float> tmpMat = xt::view(input, j);
+            xt::xarray<float> tmpFilter = xt::view(this->filters, i, j);
+            xt::xarray<float> convolution_result = matrixConvolution(tmpMat, tmpFilter, std::get<3>(this->filtersShape), std::get<4>(this->filtersShape));
 
             xt::view(output, i) = convolution_result;
         }
     }
 
-    this->output = batchNorm(this->output, this->beta, this->gamma);
+	if (this->normalize)
+	{
+		this->output = batchNorm(this->output);
+	}
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
         this->activation->forward(this->output);

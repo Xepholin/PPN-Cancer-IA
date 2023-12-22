@@ -13,8 +13,8 @@ void Dense::forward(xt::xarray<float> input)
         this->input = input;
     }
 
-    std::cout << "input\n" << this->input << '\n' << std::endl;
-    std::cout << "weights\n" << this->weights << '\n' << std::endl;
+    // std::cout << "input\n" << this->input << '\n' << std::endl;
+    // std::cout << "weights\n" << this->weights << '\n' << std::endl;
     
     for (int j = 0; j < this->weights.shape()[1]; ++j)
     {
@@ -28,78 +28,87 @@ void Dense::forward(xt::xarray<float> input)
 
             dotResult += weights(i, j) * this->input(i);
         }
-        output(j) = dotResult;
+        this->output(j) = dotResult;
+		// std::cout << dotResult << "\n" << std::endl;
     }
 
+	// std::cout << "before output\n" << this->output << '\n' << std::endl;
     // std::cout << "before batchnorm output\n" << this->output << '\n' << std::endl;
 
-    if (this->activationType != softmax)    {
-        this->output = batchNorm(this->output, this->beta, this->gamma);
+    if (this->normalize)
+	{
+        this->output = batchNorm(this->output);
     }
 
     // std::cout << "before relu output\n" << this->output << '\n' << std::endl;
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
         this->activation->forward(this->output);
-        this->output = this->activation->output;   
+        this->output = this->activation->output;
     }
 
-    std::cout << "output\n" << this->output << '\n' << std::endl;
+	// std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 void Dense::backward(
     float cost,
     float learningRate)
 {
-    
-    xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[0]});
+    xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[1]});
 
     // Calcul du gradient de l'erreur selon les sorties de la couche interne l
-    for (int i = 0; i < this->weights.shape()[0]; ++i)
+    for (int i = 0; i < this->weights.shape()[1]; ++i)
     {
-        if(this->drop(i) == true)
-        {
-            continue;
-        }
 
         float gradient = 0.0;
-        for (int j = 0; j < this->weights.shape()[1]; ++j)
+        for (int j = 0; j < this->weights.shape()[0]; ++j)
         {
-            gradient +=  2.0*(cost - output(j))* this->weights(i, j) * this->activation->prime(output(j));
+			if (this->drop(j) == true)
+			{
+				continue;
+			}
+
+            gradient += 2.0 * (cost - output(i)) * this->weights(j, i) * this->activation->prime(output(i));
         }
         layerGradient(i) = gradient;
     }
+
+	std::cout << "layerGradient\n" << layerGradient << '\n' << std::endl;
 
     // Calcul du gradient de l'erreur selon les poids pour la couche l
     xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
 
-        if(this->drop(i) == true){
+        if (this->drop(i) == true){
             continue;
         }
-        
+
         for (int j = 0; j < this->weights.shape()[1]; ++j)
         {
-
-            weightsGradient(i, j) += layerGradient(j) * this->activation->prime(output(j));
+            weightsGradient(i, j) = layerGradient(j) * this->activation->prime(output(j));
+            
         }
     }
+
+	// std::cout << "weightsGradient\n" << weightsGradient << '\n' << std::endl;
+	// std::cout << "old weights\n" << this->weights << '\n' << std::endl;
 
     // Mise a jour des poids lie a la couche l
     for (int i = 0; i < weights.shape()[0]; ++i)
     {
 
-        if(this->drop(i) == true){
+        if (this->drop(i) == true){
             continue;
         }
 
         for (int j = 0; j < this->weights.shape()[1]; ++j)
-        {
-
+        {   
             this->weights(i, j) -= learningRate * weightsGradient(i, j) * this->input(i);
         }
     }
+
+	// std::cout << "new weights\n" << this->weights << '\n' << std::endl;
 }
 
 
@@ -124,7 +133,7 @@ void Dense::dropout(uint16_t dropRate)
 
     for (int i = 0; i < this->weights.shape()[0]; ++i)
     {
-        if (dropRate <= std::uniform_int_distribution<>(1, 100)(gen))
+        if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen))
         {
             this->drop(i) = true;
         }
@@ -138,11 +147,11 @@ void Dense::dropout(uint16_t dropRate)
 void Dense::heWeightsInit()    {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
 
 void Dense::XGWeightsInit() {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std/1000.0);
+    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }

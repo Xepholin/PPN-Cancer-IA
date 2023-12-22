@@ -5,12 +5,12 @@
 
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width);
 
-xt::xarray<float> batchNorm(xt::xarray<float> input, float beta, float gamma);
+xt::xarray<float> batchNorm(xt::xarray<float> input);
 
 xt::xarray<float> flatten(xt::xarray<float> input);
 
-float MSE(xt::xarray<float> output, u_int8_t trueValue);
+float MSE(xt::xarray<float> output, xt::xarray<int> trueValue);
 
-float crossEntropy(xt::xarray<float> output, xt::xarray<float>  trueValue);
+float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue);
 
 #endif

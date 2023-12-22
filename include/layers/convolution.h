@@ -32,12 +32,15 @@ class Convolution : public ILayer
         ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
         Activation *activation;
 
+		bool normalize = false;
+
         float beta = 0.0;
         float gamma = 1.0;
 
         Convolution(int depth, std::tuple<int, int, int> inputShape, 
                     std::tuple<int, int, int, int, int> filtersShape, 
-                    ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE)
+                    ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
+					bool normalize = false)
         {
             this->name = "Convolution";
 
@@ -62,6 +65,8 @@ class Convolution : public ILayer
             this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
+
+			this->normalize = normalize;
 
             switch (this->activationType)
             {

@@ -12,9 +12,6 @@ class ReLu : public Activation
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
         
-        float beta = 0;
-        float gamma = 1;
-        
         ReLu(std::tuple<int, int, int> inputShape)
         {
             this->name = "ReLu";
