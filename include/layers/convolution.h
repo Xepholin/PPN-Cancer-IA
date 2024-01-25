@@ -24,8 +24,6 @@ class Convolution : public ILayer
         // nbFilter - Depth - Height - Width -
         xt::xarray<float> filters;
 
-        int bias = 1;
-
         ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
         Activation *activation;
 

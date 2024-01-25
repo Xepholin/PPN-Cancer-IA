@@ -42,11 +42,14 @@
 
 // }
 
-NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
+NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, float learningRate, uint16_t dropRate)	{
 
     NeuralNetwork model;
+	model.learningRate = learningRate;
+    model.dropRate = dropRate;
 
-    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{1, 3, 3, 2, 0}};
+
+    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{1, 3, 3, 2, 0}, relu};
 
 	// ------------------------------------------------------------------------------
 
@@ -54,7 +57,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
 
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(pool_1->output.size(), 8, ActivationType::ACTIVATION_NO_TYPE, false, true);
+    Dense *dense1 = new Dense(pool_1->output.size(), 8, relu, false, true);
 
 	// ------------------------------------------------------------------------------
 
@@ -70,9 +73,11 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
     return model;
 }
 
-NeuralNetwork CNN3(std::tuple<int, int, int> inputShape){
+NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, float learningRate, uint16_t dropRate){
 
     NeuralNetwork nn;
+    nn.learningRate = learningRate;
+    nn.dropRate = dropRate;
 
     int fil1 = 6;
     int fil2 = 16;

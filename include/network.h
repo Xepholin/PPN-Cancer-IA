@@ -14,19 +14,23 @@ class NeuralNetwork
 
         std::vector<ILayer*> nn;
 
+        float learningRate;
+        uint16_t dropRate;
+
         void add(ILayer *layer);
 
-        void dropDense(uint16_t dropRate);
+        void dropDense();
 
-        void miniBatch(xt::xarray<float> batch, xt::xarray<int> label, uint16_t dropRate, float learningRate);
+        void miniBatch(xt::xarray<float> batch, xt::xarray<int> label);
 
-        void train(xt::xarray<float> input, xt::xarray<int> trueLabel, float learningRate);
+        void train(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
-        void detect( xt::xarray<float> input);
+        void detect(xt::xarray<float> input);
 
-        void load(const char * path );
+        void load(const std::string path);
 
-        void save(const char * path) const;
+        void save(const std::string path) const;
+
 };
 
 #endif
