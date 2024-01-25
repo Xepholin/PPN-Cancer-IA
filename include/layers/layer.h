@@ -10,7 +10,6 @@
 
 #include <xtensor/xio.hpp>
 
-// ILayer(xt::xarray<float> input, xt::xarray<float> output)
 class ILayer
 {
 
@@ -22,7 +21,7 @@ class ILayer
 
         virtual void forward(xt::xarray<float> input);
 
-        virtual void backward(xt::xarray<float> cost, float learningRate);
+        virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate);
 
         virtual void print() const;
 };

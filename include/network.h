@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "layer.h"
-#include "dense.h"
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
@@ -19,9 +18,9 @@ class NeuralNetwork
 
         void dropDense(uint16_t dropRate);
 
-        void miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabels, uint16_t dropRate);
+        void miniBatch(xt::xarray<float> batch, xt::xarray<int> label, uint16_t dropRate, float learningRate);
 
-        void train(xt::xarray<float> input, xt::xarray<int> trueLabel);
+        void train(xt::xarray<float> input, xt::xarray<int> trueLabel, float learningRate);
 
         void detect( xt::xarray<float> input);
 

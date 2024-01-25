@@ -7,7 +7,7 @@ void Activation::forward(xt::xarray<float> input)
     std::cout << "Activation forward" << std::endl;
 }
 
-void Activation::backward(xt::xarray<float> cost, float learningRate)
+xt::xarray<float> Activation::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Activation backward" << std::endl;
 }

@@ -10,8 +10,16 @@ class Softmax : public Activation {
 	int inputShape = 0;
 	int outputShape = 0;
 
+	/**
+	 * @brief Constructeur de la classe Softmax.
+	 *
+	 * Ce constructeur initialise une fonction d'activation Softmax avec les paramètres spécifiés.
+	 *
+	 * @param inputShape La taille de l'entrée de la fonction d'activation.
+	*/
 	Softmax(int inputShape) {
-		this->name = "Softmax";
+		name = "Softmax";
+
 		this->inputShape = inputShape;
 		this->outputShape = inputShape;
 
@@ -23,7 +31,7 @@ class Softmax : public Activation {
 
 	virtual void forward(xt::xarray<float> input) override;
 
-	virtual void backward(xt::xarray<float> cost, float learningRate) override;
+	virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
 	virtual float prime(float x) override;
 

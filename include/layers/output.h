@@ -7,7 +7,6 @@
 #include "softmax.h"
 #include "tools.h"
 
-// Output(int inputShape, int outputShape)
 class Output : public ILayer {
    public:
 	// 1 x Longueur
@@ -22,21 +21,30 @@ class Output : public ILayer {
 
 	xt::xarray<bool> drop;
 
-	int bias = 1;
+	xt::xarray<float> bias;
 
 	ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
 	Activation *activation;
 
 	bool normalize = false;
 
-	bool flatten = false;
-
 	xt::xarray<float> bOutput;
 
+	/**
+	 * @brief Constructeur de la classe Output.
+	 *
+	 * Ce constructeur initialise une couche de sortie avec les paramètres spécifiés.
+	 *
+	 * @param inputShape La taille de l'entrée de la couche de sortie.
+	 * @param outputShape La taille de la sortie de la couche de sortie.
+	 * @param activationType Le type d'activation à appliquer après la couche de sortie (par défaut, pas d'activation).
+	 * @param normalize Indique si la normalisation doit être appliquée après la couche de sortie (par défaut, désactivée).
+	*/
 	Output(int inputShape, int outputShape,
 		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-		   bool normalize = false, bool flatten = false) {
-		this->name = "Output";
+		   bool normalize = false) {
+		name = "Output";
+
 		this->inputShape = inputShape;
 		this->outputShape = outputShape;
 		this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
@@ -44,14 +52,13 @@ class Output : public ILayer {
 		this->input = xt::empty<float>({inputShape});
 		this->output = xt::empty<float>({outputShape});
 		this->bOutput = xt::empty<float>({outputShape});
+		this->bias = xt::random::randn<float>({outputShape});
 
 		drop = xt::zeros<bool>({inputShape});
 
 		this->activationType = activationType;
 
 		this->normalize = normalize;
-
-		this->flatten = flatten;
 
 		switch (this->activationType) {
 			case ActivationType::ACTIVATION_NO_TYPE:
@@ -80,10 +87,9 @@ class Output : public ILayer {
 
 	virtual void forward(xt::xarray<float> input) override;
 
-	virtual void backward(
-		float cost,
-		float learningRate, 
-        xt::xarray<int> trueLabel);
+	virtual xt::xarray<float> backward(
+		xt::xarray<float> label,
+    	float learningRate);
 
 	void print() const override;
 

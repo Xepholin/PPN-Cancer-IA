@@ -7,11 +7,9 @@
 #include "softmax.h"
 #include "tools.h"
 
-// Dense(int inputShape, int outputShape)
 class Dense : public ILayer
 {
     public:
-    
         // 1 x Longueur
         int inputShape = 0;
         int outputShape = 0;
@@ -24,20 +22,32 @@ class Dense : public ILayer
 
         xt::xarray<bool> drop;
 
-        int bias = 1;
+        xt::xarray<float> bias;
 
-        ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
+        ActivationType activationType;
         Activation *activation;
 
-		bool normalize = false;
+		bool normalize;
 
-        bool flatten = false;
+        bool flatten;
 
+		xt::xarray<float> bOutput;
+
+		/**
+		 * @brief Constructeur de la classe Dense.
+		 *
+		 * Ce constructeur initialise une couche dense avec les paramètres spécifiés.
+		 *
+		 * @param inputShape La taille de l'entrée de la couche dense.
+		 * @param outputShape La taille de la sortie de la couche dense.
+		 * @param activationType Le type d'activation à appliquer après la couche dense (par défaut, pas d'activation).
+		 * @param normalize Indique si la normalisation doit être appliquée après la couche dense (par défaut, désactivée).
+		 * @param flatten Indique si l'entrée doit être aplatie (par défaut, désactivé).
+		*/
         Dense(int inputShape, int outputShape,
 			  ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-			  bool normalize = false, bool flatten = false)
-        {
-            this->name = "Dense";
+			  bool normalize = false, bool flatten = false)	{
+			name = "Dense";
 
             this->inputShape = inputShape;
             this->outputShape = outputShape;
@@ -45,6 +55,8 @@ class Dense : public ILayer
 
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
+			this->bOutput = xt::empty<float>({outputShape});
+			this->bias = xt::random::randn<float>({outputShape});
 
             drop = xt::zeros<bool>({inputShape});
 
@@ -82,8 +94,8 @@ class Dense : public ILayer
 
         virtual void forward(xt::xarray<float> input) override;
 
-        virtual void backward(
-            float cost,
+        virtual xt::xarray<float> backward(
+        	xt::xarray<float> gradient,
             float learningRate);
 
         void print() const override;

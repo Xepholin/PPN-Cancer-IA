@@ -8,13 +8,20 @@
 class ReLu : public Activation
 {
     public:
-
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
-        
+
+		/**
+		 * @brief Constructeur de la classe ReLu.
+		 *
+		 * Ce constructeur initialise une fonction d'activation ReLu avec les paramètres spécifiés.
+		 *
+		 * @param inputShape Tuple représentant la forme de l'entrée avec les dimensions (profondeur, hauteur, largeur).
+		*/
         ReLu(std::tuple<int, int, int> inputShape)
         {
-            this->name = "ReLu";
+			name = "ReLu";
+			
             this->inputShape = inputShape;
             this->outputShape = inputShape;
 
@@ -30,7 +37,7 @@ class ReLu : public Activation
 
         virtual void forward(xt::xarray<float> input) override;
         
-        virtual void backward(xt::xarray<float> cost, float learningRate) override;
+        virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
         virtual float prime(float x) override;
 

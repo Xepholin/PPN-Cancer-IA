@@ -25,8 +25,10 @@ void Dense::forward(xt::xarray<float> input) {
 			dotResult += weights(i, j) * this->input(i);
 		}
 
-		this->output(j) = dotResult;
+		this->output(j) = dotResult + bias(j);
 	}
+
+	this->bOutput = this->output;
 
 	// std::cout << "before normalized output\n" << this->output << '\n' << std::endl;
 
@@ -43,51 +45,44 @@ void Dense::forward(xt::xarray<float> input) {
 
 }
 
-void Dense::backward(
-	float cost,
+xt::xarray<float> Dense::backward(
+	xt::xarray<float> gradient,
 	float learningRate) 
 {
-	xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[1]});
+	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
-	// Calcul du gradient de l'erreur selon les sorties de la couche interne l
-	for (int i = 0; i < this->outputShape; ++i) {
-		float gradient = 0.0;
-
-		for (int j = 0; j < this->inputShape; ++j) {
-			gradient += (cost - output(i)) * this->weights(i, j) * this->activation->prime(output(i));
-
-		}
-		layerGradient(i) = gradient;
+	for (int i = 0; i < outputShape; ++i)	{
+		layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - gradient(i)));
 	}
 
-
-	// Calcul du gradient de l'erreur selon les poids pour la couche l
-	xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
-
-	for (int i = 0; i < this->inputShape; ++i) {
-		if (this->drop(i) == true) {
-			continue;
-		}
-
-		float gradient = 0.0;
-		for (int j = 0; j < outputShape; ++j) {
-			weightsGradient(i, j) = layerGradient(j) * this->activation->prime(output(j));
+	xt::xarray<float> weightsGradient = xt::empty<float>({inputShape, outputShape});
+	
+	for (int i = 0; i < inputShape; ++i)	{
+		for (int j = 0; j < outputShape; ++j)	{
+			weightsGradient(i, j) = input(i) * layerGradient(j);
+			weightsGradient(i, j) = (-learningRate) * weightsGradient(i, j);
 		}
 	}
 
+	xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
-    float old = this->weights(0,0);
+	for (int i = 0; i < outputShape; ++i)	{
+		biasGradient(i) = layerGradient(i);
+		biasGradient(i) = (-learningRate) * biasGradient(i);
+	}
 
-	// Mise a jour des poids lie a la couche l
-	for (int i = 0; i < this->inputShape; ++i) {
-		if (this->drop(i) == true) {
-			continue;
-		}
+	weights = weights + weightsGradient;
+	bias = bias + biasGradient;
 
-		for (int j = 0; j < this->outputShape; ++j) {
-			this->weights(i, j) -= learningRate * weightsGradient(i, j) * input(i);
+	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
+	
+	for (int i = 0; i < inputShape; ++i)	{
+		for (int j = 0; j < outputShape; ++j)	{
+			inputGradient(i) = weights(i, j) * layerGradient(j);
 		}
 	}
+
+	return inputGradient;
 }
 
 void Dense::print() const {

@@ -6,13 +6,8 @@
 
 void Output::forward(xt::xarray<float> input)
 {   
-    if (this->flatten)  {
-        this->input = xt::flatten(input);
-    }
-    else
-	{
-        this->input = input;
-    }
+
+	this->input = input;
 
 	for (int j = 0; j < this->outputShape; ++j)
     {
@@ -26,7 +21,7 @@ void Output::forward(xt::xarray<float> input)
 
             dotResult += weights(i, j) * this->input(i);
         }
-        this->output(j) = dotResult;
+        this->output(j) = dotResult + bias(j);
     }
 
     if (this->normalize)
@@ -41,61 +36,51 @@ void Output::forward(xt::xarray<float> input)
         this->output = this->activation->output;
     }
     
+	// std::cout << this->output << std::endl;
 }
 
-void Output::backward(
-    float cost,
-    float learningRate,
-    xt::xarray<int> trueLabel)
+xt::xarray<float> Output::backward(
+	xt::xarray<float> label,
+    float learningRate)
 {
-    xt::xarray<float> layerGradientOutput = xt::empty<float> ({this->output.shape()[0]});
+	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
-    // Calcul du gradient de cross entropy par rapport à l'output de Softmax
-    for (int i = 0; i < this->output.shape()[0]; ++i)
-    {
-        layerGradientOutput(i) = this->output(i) - trueLabel(i);
-    }
-
-    xt::xarray<float> layerGradient = xt::empty<float>({this->weights.shape()[1]});
-
-	// Calcul du gradient de la MSE selon les sorties de la couche d'output
-	for (int i = 0; i < this->weights.shape()[1]; ++i) {
-		float gradient = 0.0;
-		for (int j = 0; j < this->weights.shape()[0]; ++j) {
-
-			gradient +=  layerGradientOutput(j)* this->weights(j, i) * this->activation->prime(bOutput(j));
-		}
-		exit(0);
-		layerGradient(i) = gradient;
+	for (int i = 0; i < outputShape; ++i)	{
+		layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - label(i)));
 	}
 
-	std::cout << "layerGradient\n"
-			  << layerGradient << '\n'
-			  << std::endl;
-
-	// Calcul du gradient de l'erreur selon les poids pour la couche de sortie
-	xt::xarray<float> weightsGradient = xt::empty<float>({weights.shape()[0], weights.shape()[1]});
-	for (int i = 0; i < weights.shape()[0]; ++i) {
-		if (this->drop(i) == true) {
-			continue;
-		}
-
-		float gradient = 0.0;
-		for (int j = 0; j < this->weights.shape()[1]; ++j) {
-			weightsGradient(i, j) = layerGradient(j) * this->activation->prime(bOutput(j));
+	xt::xarray<float> weightsGradient = xt::empty<float>({inputShape, outputShape});
+	
+	for (int i = 0; i < inputShape; ++i)	{
+		for (int j = 0; j < outputShape; ++j)	{
+			weightsGradient(i, j) = input(i) * layerGradient(j);
+			weightsGradient(i, j) = (-learningRate) * weightsGradient(i, j);
 		}
 	}
 
-	// Mise a jour des poids lie a la couche de sortie
-	for (int i = 0; i < weights.shape()[0]; ++i) {
-		if (this->drop(i) == true) {
-			continue;
-		}
+	xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
-		for (int j = 0; j < this->weights.shape()[1]; ++j) {
-			this->weights(i, j) -= learningRate * weightsGradient(i, j) * bOutput(j);
+	for (int i = 0; i < outputShape; ++i)	{
+		biasGradient(i) = layerGradient(i);
+		biasGradient(i) = (-learningRate) * biasGradient(i);
+	}
+
+	// std::cout << weightsGradient << std::endl;
+
+	weights = weights + weightsGradient;
+	bias = bias + biasGradient;
+
+	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
+
+	for (int i = 0; i < inputShape; ++i)	{
+		for (int j = 0; j < outputShape; ++j)	{
+			inputGradient(i) = weights(i, j) * layerGradient(j);
 		}
 	}
+
+	// std::cout << weightsGradient << std::endl;
+
+	return inputGradient;
 }
 
 

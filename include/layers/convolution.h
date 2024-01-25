@@ -9,12 +9,9 @@
 #include "softmax.h"
 #include "tools.h"
 
-// Convolution(int depth, std::tuple<int, int, int> inputShape, std::tuple<int, int, int, int, int> filtersShape, ActivationType), 
 class Convolution : public ILayer
 {
-
     public:
-    
         int depth = 0;
 
         // Depth - Height - Width
@@ -37,12 +34,23 @@ class Convolution : public ILayer
         float beta = 0.0;
         float gamma = 1.0;
 
+		/**
+		 * @brief Constructeur de la classe Convolution.
+		 *
+		 * Ce constructeur initialise une couche de convolution avec les paramètres spécifiés.
+		 *
+		 * @param depth La profondeur de la couche de convolution.
+		 * @param inputShape Tuple représentant la forme de l'entrée avec les dimensions (profondeur, hauteur, largeur).
+		 * @param filtersShape Tuple représentant la forme des filtres avec les dimensions (profondeur, hauteur, largeur, stride, padding).
+		 * @param activationType Le type d'activation à appliquer après la convolution (par défaut, pas d'activation).
+		 * @param normalize Indique si la normalisation doit être appliquée après la convolution (par défaut, désactivée).
+		*/
         Convolution(int depth, std::tuple<int, int, int> inputShape, 
                     std::tuple<int, int, int, int, int> filtersShape, 
                     ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
 					bool normalize = false)
         {
-            this->name = "Convolution";
+			name = "Convolution";
 
             this->depth = depth; // Nombre d'image dans la couche actuelle
             this->inputShape = inputShape;
@@ -92,7 +100,7 @@ class Convolution : public ILayer
 
         void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> cost, float learningRate) override;
+        xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
         void print() const override;
 

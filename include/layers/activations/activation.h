@@ -20,15 +20,15 @@ class Activation : public ILayer
 
     public:
 
-        Activation()    {
-            this->name = "Activation";
-        }
+        Activation()	{
+			name = "Activation";
+		}
 
         ~Activation() = default;
     
         virtual void forward(xt::xarray<float> input) override;
 
-        virtual void backward(xt::xarray<float> cost, float learningRate) override;
+        virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
         virtual float prime(float x);
 

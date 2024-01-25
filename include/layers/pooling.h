@@ -15,12 +15,10 @@ enum PoolingType
 
 std::ostream& operator<<(std::ostream& out, const PoolingType value);
 
-// Pooling(std::tuple<int, int, int> inputShape, int size, int stride, int padding, Pooling::PoolingType type)
 class Pooling : public ILayer
 {
 
     public:
-
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
 
@@ -29,11 +27,23 @@ class Pooling : public ILayer
         int padding = 0;
         PoolingType type = PoolingType::POOLING_NO_TYPE;
 
+		/**
+		 * @brief Constructeur de la classe Pooling.
+		 *
+		 * Ce constructeur initialise une couche de pooling avec les paramètres spécifiés.
+		 *
+		 * @param inputShape Tuple représentant la forme de l'entrée avec les dimensions (profondeur, hauteur, largeur).
+		 * @param size La taille du filtre de pooling.
+		 * @param stride Le décalage entre les filtres lors de l'application du pooling.
+		 * @param padding Le rembourrage à appliquer autour de l'entrée avant le pooling.
+		 * @param poolingType Le type de pooling à appliquer (par défaut, pas de pooling).
+		*/
         Pooling(std::tuple<int, int, int> inputShape,
                 int size, int stride, int padding, 
                 PoolingType poolingType = PoolingType::POOLING_NO_TYPE)
-        {   
-            this->name = "Pooling";
+        {
+			name = "Pooling";
+			
             this->inputShape = inputShape;
 
             int depth = std::get<0>(inputShape);
@@ -58,7 +68,7 @@ class Pooling : public ILayer
 
         void forward(xt::xarray<float> input) override;
 
-        void backward(xt::xarray<float> cost, float learningRate) override;
+        xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
         void print() const override;
 

@@ -44,13 +44,9 @@
 
 NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
 
-    NeuralNetwork nn;
+    NeuralNetwork model;
 
-    int fil1 = 32;
-	int fil2 = 64;
-
-    std::tuple<int, int, int, int, int> conv1_filtersShape{fil1, 3, 3, 2, 0};
-    Convolution* conv1 = new Convolution{1, inputShape, conv1_filtersShape, relu};
+    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{1, 3, 3, 2, 0}};
 
 	// ------------------------------------------------------------------------------
 
@@ -58,16 +54,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
 
     // ------------------------------------------------------------------------------
 
-    std::tuple<int, int, int, int, int> conv2_filtersShape{fil2, 3, 3, 1, 0};
-    Convolution* conv2 =  new Convolution{1, pool_1->outputShape, conv2_filtersShape, relu};
-
-	// ------------------------------------------------------------------------------
-
-    Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
-
-    // ------------------------------------------------------------------------------
-
-    Dense *dense1 = new Dense(pool_2->output.size(), 128, relu, true, true);
+    Dense *dense1 = new Dense(pool_1->output.size(), 8, ActivationType::ACTIVATION_NO_TYPE, false, true);
 
 	// ------------------------------------------------------------------------------
 
@@ -75,14 +62,12 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape){
 
     // ------------------------------------------------------------------------------
 
-    nn.add(conv1);
-    nn.add(pool_1);
-    nn.add(conv2);
-    nn.add(pool_2);
-    nn.add(dense1);
-    nn.add(output);
+    model.add(conv1);
+    model.add(pool_1);
+    model.add(dense1);
+    model.add(output);
 
-    return nn;
+    return model;
 }
 
 NeuralNetwork CNN3(std::tuple<int, int, int> inputShape){
@@ -93,26 +78,21 @@ NeuralNetwork CNN3(std::tuple<int, int, int> inputShape){
     int fil2 = 16;
     int fil3 = 16;
 
-    std::tuple<int, int, int, int, int> conv1_filtersShape{fil1, 6, 6, 1, 0};
-
     // ------------------------------------------------------------------------------
-    Convolution* conv1 = new Convolution{1, inputShape, conv1_filtersShape, relu, true};
+	
+    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{fil1, 6, 6, 1, 0}, relu};
     Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
 
-    // ------------------------------------------------------------------------------
-    // Changer le stride à 2 => 1024 flatted à 256
-    std::tuple<int, int, int, int, int> conv2_filtersShape{fil2, 5, 5, 1, 0};
-
     // ------------------------------------------------------sys------------------------
-    Convolution* conv2 =  new Convolution{1, pool_1->outputShape, conv2_filtersShape, relu, true};
+
+    Convolution* conv2 =  new Convolution{1, pool_1->outputShape, std::tuple{fil2, 5, 5, 1, 0}, relu};
     Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
 
-
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(pool_2->output.size(), 84, relu, true, true);
+    Dense *dense1 = new Dense(pool_2->output.size(), 84, relu, false, true);
 
-    Dense *dense2 = new Dense(84, 32, relu, true);
+    Dense *dense2 = new Dense(84, 32, relu);
 
 	Output *output = new Output(32, 2, softmax);
 

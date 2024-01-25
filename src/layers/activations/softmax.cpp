@@ -19,7 +19,7 @@ void Softmax::forward(xt::xarray<float> input)
 }
 
 
-void Softmax::backward(xt::xarray<float> cost, float learningRate)   {
+xt::xarray<float> Softmax::backward(xt::xarray<float> cost, float learningRate)   {
 	std::cout << "backward softmax" << std::endl;
 }
 

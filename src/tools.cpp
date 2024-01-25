@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "tools.h"
+#include "layer.h"
 
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width)
 {
