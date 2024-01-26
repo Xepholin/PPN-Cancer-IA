@@ -6,6 +6,11 @@
 #include "tools.h"
 #include "layer.h"
 
+#include "convolution.h"
+#include "dense.h"
+#include "pooling.h"
+#include "output.h"
+
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width)
 {
     // Pour générer une simulation d'une loi centrée et réduite 
@@ -107,7 +112,7 @@ int continueTraining()	{
 	return train;
 }
 
-void saveConfirm(NeuralNetwork nn)	{
+void saveConfirm(NeuralNetwork nn, bool loaded)	{
 	while(1)	{
 		std::string save;
 
@@ -119,10 +124,7 @@ void saveConfirm(NeuralNetwork nn)	{
 		if (!save.compare("y"))	{
 			std::string path;
 
-			std::cout << "enter name" << std::endl;
-			getline(std::cin, path);
-
-			path = "../saves/" + path;
+			path = "../saves/" + nn.name;
 			
 			try
 			{
@@ -135,6 +137,8 @@ void saveConfirm(NeuralNetwork nn)	{
 			}
 
 			nn.save(path);
+
+			std::cout << "done" << std::endl;
 			break;
 		}
 		else if (!save.compare("n"))	{
@@ -142,6 +146,41 @@ void saveConfirm(NeuralNetwork nn)	{
 		}
 		else	{
 			continue;
+		}
+	}
+}
+
+void display_network(NeuralNetwork nn)
+{
+
+	for (int i = 0; i < nn.nn.size(); ++i)
+	{
+		std::cout << nn.nn[i]->name << std::endl;
+		if (Convolution *conv = dynamic_cast<Convolution *>(nn.nn[i]))
+		{
+			std::cout << "   " <<  std::get<0>(conv->inputShape) << " " << std::get<1>(conv->inputShape) << " " << std::get<2>(conv->inputShape) << " " << std::endl;
+			std::cout << "   " <<  std::get<0>(conv->outputShape) << " " << std::get<1>(conv->outputShape) << " " << std::get<2>(conv->outputShape) << " " << std::endl;
+			std::cout << "   " <<  std::get<0>(conv->filtersShape) << " " << std::get<1>(conv->filtersShape) << " " << std::get<2>(conv->filtersShape) << " " << std::get<3>(conv->filtersShape) << " " << std::get<4>(conv->filtersShape) << std::endl;
+			std::cout << "   " <<  conv->activationType << std::endl;
+			std::cout << "   " <<  conv->normalize << std::endl;
+		}
+		else if (Pooling *pool = dynamic_cast<Pooling *>(nn.nn[i]))
+		{
+			std::cout << "   " << pool->size << std::endl;
+			std::cout << "   " << pool->stride << std::endl;
+			std::cout << "   " << pool->padding << std::endl;
+		}
+		else if (Output *outp = dynamic_cast<Output *>(nn.nn[i]))
+		{
+			std::cout << "   " << outp->inputShape << std::endl;
+			std::cout << "   " << outp->outputShape << std::endl;
+			std::cout << "   " << outp->activationType << std::endl;
+		}
+		else if (Dense *dense = dynamic_cast<Dense *>(nn.nn[i]))
+		{
+			std::cout << "   " << dense->inputShape << std::endl;
+			std::cout << "   " << dense->outputShape << std::endl;
+			std::cout << "   " << dense->activationType << std::endl;
 		}
 	}
 }

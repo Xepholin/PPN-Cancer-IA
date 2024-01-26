@@ -90,7 +90,8 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> datas
 
 void NeuralNetwork::detect(xt::xarray<float> input) {}
 
-void NeuralNetwork::load(const std::string path) {
+void NeuralNetwork::load(const std::string path)
+{
 	std::ifstream inputFile;
 	std::ifstream layerFile;
 	std::string tmpStr = path + "/nn" + ".dat";
@@ -99,20 +100,23 @@ void NeuralNetwork::load(const std::string path) {
 	int size = 0;
 	std::string info;
 
+	inputFile >> this->name;
+	inputFile >> this->nbEpoch;
 	inputFile >> size;
 	inputFile >> this->learningRate;
 	inputFile >> this->dropRate;
 
 	std::string buffer;
 
-	for (int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i)
+	{
 		inputFile >> buffer;
 
-		if (!buffer.find("conv")) {
+		if (!buffer.find("conv"))
+		{
 			tmpStr = path + "/" + buffer + ".dat";
 
 			layerFile.open(tmpStr);
-			std::cout << tmpStr << std::endl;
 
 			int a, b, c, d, e;
 			layerFile >> a >> b >> c;
@@ -124,9 +128,12 @@ void NeuralNetwork::load(const std::string path) {
 
 			ActivationType type;
 
-			if (info.compare("ReLu")) {
+			if (info.compare("ReLu"))
+			{
 				type = relu;
-			} else {
+			}
+			else
+			{
 				type = ACTIVATION_NO_TYPE;
 			}
 
@@ -134,63 +141,139 @@ void NeuralNetwork::load(const std::string path) {
 			Convolution *conv = new Convolution{1, inputShape, filtersShape, type, (bool)a};
 
 			tmpStr = path + "/" + buffer + "_filters.npy";
-			std::cout << tmpStr << std::endl;
-			
-			auto abcde = xt::load_npy<float>(tmpStr) ;
-			conv->filters = abcde;
+
+			conv->filters = xt::load_npy<float>(tmpStr);
+
 			this->add(conv);
 
 			layerFile.close();
 		}
+		else if (!buffer.find("pooling"))
+		{
+			tmpStr = path + "/" + buffer + ".dat";
 
-		//  else if (!buffer.find("pooling")) {
-		// 	tmpStr = path + "/" + buffer + ".dat";
+			layerFile.open(tmpStr);
+			int a, b, c, size, stride, padding;
 
-		// 	layerFile.open(tmpStr);
-		// 	std::cout << tmpStr << std::endl;
+			layerFile >> a >> b >> c;
+			std::tuple<int, int, int> inputShape{a, b, c};
+			layerFile >> size;
+			layerFile >> stride;
+			layerFile >> padding;
 
-		// 	int a, b, c, d, e;
-		// 	layerFile >> a >> b >> c;
-		// 	std::tuple<int, int, int> inputShape{a, b, c};
-		// 	layerFile >> a >> b >> c;
-		// 	std::tuple<int, int, int> outputShape{a, b, c};
-		// 	layerFile >> a >> b >> c >> d >> e;
-		// 	std::tuple<int, int, int, int, int> filtersShape{a, b, c, d, e};
+			PoolingType type;
 
-		// 	ActivationType type;
+			if (info.compare("max."))
+			{
+				type = POOLING_MAX;
+			}
+			else if (info.compare("min."))
+			{
+				type = POOLING_MIN;
+			}
+			else if (info.compare("avg."))
+			{
+				type = POOLING_AVG;
+			}
+			layerFile >> a;
+			Pooling *pool = new Pooling{inputShape, size, stride, padding, type};
 
-		// 	if (info.compare("ReLu")) {
-		// 		type = relu;
-		// 	} else {
-		// 		type = ACTIVATION_NO_TYPE;
-		// 	}
+			this->add(pool);
 
-		// 	layerFile >> a;
-		// 	Convolution *conv = new Convolution{1, inputShape, filtersShape, type, (bool)a};
+			layerFile.close();
+		}
+		else if (!buffer.find("dense"))
+		{
+			tmpStr = path + "/" + buffer + ".dat";
 
-		// 	tmpStr = path + "/" + buffer + "_filters.npy";
-		// 	std::cout << tmpStr << std::endl;
-		// 	auto abcde= xt::load_npy<float>(tmpStr);
-		// 	layerFile.close();
-		// }
+			layerFile.open(tmpStr);
+
+			int inputShape, outputShape, norm, flat;
+			layerFile >> inputShape;
+			layerFile >> outputShape;
+			ActivationType type;
+
+			if (info.compare("ReLu"))
+			{
+				type = relu;
+			}
+			else
+			{
+				type = ACTIVATION_NO_TYPE;
+			}
+
+			layerFile >> norm;
+			layerFile >> flat;
+			Dense *dense = new Dense{inputShape, outputShape, type, (bool)norm, (bool)flat};
+
+			tmpStr = path + "/" + buffer + "_weights.npy";
+			dense->weights = xt::load_npy<float>(tmpStr);
+
+
+			tmpStr = path + "/" + buffer + "_bias.npy";
+			dense->bias = xt::load_npy<float>(tmpStr);
+			this->add(dense);
+
+			layerFile.close();
+		}
+		else if (!buffer.find("output"))
+		{
+			tmpStr = path + "/" + buffer + ".dat";
+
+			layerFile.open(tmpStr);
+
+			int inputShape, outputShape, norm;
+			layerFile >> inputShape;
+			layerFile >> outputShape;
+			ActivationType type;
+
+			if (info.compare("Softmax"))
+			{
+				type = softmax;
+			}
+			else
+			{
+				type = ACTIVATION_NO_TYPE;
+			}
+
+			layerFile >> norm;
+			Output *out = new Output{inputShape, outputShape, type, (bool)norm};
+
+			tmpStr = path + "/" + buffer + "_weights.npy";
+
+			out->weights = xt::load_npy<float>(tmpStr);
+
+			tmpStr = path + "/" + buffer + "_bias.npy";
+
+			out->bias = xt::load_npy<float>(tmpStr);
+
+			this->add(out);
+
+			layerFile.close();
+		}
 	}
 
 	inputFile.close();
 }
 
-void NeuralNetwork::save(const std::string path) const {
+void NeuralNetwork::save(const std::string path) const
+{
 	std::ofstream outputFile;
 
 	std::ofstream nnFile;
 	std::string tmpStr = path + "/nn" + ".dat";
 	nnFile.open(tmpStr);
 
+	nnFile << this->name << std::endl;
+	nnFile << this->nbEpoch << std::endl;
 	nnFile << this->nn.size() << std::endl;
 	nnFile << this->learningRate << std::endl;
 	nnFile << this->dropRate << std::endl;
 
-	for (int i = 0; i < this->nn.size(); ++i) {
-		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
+	for (int i = 0; i < this->nn.size(); ++i)
+	{
+		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))
+		{
 			tmpStr = path + "/dense" + std::to_string(i) + ".dat";
 			nnFile << "dense" << std::to_string(i) << std::endl;
 			outputFile.open(tmpStr);
@@ -206,7 +289,9 @@ void NeuralNetwork::save(const std::string path) const {
 
 			tmpStr = path + "/dense" + std::to_string(i) + "_bias.npy";
 			xt::dump_npy(tmpStr, dense->bias);
-		} else if (Output *output = dynamic_cast<Output *>(this->nn[i])) {
+		}
+		else if (Output *output = dynamic_cast<Output *>(this->nn[i]))
+		{
 			tmpStr = path + "/output" + std::to_string(i) + ".dat";
 			nnFile << "output" << std::to_string(i) << std::endl;
 
@@ -223,8 +308,9 @@ void NeuralNetwork::save(const std::string path) const {
 
 			tmpStr = path + "/output" + std::to_string(i) + "_bias.npy";
 			xt::dump_npy(tmpStr, output->bias);
-
-		} else if (Convolution *conv = dynamic_cast<Convolution *>(this->nn[i])) {
+		}
+		else if (Convolution *conv = dynamic_cast<Convolution *>(this->nn[i]))
+		{
 			tmpStr = path + "/conv" + std::to_string(i) + ".dat";
 			outputFile.open(tmpStr);
 			nnFile << "conv" << std::to_string(i) << std::endl;
@@ -241,7 +327,8 @@ void NeuralNetwork::save(const std::string path) const {
 			xt::dump_npy(tmpStr, conv->filters);
 		}
 
-		else if (Pooling *pooling = dynamic_cast<Pooling *>(this->nn[i])) {
+		else if (Pooling *pooling = dynamic_cast<Pooling *>(this->nn[i]))
+		{
 			nnFile << "pooling" << std::to_string(i) << std::endl;
 
 			tmpStr = path + "/pooling" + std::to_string(i) + ".dat";
@@ -249,12 +336,14 @@ void NeuralNetwork::save(const std::string path) const {
 			outputFile.open(tmpStr);
 
 			outputFile << std::get<0>(pooling->inputShape) << ' ' << std::get<1>(pooling->inputShape) << ' ' << std::get<2>(pooling->inputShape) << std::endl;
-			outputFile << std::get<0>(pooling->outputShape) << ' ' << std::get<1>(pooling->outputShape) << ' ' << std::get<2>(pooling->outputShape) << std::endl;
 			outputFile << pooling->size << std::endl;
 			outputFile << pooling->stride << std::endl;
 			outputFile << pooling->padding << std::endl;
+			outputFile << pooling->type << std::endl;
 			outputFile.close();
-		} else {
+		}
+		else
+		{
 			perror("Cette couche n'existe pas !");
 		}
 	}

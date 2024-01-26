@@ -68,7 +68,7 @@ xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> 
 {
 
     int sizeKernelX = kernel.shape()[0];
-    int sizeKernelY = kernel.shape()[0];
+    int sizeKernelY = kernel.shape()[1];
 
     int sizeNewMatriceX = (matrice.shape()[0] - sizeKernelX + 2 * padding) / stride + 1;
     int sizeNewMatriceY = (matrice.shape()[1] - sizeKernelY + 2 * padding) / stride + 1;

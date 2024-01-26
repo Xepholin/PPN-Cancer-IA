@@ -1,7 +1,10 @@
+#include <fstream>
 #include <iostream>
-#include <tuple>
+#include <istream>
 #include <string>
+#include <tuple>
 #include <xtensor/xarray.hpp>
+#include <xtensor/xcsv.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xrandom.hpp>
 
@@ -19,23 +22,22 @@
 #include "tools.h"
 #include "topo.h"
 
-
-#include <istream>
-#include <fstream>
-#include <iostream>
-#include <xtensor/xcsv.hpp>
-
-
 int main() {
-	xt::random::seed(time(nullptr));
+	generateAllPBM("../assets/breast", "../assets/PBM");
 
-	std::vector<std::tuple<int, float>> resultTraining;
-	xt::xarray<float> images = importAllPBM("../assets/PBM", 100);
-	NeuralNetwork nn = CNN2(std::tuple{1, 48, 47}, 0.001, 50);
+	// xt::random::seed(time(nullptr));
 
-	resultTraining = nn.train(images, xt::xarray<float>{0, 1});
+	// std::vector<std::tuple<int, float>> resultTraining;
 
-	saveConfirm(nn);
+	// xt::xarray<float> images = importAllPBM("../assets/PBM/eval/0", 3500);
+
+	// bool loaded = false;
+
+	// NeuralNetwork nn = CNN2({1, 48, 48}, "toto", 0.001, 50);
+
+	// resultTraining = nn.train(images, xt::xarray<float>{0, 1});
+
+	// saveConfirm(nn, loaded);
 
 	return 0;
 }

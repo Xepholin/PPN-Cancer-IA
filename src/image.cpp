@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include <xtensor/xview.hpp>
+#include <xtensor/xio.hpp>
 
 #include "image.h"
 #include "conv_op.h"
@@ -245,20 +246,18 @@ xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
                                {-2, 0, 2},
                                {-1, 0, 1}};
 
-        xt::xarray<float> sobY{{-1, -2, -1},
-                               {0, 0, 0},
-                               {1, 2, 1}};
+	xt::xarray<float> sobY{{-1, -2, -1},
+							{0, 0, 0},
+							{1, 2, 1}};
 
+	xt::xarray<float> gx = matrixConvolution(grayMatrice, sobX, 1, 0);
+	xt::xarray<float> gy = matrixConvolution(grayMatrice, sobY, 1, 0);
 
+	xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
 
-        auto gx = matrixConvolution(grayMatrice, sobX, 0, 1);
-        auto gy = matrixConvolution(grayMatrice, sobY, 0, 1);
+	xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
 
-        xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
-
-        xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
-
-        return boolG;
+	return boolG;
 }
 
 void saveGrayToPNG(const char *outputPath, xt::xarray<uint8_t> grayMatrice)
@@ -387,7 +386,8 @@ void generateAllPBM(const char *folderConvPath, const char *folderOutput)
                     {
                         Image image = *result;
 
-                        auto grayMatrice = toGrayScale(image);
+                        xt::xarray<float> grayMatrice = toGrayScale(image);
+
                         xt::xarray<bool> boolG = toSobel(grayMatrice);
 
                         // Remove the ".png" extension and append ".pbm"

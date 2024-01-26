@@ -42,9 +42,10 @@
 
 // }
 
-NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, float learningRate, uint16_t dropRate)	{
+NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, uint16_t dropRate)	{
 
     NeuralNetwork model;
+	model.name = name;
 	model.learningRate = learningRate;
     model.dropRate = dropRate;
 
@@ -73,9 +74,10 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, float learningRate, uin
     return model;
 }
 
-NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, float learningRate, uint16_t dropRate){
+NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, std::string name, float learningRate, uint16_t dropRate){
 
     NeuralNetwork nn;
+	nn.name = name;
     nn.learningRate = learningRate;
     nn.dropRate = dropRate;
 

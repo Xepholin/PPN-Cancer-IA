@@ -11,12 +11,22 @@
 class NeuralNetwork 
 {
     public:
-
+		std::string name;
         std::vector<ILayer*> nn;
 
-        float learningRate = 0.1;
-        uint16_t dropRate = 50;
+        float learningRate;
+        uint16_t dropRate;
 		int nbEpoch = 1;
+
+		NeuralNetwork() = default;
+
+		NeuralNetwork(std::string name, float learningRate = 0.1, uint16_t dropRate = 50)	{
+			this->name = name;
+			this->learningRate = learningRate;
+			this->dropRate = dropRate;
+		};
+
+		~NeuralNetwork() = default;
 
         void add(ILayer *layer);
 

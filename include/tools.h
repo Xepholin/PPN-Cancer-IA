@@ -17,6 +17,8 @@ float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue);
 
 int continueTraining();
 
-void saveConfirm(NeuralNetwork nn);
+void saveConfirm(NeuralNetwork nn, bool loaded);
+
+void display_network(NeuralNetwork nn);
 
 #endif
