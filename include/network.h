@@ -14,8 +14,9 @@ class NeuralNetwork
 
         std::vector<ILayer*> nn;
 
-        float learningRate;
-        uint16_t dropRate;
+        float learningRate = 0.1;
+        uint16_t dropRate = 50;
+		int nbEpoch = 1;
 
         void add(ILayer *layer);
 
@@ -23,7 +24,9 @@ class NeuralNetwork
 
         void miniBatch(xt::xarray<float> batch, xt::xarray<int> label);
 
-        void train(xt::xarray<float> input, xt::xarray<int> trueLabel);
+        void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
+
+		std::vector<std::tuple<int, float>> train(xt::xarray<float> dataset, xt::xarray<int> label);
 
         void detect(xt::xarray<float> input);
 

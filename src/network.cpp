@@ -36,7 +36,7 @@ void NeuralNetwork::dropDense() {
 	}
 }
 
-void NeuralNetwork::train(xt::xarray<float> input, xt::xarray<int> label) {
+void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 	this->nn[0]->forward(input);
 
 	for (int i = 1; i < this->nn.size(); ++i) {
@@ -60,6 +60,32 @@ void NeuralNetwork::train(xt::xarray<float> input, xt::xarray<int> label) {
 			break;
 		}
 	}
+}
+
+std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> dataset, xt::xarray<int> label)	{
+	std::vector<std::tuple<int, float>> result;
+
+	while(nbEpoch) {
+		for (int k = 0; k < dataset.shape()[0]; ++k)	{
+			xt::xarray<float> data = xt::empty<float>({1, 48, 48});
+			xt::view(data, 1) = xt::view(dataset, k);
+
+			this->dropDense();
+			this->iter(data, label);
+		}
+
+		std::cout << this->nn[this->nn.size() - 1]->output << std::endl;
+		std::cout << MSE(this->nn[this->nn.size() - 1]->output, label) << std::endl;
+
+		result.push_back(std::tuple<int, int>{nbEpoch,  MSE(this->nn[this->nn.size() - 1]->output, label)});
+		nbEpoch++;
+
+		if (nbEpoch % 10 == 0 && !continueTraining())	{
+			break;
+		}
+	}
+
+	return result;
 }
 
 void NeuralNetwork::detect(xt::xarray<float> input) {}
