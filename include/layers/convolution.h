@@ -71,7 +71,7 @@ class Convolution : public ILayer
             this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
-
+			this->activationType = activationType;
 			this->normalize = normalize;
 
             switch (this->activationType)

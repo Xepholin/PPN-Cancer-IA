@@ -1,7 +1,7 @@
 #include <random>
 #include <xtensor/xrandom.hpp>
-
 #include <cmath>
+#include <filesystem>
 
 #include "tools.h"
 #include "layer.h"
@@ -77,4 +77,71 @@ float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue)
     }
 
     return err;
+}
+
+int continueTraining()	{
+	int train = 0;
+
+	while(1)	{
+		std::string stop;
+
+		std::cout << "continue ? [y/n]" << std::endl;
+		getline (std::cin, stop);
+		std::transform(stop.begin(), stop.end(), stop.begin(),
+		[](unsigned char c){ return std::tolower(c); });
+
+		if (!stop.compare("y"))	{
+			train = 1;
+			break;
+		}
+		else if (!stop.compare("n"))	{
+			train = 0;
+			break;
+		}
+		else	{
+			std::cout << "mauvaise commande" << std::endl;
+			continue;
+		}
+	}
+
+	return train;
+}
+
+void saveConfirm(NeuralNetwork nn)	{
+	while(1)	{
+		std::string save;
+
+		std::cout << "save ? [y/n]" << std::endl;
+		getline (std::cin, save);
+		std::transform(save.begin(), save.end(), save.begin(),
+		[](unsigned char c){ return std::tolower(c); });
+
+		if (!save.compare("y"))	{
+			std::string path;
+
+			std::cout << "enter name" << std::endl;
+			getline(std::cin, path);
+
+			path = "../saves/" + path;
+			
+			try
+			{
+				std::filesystem::create_directories(path);
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << "Error creating directory: " << path << std::endl;
+				return;
+			}
+
+			nn.save(path);
+			break;
+		}
+		else if (!save.compare("n"))	{
+			break;
+		}
+		else	{
+			continue;
+		}
+	}
 }
