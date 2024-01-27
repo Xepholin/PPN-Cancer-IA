@@ -2,6 +2,7 @@
 #define TOOLS_H
 
 #include <xtensor/xarray.hpp>
+#include <filesystem>
 
 #include "network.h"
 

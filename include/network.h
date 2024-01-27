@@ -16,7 +16,7 @@ public:
 
     float learningRate;
     uint16_t dropRate;
-    int nbEpoch = 1;
+    int nbEpoch = 0;
 
     NeuralNetwork() = default;
 
@@ -37,7 +37,7 @@ public:
 
     void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
-    std::vector<std::tuple<int, float>> train(xt::xarray<float> dataset, xt::xarray<int> label);
+    std::vector<std::tuple<int, float>> train(const std::string path, int totalNumberImage);
 
     void detect(xt::xarray<float> input);
 

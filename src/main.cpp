@@ -23,17 +23,44 @@
 #include "topo.h"
 
 int main() {
-	generateAllPBM("../assets/breast", "../assets/PBM");
+	// generateAllPBM("../assets/breast", "../assets/PBM");
 
-	// xt::random::seed(time(nullptr));
 
 	// std::vector<std::tuple<int, float>> resultTraining;
 
-	// xt::xarray<float> images = importAllPBM("../assets/PBM/eval/0", 3500);
+	//xt::xarray<float> images = importAllPBM("../../train/0", 75000);
 
-	// bool loaded = false;
 
-	// NeuralNetwork nn = CNN2({1, 48, 48}, "toto", 0.001, 50);
+	// Create nn
+	xt::random::seed(time(nullptr));
+
+	NeuralNetwork nn = CNN2({1, 48, 48}, "toto", 0.001, 50);
+
+	nn.train("../../train", 150000);
+	
+	nn.save("../saves/machinedelamort");
+
+	//
+
+	// Load + train
+	bool loaded = true;
+
+	NeuralNetwork nn1;
+
+	nn.load("../saves/machinedelamort");
+
+	nn.train("../../train", 150000);
+	
+	nn.save("../saves/machinedelamort");
+
+
+	// Load + eval
+	NeuralNetwork nn2;
+
+	nn.load("../saves/machinedelamort");
+
+	nn.eval("../../eval");
+	
 
 	// resultTraining = nn.train(images, xt::xarray<float>{0, 1});
 

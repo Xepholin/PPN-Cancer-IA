@@ -28,7 +28,7 @@ void NeuralNetwork::miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabel
 
 	for (int i = 1; i < batch.shape()[0]; ++i)
 	{
-		this->train(xt::view(batch, i), trueLabels);
+		// this->train(xt::view(batch, i), trueLabels);
 	}
 }
 
@@ -77,25 +77,46 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
 	}
 }
 
-std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> dataset, xt::xarray<int> label)
+std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage)
 {
 	std::vector<std::tuple<int, float>> result;
 
-	while (nbEpoch)
-	{
-		for (int k = 0; k < dataset.shape()[0]; ++k)
-		{
-			xt::xarray<float> data = xt::empty<float>({1, 48, 48});
-			xt::view(data, 1) = xt::view(dataset, k);
+	std::string p0 = path + "/0";
+	std::string p1 = path + "/1";
 
-			this->dropDense();
-			this->iter(data, label);
+	xt::xarray<bool> train0 = importAllPBM(p0.c_str(), totalNumberImage / 2);
+	xt::xarray<bool> train1 = importAllPBM(p1.c_str(), totalNumberImage / 2);
+
+	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
+	xt::xarray<float> label = xt::empty<float>({2});
+
+	while (1)
+	{
+		for (int k = 0; k < totalNumberImage; ++k)
+		{
+			if (k & 0)
+			{
+				label = {0, 1};
+				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
+				xt::view(data, 1) = xt::view(train0, k);
+
+				this->dropDense();
+				this->iter(data, label);
+			}
+			else
+			{
+				label = {1, 0};
+				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
+				xt::view(data, 1) = xt::view(train1, k);
+
+				this->dropDense();
+				this->iter(data, label);
+			}
 		}
 
-		std::cout << this->nn[this->nn.size() - 1]->output << std::endl;
-		std::cout << MSE(this->nn[this->nn.size() - 1]->output, label) << std::endl;
+		std::cout << "erreur: " << MSE(this->nn[this->nn.size() - 1]->output, label) << std::endl;
 
-		result.push_back(std::tuple<int, int>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
+		result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 		nbEpoch++;
 
 		if (nbEpoch % 10 == 0 && !continueTraining())
@@ -115,46 +136,45 @@ void NeuralNetwork::eval(const std::string path)
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
-	xt::xarray<bool> eval1 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL/2);
-	xt::xarray<bool> eval0 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL/2);
+	xt::xarray<bool> eval1 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL / 2);
+	xt::xarray<bool> eval0 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL / 2);
 	float eval;
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 
-	for (int i = 0; i < ALL_IMAGE_EVAL; ++i)
+	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
 
-		if (i & 1)
-		{
-			xt::view(image, 1) = xt::view(eval1, i / 2);
-			this->nn[0]->forward(image);
+		xt::view(image, 1) = xt::view(eval1, i / 2);
+		this->nn[0]->forward(image);
 
-			for (int j = 1; j < this->nn.size(); ++j)
-			{
-				this->nn[j]->forward(this->nn[j - 1]->output);
-			}
-			if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
-			{
-				eval++;
-			}
-		}
-		else
+		for (int j = 1; j < this->nn.size(); ++j)
 		{
-			xt::view(image, 1) = xt::view(eval0, i / 2);
-			this->nn[0]->forward(image);
-			for (int j = 1; j < this->nn.size(); ++j)
-			{
-				this->nn[j]->forward(this->nn[j - 1]->output);
-			}
-			
-			if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
-			{
-				eval++;
-			}
+			this->nn[j]->forward(this->nn[j - 1]->output);
+		}
+		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
+		{
+			eval++;
 		}
 	}
+
+	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
+	{
+		xt::view(image, 1) = xt::view(eval0, i);
+		this->nn[0]->forward(image);
+		for (int j = 1; j < this->nn.size(); ++j)
+		{
+			this->nn[j]->forward(this->nn[j - 1]->output);
+		}
+
+		if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
+		{
+			eval++;
+		}
+	}
+
 	float total = eval / ALL_IMAGE_EVAL;
-	std::cout << total << std::endl;
+	std::cout << "accuracy : " << total * 100 << "%" << std::endl;
 }
 
 void NeuralNetwork::detect(xt::xarray<float> input) {}
