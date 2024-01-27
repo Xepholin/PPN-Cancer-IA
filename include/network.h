@@ -8,42 +8,44 @@
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
 
-class NeuralNetwork 
+class NeuralNetwork
 {
-    public:
-		std::string name;
-        std::vector<ILayer*> nn;
+public:
+    std::string name;
+    std::vector<ILayer *> nn;
 
-        float learningRate;
-        uint16_t dropRate;
-		int nbEpoch = 1;
+    float learningRate;
+    uint16_t dropRate;
+    int nbEpoch = 1;
 
-		NeuralNetwork() = default;
+    NeuralNetwork() = default;
 
-		NeuralNetwork(std::string name, float learningRate = 0.1, uint16_t dropRate = 50)	{
-			this->name = name;
-			this->learningRate = learningRate;
-			this->dropRate = dropRate;
-		};
+    NeuralNetwork(std::string name, float learningRate = 0.1, uint16_t dropRate = 50)
+    {
+        this->name = name;
+        this->learningRate = learningRate;
+        this->dropRate = dropRate;
+    };
 
-		~NeuralNetwork() = default;
+    ~NeuralNetwork() = default;
 
-        void add(ILayer *layer);
+    void add(ILayer *layer);
 
-        void dropDense();
+    void dropDense();
 
-        void miniBatch(xt::xarray<float> batch, xt::xarray<int> label);
+    void miniBatch(xt::xarray<float> batch, xt::xarray<int> label);
 
-        void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
+    void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
-		std::vector<std::tuple<int, float>> train(xt::xarray<float> dataset, xt::xarray<int> label);
+    std::vector<std::tuple<int, float>> train(xt::xarray<float> dataset, xt::xarray<int> label);
 
-        void detect(xt::xarray<float> input);
+    void detect(xt::xarray<float> input);
 
-        void load(const std::string path);
+    void eval(const std::string path);
 
-        void save(const std::string path) const;
+    void load(const std::string path);
 
+    void save(const std::string path) const;
 };
 
 #endif

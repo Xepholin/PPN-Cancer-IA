@@ -8,6 +8,7 @@
 #include <xtensor/xnpy.hpp>
 #include <xtensor/xview.hpp>
 
+#include "image.h"
 #include "activation.h"
 #include "convolution.h"
 #include "dense.h"
@@ -15,31 +16,39 @@
 #include "pooling.h"
 #include "tools.h"
 
-void NeuralNetwork::add(ILayer *layer) {
+void NeuralNetwork::add(ILayer *layer)
+{
 	this->nn.push_back(layer);
 	return;
 }
 
-void NeuralNetwork::miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabels) {
+void NeuralNetwork::miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabels)
+{
 	this->dropDense();
 
-	for (int i = 1; i < batch.shape()[0]; ++i) {
+	for (int i = 1; i < batch.shape()[0]; ++i)
+	{
 		this->train(xt::view(batch, i), trueLabels);
 	}
 }
 
-void NeuralNetwork::dropDense() {
-	for (int i = 0; i < this->nn.size(); ++i) {
-		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
+void NeuralNetwork::dropDense()
+{
+	for (int i = 0; i < this->nn.size(); ++i)
+	{
+		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))
+		{
 			dense->dropout(this->dropRate);
 		}
 	}
 }
 
-void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
+void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
+{
 	this->nn[0]->forward(input);
 
-	for (int i = 1; i < this->nn.size(); ++i) {
+	for (int i = 1; i < this->nn.size(); ++i)
+	{
 		this->nn[i]->forward(this->nn[i - 1]->output);
 	}
 
@@ -51,22 +60,31 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 
 	xt::xarray<float> recycling;
 
-	for (int i = this->nn.size() - 1; i >= 0; --i) {
-		if (this->nn[i]->name == "Output") {
+	for (int i = this->nn.size() - 1; i >= 0; --i)
+	{
+		if (this->nn[i]->name == "Output")
+		{
 			recycling = this->nn[i]->backward(label, this->learningRate);
-		} else if (this->nn[i]->name == "Dense") {
+		}
+		else if (this->nn[i]->name == "Dense")
+		{
 			recycling = this->nn[i]->backward(recycling, this->learningRate);
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
 }
 
-std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> dataset, xt::xarray<int> label)	{
+std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> dataset, xt::xarray<int> label)
+{
 	std::vector<std::tuple<int, float>> result;
 
-	while(nbEpoch) {
-		for (int k = 0; k < dataset.shape()[0]; ++k)	{
+	while (nbEpoch)
+	{
+		for (int k = 0; k < dataset.shape()[0]; ++k)
+		{
 			xt::xarray<float> data = xt::empty<float>({1, 48, 48});
 			xt::view(data, 1) = xt::view(dataset, k);
 
@@ -77,15 +95,66 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(xt::xarray<float> datas
 		std::cout << this->nn[this->nn.size() - 1]->output << std::endl;
 		std::cout << MSE(this->nn[this->nn.size() - 1]->output, label) << std::endl;
 
-		result.push_back(std::tuple<int, int>{nbEpoch,  MSE(this->nn[this->nn.size() - 1]->output, label)});
+		result.push_back(std::tuple<int, int>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 		nbEpoch++;
 
-		if (nbEpoch % 10 == 0 && !continueTraining())	{
+		if (nbEpoch % 10 == 0 && !continueTraining())
+		{
 			break;
 		}
 	}
 
 	return result;
+}
+
+void NeuralNetwork::eval(const std::string path)
+{
+
+#define ALL_IMAGE_EVAL 7000
+
+	std::string p0 = path + "/0";
+	std::string p1 = path + "/1";
+
+	xt::xarray<bool> eval1 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL/2);
+	xt::xarray<bool> eval0 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL/2);
+	float eval;
+
+	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
+
+	for (int i = 0; i < ALL_IMAGE_EVAL; ++i)
+	{
+
+		if (i & 1)
+		{
+			xt::view(image, 1) = xt::view(eval1, i / 2);
+			this->nn[0]->forward(image);
+
+			for (int j = 1; j < this->nn.size(); ++j)
+			{
+				this->nn[j]->forward(this->nn[j - 1]->output);
+			}
+			if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
+			{
+				eval++;
+			}
+		}
+		else
+		{
+			xt::view(image, 1) = xt::view(eval0, i / 2);
+			this->nn[0]->forward(image);
+			for (int j = 1; j < this->nn.size(); ++j)
+			{
+				this->nn[j]->forward(this->nn[j - 1]->output);
+			}
+			
+			if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
+			{
+				eval++;
+			}
+		}
+	}
+	float total = eval / ALL_IMAGE_EVAL;
+	std::cout << total << std::endl;
 }
 
 void NeuralNetwork::detect(xt::xarray<float> input) {}
@@ -208,7 +277,6 @@ void NeuralNetwork::load(const std::string path)
 
 			tmpStr = path + "/" + buffer + "_weights.npy";
 			dense->weights = xt::load_npy<float>(tmpStr);
-
 
 			tmpStr = path + "/" + buffer + "_bias.npy";
 			dense->bias = xt::load_npy<float>(tmpStr);
