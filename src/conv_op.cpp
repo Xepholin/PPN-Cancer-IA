@@ -103,7 +103,7 @@ xt::xarray<float> padMatrice(xt::xarray<float>  matrice, int padding){
     int sizeNewMatriceX = matrice.shape()[0] + 2 * padding;
     int sizeNewMatriceY = matrice.shape()[1] + 2 * padding;
 
-    xt::xarray<float> paddedMatrice{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
+    xt::xarray<float> paddedMatrice{xt::zeros<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
 
     for (int i = 0; i < matrice.shape()[0]; ++i)
     {
