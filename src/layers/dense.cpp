@@ -12,9 +12,6 @@ void Dense::forward(xt::xarray<float> input) {
 		this->input = input;
 	}
 
-	// std::cout << "input\n" << this->input << '\n' << std::endl;
-	// std::cout << "weights\n" << this->weights << '\n' << std::endl;
-
 	for (int j = 0; j < this->outputShape; ++j) {
 		float dotResult = 0;
 		for (int i = 0; i < this->inputShape; ++i) {
@@ -30,19 +27,24 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->bOutput = this->output;
 
-	// std::cout << "before normalized output\n" << this->output << '\n' << std::endl;
+	// std::cout << this->input << std::endl;
+	// std::cout << this->weights << std::endl;
+	// std::cout << this->bias << std::endl;
+	// std::cout << this->output << std::endl;
+	
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
 
 	if (this->normalize) {
 		this->output = normalized(this->output);
 	}
 
-	// std::cout << "before relu output\n" << this->output << '\n' << std::endl;
-
 	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
-
 }
 
 xt::xarray<float> Dense::backward(

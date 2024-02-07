@@ -68,12 +68,14 @@ class Output : public ILayer {
 
 			case ActivationType::ACTIVATION_RELU:
 				this->activation = new ReLu(std::tuple<int, int, int>{1, 1, outputShape});
-				this->heWeightsInit();
+				this->weights = xt::random::randn<float>({inputShape, outputShape});
+				// this->heWeightsInit();
 				break;
 
 			case ActivationType::ACTIVATION_SOFTMAX:
 				this->activation = new Softmax(outputShape);
-				this->XGWeightsInit();
+				this->weights = xt::random::randn<float>({inputShape, outputShape});
+				// this->XGWeightsInit();
 				break;
 
 			default:

@@ -23,48 +23,23 @@
 #include "topo.h"
 
 int main() {
-	// generateAllPBM("../assets/breast", "../assets/PBM");
-
-
-	// std::vector<std::tuple<int, float>> resultTraining;
-
-	//xt::xarray<float> images = importAllPBM("../../train/0", 75000);
-
-
 	// Create nn
-	xt::random::seed(time(nullptr));
+    xt::random::seed(time(nullptr));
 
-	NeuralNetwork nn = CNN2({1, 48, 48}, "toto", 0.001, 50);
+	NeuralNetwork nn = CNN2({1, 48, 48}, "test", 0.0001, 0);
 
-	nn.train("../../train", 150000);
+	// NeuralNetwork nn;
+	// nn.load("../saves/test");
+
+	// saveConfirm(nn, false);
+
+	// nn.load("../saves/toto");
 	
-	nn.save("../saves/machinedelamort");
+    nn.train("../assets/processed/train", 15);
 
-	//
+    nn.eval("../assets/processed/eval");
 
-	// Load + train
-	bool loaded = true;
-
-	NeuralNetwork nn1;
-
-	nn.load("../saves/machinedelamort");
-
-	nn.train("../../train", 150000);
-	
-	nn.save("../saves/machinedelamort");
-
-
-	// Load + eval
-	NeuralNetwork nn2;
-
-	nn.load("../saves/machinedelamort");
-
-	nn.eval("../../eval");
-	
-
-	// resultTraining = nn.train(images, xt::xarray<float>{0, 1});
-
-	// saveConfirm(nn, loaded);
+	saveConfirm(nn, false);
 
 	return 0;
 }

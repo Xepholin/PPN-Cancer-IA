@@ -24,19 +24,17 @@ void Output::forward(xt::xarray<float> input)
         this->output(j) = dotResult + bias(j);
     }
 
+	this->bOutput = this->output;
+
     if (this->normalize)
 	{
         this->output = normalized(this->input);
     }
 
-	this->bOutput = this->output;
-
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
         this->activation->forward(this->output);
         this->output = this->activation->output;
     }
-    
-	// std::cout << this->output << std::endl;
 }
 
 xt::xarray<float> Output::backward(

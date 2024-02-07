@@ -49,25 +49,10 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 	model.learningRate = learningRate;
     model.dropRate = dropRate;
 
-
-    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{1, 3, 3, 2, 0}, relu};
-
-	// ------------------------------------------------------------------------------
-
-    Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
-
-    // ------------------------------------------------------------------------------
-
-    Dense *dense1 = new Dense(pool_1->output.size(), 8, relu, false, true);
-
-	// ------------------------------------------------------------------------------
+    Dense *dense1 = new Dense(48*48, 8, relu, false, true);
 
     Output *output = new Output(dense1->output.size(), 2, softmax);
 
-    // ------------------------------------------------------------------------------
-
-    model.add(conv1);
-    model.add(pool_1);
     model.add(dense1);
     model.add(output);
 
