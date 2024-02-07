@@ -6,6 +6,9 @@
 #include "tools.h"
 
 void Dense::forward(xt::xarray<float> input) {
+
+	std::cout << "Dense\n" << std::endl;
+
 	if (this->flatten) {
 		this->input = xt::flatten(input);
 	} else {
@@ -27,16 +30,6 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->bOutput = this->output;
 
-	// std::cout << this->input << std::endl;
-	// std::cout << this->weights << std::endl;
-	// std::cout << this->bias << std::endl;
-	// std::cout << this->output << std::endl;
-	
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-
 	if (this->normalize) {
 		this->output = normalized(this->output);
 	}
@@ -45,12 +38,24 @@ void Dense::forward(xt::xarray<float> input) {
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
+
+	std::cout << "input:\n" << this->input << std::endl;
+	std::cout << "weights:\n" << this->weights << std::endl;
+	std::cout << "bias:\n" << this->bias << std::endl;
+	std::cout << "output:\n" << this->output << std::endl;
+	
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 xt::xarray<float> Dense::backward(
 	xt::xarray<float> gradient,
 	float learningRate) 
 {
+	std::cout << "Dense\n" << std::endl;
+	
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
 	for (int i = 0; i < outputShape; ++i)	{
@@ -83,6 +88,15 @@ xt::xarray<float> Dense::backward(
 			inputGradient(i) = weights(i, j) * layerGradient(j);
 		}
 	}
+
+	std::cout << "layerGradient:\n" << layerGradient << std::endl;
+	std::cout << "weightsGradient:\n" << weightsGradient << std::endl;
+	std::cout << "biasGradient:\n" << biasGradient << std::endl;
+	std::cout << "inputGradient:\n" << inputGradient << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
 
 	return inputGradient;
 }

@@ -60,13 +60,11 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
 
 	xt::xarray<float> recycling;
 
-	for (int i = this->nn.size() - 1; i >= 0; --i)
+	recycling = this->nn[this->nn.size() - 1]->backward(label, this->learningRate);
+
+	for (int i = this->nn.size() - 2; i >= 0; --i)
 	{
-		if (this->nn[i]->name == "Output")
-		{
-			recycling = this->nn[i]->backward(label, this->learningRate);
-		}
-		else if (this->nn[i]->name == "Dense")
+		if (this->nn[i]->name == "Dense")
 		{
 			recycling = this->nn[i]->backward(recycling, this->learningRate);
 		}
@@ -75,6 +73,8 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
 			break;
 		}
 	}
+
+	exit(0);
 }
 
 std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage)
@@ -92,14 +92,14 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 	std::string savePath = "../saves/" + this->name;
 
-	try
-	{
-		std::filesystem::create_directories(savePath);
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << "Error creating directory: " << savePath << std::endl;
-	}
+	// try
+	// {
+	// 	std::filesystem::create_directories(savePath);
+	// }
+	// catch (const std::exception &e)
+	// {
+	// 	std::cerr << "Error creating directory: " << savePath << std::endl;
+	// }
 
 	while (1)
 	{
@@ -126,13 +126,14 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 				this->iter(data, label);
 			}
 
+			continueTraining();
+
 			error += MSE(this->nn[this->nn.size() - 1]->output, label);
-			// std::cout << error << std::endl;
 		}
 
-		this->save(savePath);
+		// this->save(savePath);
 
-		// std::cout << "erreur: " << error/totalNumberImage << std::endl;
+		std::cout << "erreur: " << error/totalNumberImage << std::endl;
 
 		result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 		nbEpoch++;
@@ -160,28 +161,30 @@ void NeuralNetwork::eval(const std::string path)
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 
+	std::cout << "eval for positive" << std::endl;
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval1, i / 2);
 		this->nn[0]->forward(image);
 
-  		// std::cout << this->nn[0]->output << "  shape :" << this->nn[0]->output.shape()[0] << std::endl;
-
 		for (int j = 1; j < this->nn.size(); ++j)
 		{
 			this->nn[j]->forward(this->nn[j - 1]->output);
 		}
-		// std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
+
+		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
 		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
 		{
 			eval++;
 		}
 	}
 
+	std::cout << "eval for negative" << std::endl;
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval0, i);
 		this->nn[0]->forward(image);
+
 		for (int j = 1; j < this->nn.size(); ++j)
 		{
 			this->nn[j]->forward(this->nn[j - 1]->output);

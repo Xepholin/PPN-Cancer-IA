@@ -69,8 +69,8 @@ float MSE(xt::xarray<float> output, xt::xarray<float> trueValue)
     {
         err += ((output(i) - trueValue(i)) * (output(i) - trueValue(i)));
 	}
-	
-	err *= 1/trueValue.size();
+
+	err *= 1.0/trueValue.size();
 
     return err;
 }

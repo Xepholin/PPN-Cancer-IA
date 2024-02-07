@@ -24,22 +24,24 @@
 
 int main() {
 	// Create nn
-    xt::random::seed(time(nullptr));
+    xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2({1, 48, 48}, "test", 0.0001, 0);
+	// NeuralNetwork nn = CNN2({1, 48, 48}, "test", 0.001, 0);
 
-	// NeuralNetwork nn;
-	// nn.load("../saves/test");
+	NeuralNetwork nn;
+	nn.load("../saves/test");
 
-	// saveConfirm(nn, false);
+	xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm");
+
+	nn.iter(image, xt::xarray<float>{0, 1});
 
 	// nn.load("../saves/toto");
 	
-    nn.train("../assets/processed/train", 15);
+    // nn.train("../assets/processed/train", 150);
 
-    nn.eval("../assets/processed/eval");
+    // nn.eval("../assets/processed/eval");
 
-	saveConfirm(nn, false);
+	// saveConfirm(nn, false);
 
 	return 0;
 }
