@@ -54,9 +54,9 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
 
 	// std::cout << "output: " << this->nn[this->nn.size() - 1]->output << std::endl;
 
-	float error = MSE(this->nn[this->nn.size() - 1]->output, label);
+	float loss = MSE(this->nn[this->nn.size() - 1]->output, label);
 
-	// std::cout << error << std::endl;
+	// std::cout << loss << std::endl;
 
 	xt::xarray<float> recycling;
 
@@ -73,8 +73,6 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
 			break;
 		}
 	}
-
-	exit(0);
 }
 
 std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage)
@@ -103,7 +101,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 	while (1)
 	{
-		float error = 0.0;
+		float loss = 0.0;
 
 		for (int k = 0; k < totalNumberImage; k++)
 		{
@@ -126,14 +124,12 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 				this->iter(data, label);
 			}
 
-			continueTraining();
-
-			error += MSE(this->nn[this->nn.size() - 1]->output, label);
+			loss += MSE(this->nn[this->nn.size() - 1]->output, label);
 		}
 
 		// this->save(savePath);
 
-		std::cout << "erreur: " << error/totalNumberImage << std::endl;
+		std::cout << "loss: " << loss/totalNumberImage << std::endl;
 
 		result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 		nbEpoch++;

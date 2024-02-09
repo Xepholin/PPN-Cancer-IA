@@ -5,9 +5,7 @@
 #include "tools.h"
 
 void Output::forward(xt::xarray<float> input)
-{   
-	std::cout << "Output\n" << std::endl;
-	
+{
 	this->input = input;
 
 	for (int j = 0; j < this->outputShape; ++j)
@@ -37,23 +35,22 @@ void Output::forward(xt::xarray<float> input)
         this->output = this->activation->output;
     }
 
-	std::cout << "input:\n" << this->input << std::endl;
-	std::cout << "weights:\n" << this->weights << std::endl;
-	std::cout << "bias:\n" << this->bias << std::endl;
-	std::cout << "output:\n" << this->output << std::endl;
+	// std::cout << "Output forward\n" << std::endl;
+	// std::cout << "input:\n" << this->input << std::endl;
+	// std::cout << "weights:\n" << this->weights << std::endl;
+	// std::cout << "bias:\n" << this->bias << std::endl;
+	// std::cout << "output:\n" << this->output << std::endl;
 	
-	std::cout << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
 }
 
 xt::xarray<float> Output::backward(
 	xt::xarray<float> label,
     float learningRate)
 {
-	std::cout << "Output\n" << std::endl;
-	
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
 	for (int i = 0; i < outputShape; ++i)	{
@@ -75,8 +72,6 @@ xt::xarray<float> Output::backward(
 		biasGradient(i) = layerGradient(i);
 	}
 
-	std::cout << "weights:\n" << this->weights << std::endl;
-
 	weights = weights + (-learningRate) * weightsGradient;
 	bias = bias + (-learningRate) * biasGradient;
 
@@ -89,14 +84,15 @@ xt::xarray<float> Output::backward(
 		}
 	}
 
-	std::cout << "layerGradient:\n" << layerGradient << std::endl;
-	std::cout << "weightsGradient:\n" << weightsGradient << std::endl;
-	std::cout << "biasGradient:\n" << biasGradient << std::endl;
-	std::cout << "inputGradient:\n" << inputGradient << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
+	// std::cout << "Output backprop\n" << std::endl;
+	// std::cout << "layerGradient:\n" << layerGradient << std::endl;
+	// std::cout << "weightsGradient:\n" << weightsGradient << std::endl;
+	// std::cout << "biasGradient:\n" << biasGradient << std::endl;
+	// std::cout << "inputGradient:\n" << inputGradient << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
 
 	return inputGradient;
 }
