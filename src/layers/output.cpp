@@ -65,19 +65,21 @@ xt::xarray<float> Output::backward(
 	for (int i = 0; i < inputShape; ++i)	{
 		for (int j = 0; j < outputShape; ++j)	{
 			weightsGradient(i, j) = input(i) * layerGradient(j);
-			weightsGradient(i, j) = (-learningRate) * weightsGradient(i, j);
 		}
 	}
+
 
 	xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
 	for (int i = 0; i < outputShape; ++i)	{
 		biasGradient(i) = layerGradient(i);
-		biasGradient(i) = (-learningRate) * biasGradient(i);
 	}
 
-	weights = weights + weightsGradient;
-	bias = bias + biasGradient;
+	std::cout << "weights:\n" << this->weights << std::endl;
+
+	weights = weights + (-learningRate) * weightsGradient;
+	bias = bias + (-learningRate) * biasGradient;
+
 
 	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 
