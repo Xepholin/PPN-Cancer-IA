@@ -96,7 +96,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 	// }
 	// catch (const std::exception &e)
 	// {
-	// 	std::cerr << "Error creating directory: " << savePath << std::endl;
+	//  	std::cerr << "Error creating directory: " << savePath << std::endl;
 	// }
 
 	while (1)
@@ -127,14 +127,14 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 			loss += MSE(this->nn[this->nn.size() - 1]->output, label);
 		}
 
+		nbEpoch++;
 		// this->save(savePath);
-
-		std::cout << "loss: " << loss/totalNumberImage << std::endl;
+		
+		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/totalNumberImage << std::endl;
 
 		result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
-		nbEpoch++;
 
-		if (nbEpoch % 20 == 0 && !continueTraining())
+		if (nbEpoch % 5 == 0 && !continueTraining())
 		{
 			break;
 		}
@@ -153,14 +153,14 @@ void NeuralNetwork::eval(const std::string path)
 
 	xt::xarray<bool> eval0 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL / 2);
 	xt::xarray<bool> eval1 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL / 2);
-	float eval;
+	float eval = 0;
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 
 	std::cout << "eval for positive" << std::endl;
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
-		xt::view(image, 1) = xt::view(eval1, i / 2);
+		xt::view(image, 1) = xt::view(eval1, i);
 		this->nn[0]->forward(image);
 
 		for (int j = 1; j < this->nn.size(); ++j)
