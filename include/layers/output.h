@@ -7,8 +7,9 @@
 #include "softmax.h"
 #include "tools.h"
 
-class Output : public ILayer {
-   public:
+class Output : public ILayer
+{
+public:
 	// 1 x Longueur
 	int inputShape = 0;
 	int outputShape = 0;
@@ -39,15 +40,16 @@ class Output : public ILayer {
 	 * @param outputShape La taille de la sortie de la couche de sortie.
 	 * @param activationType Le type d'activation à appliquer après la couche de sortie (par défaut, pas d'activation).
 	 * @param normalize Indique si la normalisation doit être appliquée après la couche de sortie (par défaut, désactivée).
-	*/
+	 */
 	Output(int inputShape, int outputShape,
 		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-		   bool normalize = false) {
+		   bool normalize = false)
+	{
 		name = "Output";
 
 		this->inputShape = inputShape;
 		this->outputShape = outputShape;
-		this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
+		this->weightsShape = std::tuple<int, int>{outputShape, inputShape};
 
 		this->input = xt::empty<float>({inputShape});
 		this->output = xt::empty<float>({outputShape});
@@ -60,30 +62,32 @@ class Output : public ILayer {
 
 		this->normalize = normalize;
 
-		switch (this->activationType) {
-			case ActivationType::ACTIVATION_NO_TYPE:
-				this->activation = new Activation;
-				this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-				break;
+		switch (this->activationType)
+		{
+		case ActivationType::ACTIVATION_NO_TYPE:
+			this->activation = new Activation;
+			this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0 / inputShape);
+			break;
 
-			case ActivationType::ACTIVATION_RELU:
-				this->activation = new ReLu(std::tuple<int, int, int>{1, 1, outputShape});
-				this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-				// this->heWeightsInit();
-				break;
+		case ActivationType::ACTIVATION_RELU:
+			this->activation = new ReLu(std::tuple<int, int, int>{1, 1, outputShape});
+			this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0 / inputShape);
+			// this->heWeightsInit();
+			break;
 
-			case ActivationType::ACTIVATION_SOFTMAX:
-				this->activation = new Softmax(outputShape);
-				this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-				// this->XGWeightsInit();
-				break;
+		case ActivationType::ACTIVATION_SOFTMAX:
+			this->activation = new Softmax(outputShape);
+			this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0 / inputShape);
+			// this->XGWeightsInit();
+			break;
 
-			default:
-				perror("Dense Activation Type Error");
+		default:
+			perror("Dense Activation Type Error");
 		}
 	}
 
-	~Output() {
+	~Output()
+	{
 		delete this->activation;
 	}
 
@@ -91,7 +95,7 @@ class Output : public ILayer {
 
 	virtual xt::xarray<float> backward(
 		xt::xarray<float> label,
-    	float learningRate);
+		float learningRate);
 
 	void print() const override;
 

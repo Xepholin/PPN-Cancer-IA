@@ -5,7 +5,7 @@ project(PPN-CANCER-IA)
 set(CMAKE_CXX_STANDARD 17)
 
 # Enable debugging information
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -mavx -march=native -O3")
 
 # Main program source files
 set(MAIN_SOURCE_FILES

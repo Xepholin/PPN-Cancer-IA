@@ -22,4 +22,7 @@ void saveConfirm(NeuralNetwork nn, bool loaded);
 
 void display_network(NeuralNetwork nn);
 
+xt::xarray<float> dot_product_fma(xt::xarray<float> weights, xt::xarray<float> input);
+
+
 #endif
