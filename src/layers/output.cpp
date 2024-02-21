@@ -7,23 +7,12 @@
 void Output::forward(xt::xarray<float> input)
 {
 	this->input = input;
-
+	
 	this->dropout();
 
-	for (int j = 0; j < this->outputShape; ++j)
-    {
-        float dotResult = 0;
-        for (int i = 0; i < this->inputShape; ++i)
-        {
-            if (drop(i) == true)
-            {
-                continue;
-            }
+	this->output = dot_product_fma(this->weights,this->input) + bias;
 
-            dotResult += weights(i, j) * this->input(i);
-        }
-        this->output(j) = dotResult + bias(j);
-    }
+	// std::cout << output << std::endl;
 
 	this->bOutput = this->output;
 
@@ -59,11 +48,11 @@ xt::xarray<float> Output::backward(
 		layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - label(i)));
 	}
 
-	xt::xarray<float> weightsGradient = xt::empty<float>({inputShape, outputShape});
+	xt::xarray<float> weightsGradient = xt::empty<float>({outputShape,inputShape});
 	
 	for (int i = 0; i < inputShape; ++i)	{
 		for (int j = 0; j < outputShape; ++j)	{
-			weightsGradient(i, j) = input(i) * layerGradient(j);
+			weightsGradient(j, i) = input(i) * layerGradient(j);
 		}
 	}
 
@@ -82,7 +71,7 @@ xt::xarray<float> Output::backward(
 
 	for (int i = 0; i < inputShape; ++i)	{
 		for (int j = 0; j < outputShape; ++j)	{
-			inputGradient(i) = weights(i, j) * layerGradient(j);
+			inputGradient(i) = weights(j, i) * layerGradient(j);
 		}
 	}
 
@@ -122,11 +111,11 @@ void Output::dropout() {
 void Output::heWeightsInit()    {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
+    this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
 }
 
 void Output::XGWeightsInit() {
     float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
-    this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
+    this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
 }

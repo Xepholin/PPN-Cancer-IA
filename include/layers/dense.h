@@ -52,7 +52,7 @@ class Dense : public ILayer
 
             this->inputShape = inputShape;
             this->outputShape = outputShape;
-            this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
+            this->weightsShape = std::tuple<int, int>{outputShape, inputShape};
 
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
@@ -72,18 +72,18 @@ class Dense : public ILayer
             {
                 case ActivationType::ACTIVATION_NO_TYPE:
                     this->activation = new Activation;
-                    this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+                    this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     break;
 
                 case ActivationType::ACTIVATION_RELU:
                     this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
-					// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+					// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     this->heWeightsInit();
                     break;
 
                 case ActivationType::ACTIVATION_SOFTMAX:
                     this->activation = new Softmax(outputShape);
-					// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+					// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     this->XGWeightsInit();
                     break;
                     
