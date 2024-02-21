@@ -27,7 +27,7 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2({1, 48, 48}, "topo2", 0.0001);
+	NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.0001);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo2");

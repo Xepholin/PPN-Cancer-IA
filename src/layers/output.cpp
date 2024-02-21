@@ -39,53 +39,53 @@ void Output::forward(xt::xarray<float> input)
 }
 
 xt::xarray<float> Output::backward(
-	xt::xarray<float> label,
+    xt::xarray<float> label,
     float learningRate)
 {
-	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
+    xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
-	for (int i = 0; i < outputShape; ++i)	{
-		layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - label(i)));
-	}
+    // Calculer le gradient pour chaque neurone de sortie
+    for (int i = 0; i < outputShape; ++i)
+    {
+        layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - label(i)));
+    }
 
-	xt::xarray<float> weightsGradient = xt::empty<float>({outputShape,inputShape});
-	
-	for (int i = 0; i < inputShape; ++i)	{
-		for (int j = 0; j < outputShape; ++j)	{
-			weightsGradient(j, i) = input(i) * layerGradient(j);
-		}
-	}
+    xt::xarray<float> weightsGradient = xt::empty<float>({outputShape,inputShape});
+    xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
+    // Calculer les gradients des poids et des biais
+    for (int i = 0; i < inputShape; ++i)
+    {
+        for (int j = 0; j < outputShape; ++j)
+        {
+            weightsGradient(j, i) = input(i) * layerGradient(j);
+            // Application du taux d'apprentissage déplacée ici
+        }
+    }
 
-	xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
+    // Mise à jour des poids et des biais
+    for (int i = 0; i < outputShape; ++i)
+    {
+        biasGradient(i) = layerGradient(i);
+    }
 
-	for (int i = 0; i < outputShape; ++i)	{
-		biasGradient(i) = layerGradient(i);
-	}
+    weights = weights - learningRate * weightsGradient;
+    bias = bias - learningRate * biasGradient;
 
-	weights = weights + (-learningRate) * weightsGradient;
-	bias = bias + (-learningRate) * biasGradient;
+    xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 
+    // Accumulation correcte du gradient d'entrée
+    for (int i = 0; i < inputShape; ++i)
+    {
+        float sum = 0;
+        for (int j = 0; j < outputShape; ++j)
+        {
+            sum += weights(j, i) * layerGradient(j);
+        }
+        inputGradient(i) = sum;
+    }
 
-	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
-
-	for (int i = 0; i < inputShape; ++i)	{
-		for (int j = 0; j < outputShape; ++j)	{
-			inputGradient(i) = weights(j, i) * layerGradient(j);
-		}
-	}
-
-	// std::cout << "Output backprop\n" << std::endl;
-	// std::cout << "layerGradient:\n" << layerGradient << std::endl;
-	// std::cout << "weightsGradient:\n" << weightsGradient << std::endl;
-	// std::cout << "biasGradient:\n" << biasGradient << std::endl;
-	// std::cout << "inputGradient:\n" << inputGradient << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-
-	return inputGradient;
+    return inputGradient;
 }
 
 
