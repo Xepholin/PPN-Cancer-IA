@@ -140,8 +140,7 @@ void saveConfirm(NeuralNetwork nn, bool loaded)	{
 			}
 
 			nn.save(path);
-
-			std::cout << "done" << std::endl;
+			
 			break;
 		}
 		else if (!save.compare("n"))	{

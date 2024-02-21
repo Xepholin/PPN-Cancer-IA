@@ -19,6 +19,7 @@ class Output : public ILayer {
 	// Height -Width
 	xt::xarray<float> weights;
 
+	int dropRate = 0;
 	xt::xarray<bool> drop;
 
 	xt::xarray<float> bias;
@@ -42,7 +43,7 @@ class Output : public ILayer {
 	*/
 	Output(int inputShape, int outputShape,
 		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-		   bool normalize = false) {
+		   int dropRate = 0, bool normalize = false) {
 		name = "Output";
 
 		this->inputShape = inputShape;
@@ -54,6 +55,7 @@ class Output : public ILayer {
 		this->bOutput = xt::empty<float>({outputShape});
 		this->bias = xt::random::randn<float>({outputShape});
 
+		this->dropRate = dropRate;
 		drop = xt::zeros<bool>({inputShape});
 
 		this->activationType = activationType;
@@ -68,14 +70,14 @@ class Output : public ILayer {
 
 			case ActivationType::ACTIVATION_RELU:
 				this->activation = new ReLu(std::tuple<int, int, int>{1, 1, outputShape});
-				this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-				// this->heWeightsInit();
+				// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+				this->heWeightsInit();
 				break;
 
 			case ActivationType::ACTIVATION_SOFTMAX:
 				this->activation = new Softmax(outputShape);
-				this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-				// this->XGWeightsInit();
+				// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+				this->XGWeightsInit();
 				break;
 
 			default:
@@ -94,6 +96,8 @@ class Output : public ILayer {
     	float learningRate);
 
 	void print() const override;
+
+	void dropout();
 
 	void heWeightsInit();
 

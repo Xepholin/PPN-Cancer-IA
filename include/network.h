@@ -15,16 +15,15 @@ public:
     std::vector<ILayer *> nn;
 
     float learningRate;
-    uint16_t dropRate;
     int nbEpoch = 0;
+	float accuracy = 0.0;
 
     NeuralNetwork() = default;
 
-    NeuralNetwork(std::string name, float learningRate = 0.1, uint16_t dropRate = 50)
+    NeuralNetwork(std::string name, float learningRate = 0.1)
     {
         this->name = name;
         this->learningRate = learningRate;
-        this->dropRate = dropRate;
     };
 
     ~NeuralNetwork() = default;
@@ -33,7 +32,7 @@ public:
 
     void dropDense();
 
-    void miniBatch(xt::xarray<float> batch, xt::xarray<int> label);
+    void miniBatch(int size);
 
     void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
 

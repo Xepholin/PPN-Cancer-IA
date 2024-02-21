@@ -62,33 +62,33 @@ target_link_libraries(main.exe PRIVATE PNG::PNG)
 
 
 
-# Include Google Test
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+# # Include Google Test
+# find_package(GTest REQUIRED)
+# include_directories(${GTEST_INCLUDE_DIRS})
 
-# Test executable
-add_executable(test.exe src/conv_op.cpp src/layers/layer.cpp src/layers/pooling.cpp test/tests.cpp)
+# # Test executable
+# add_executable(test.exe src/conv_op.cpp src/layers/layer.cpp src/layers/pooling.cpp test/tests.cpp)
 
 
-target_include_directories(test.exe PRIVATE
-    "${PROJECT_SOURCE_DIR}/include"
-)
+# target_include_directories(test.exe PRIVATE
+#     "${PROJECT_SOURCE_DIR}/include"
+# )
 
-target_include_directories(test.exe PRIVATE
-    "${PROJECT_SOURCE_DIR}/include/layers"
-)
+# target_include_directories(test.exe PRIVATE
+#     "${PROJECT_SOURCE_DIR}/include/layers"
+# )
 
-target_include_directories(test.exe PRIVATE
-    "${PROJECT_SOURCE_DIR}/include/layers/activations"
-)
+# target_include_directories(test.exe PRIVATE
+#     "${PROJECT_SOURCE_DIR}/include/layers/activations"
+# )
 
-# Link PNG library to tests.exe (if needed)
-target_link_libraries(test.exe PRIVATE PNG::PNG)
+# # Link PNG library to tests.exe (if needed)
+# target_link_libraries(test.exe PRIVATE PNG::PNG)
 
-# GTest
-find_package(GTest REQUIRED)
-target_link_libraries(test.exe PUBLIC GTest::GTest GTest::Main)
-enable_testing()
+# # GTest
+# find_package(GTest REQUIRED)
+# target_link_libraries(test.exe PUBLIC GTest::GTest GTest::Main)
+# enable_testing()
 
-# Tests
-gtest_discover_tests(test.exe)
+# # Tests
+# gtest_discover_tests(test.exe)

@@ -7,6 +7,7 @@
 #include <xtensor/xio.hpp>
 #include <xtensor/xnpy.hpp>
 #include <xtensor/xview.hpp>
+#include <chrono>
 
 #include "image.h"
 #include "activation.h"
@@ -22,24 +23,11 @@ void NeuralNetwork::add(ILayer *layer)
 	return;
 }
 
-void NeuralNetwork::miniBatch(xt::xarray<float> batch, xt::xarray<int> trueLabels)
+void NeuralNetwork::miniBatch(int size)
 {
-	this->dropDense();
-
-	for (int i = 1; i < batch.shape()[0]; ++i)
+	for (int i = 1; i < size; ++i)
 	{
 		// this->train(xt::view(batch, i), trueLabels);
-	}
-}
-
-void NeuralNetwork::dropDense()
-{
-	for (int i = 0; i < this->nn.size(); ++i)
-	{
-		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))
-		{
-			dense->dropout(this->dropRate);
-		}
 	}
 }
 
@@ -82,6 +70,8 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
+	std::cout << "Loading dataset..." << std::endl;
+
 	xt::xarray<bool> train0 = importAllPBM(p0.c_str(), totalNumberImage / 2);
 	xt::xarray<bool> train1 = importAllPBM(p1.c_str(), totalNumberImage / 2);
 
@@ -90,18 +80,24 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 	std::string savePath = "../saves/" + this->name;
 
-	// try
-	// {
-	// 	std::filesystem::create_directories(savePath);
-	// }
-	// catch (const std::exception &e)
-	// {
-	//  	std::cerr << "Error creating directory: " << savePath << std::endl;
-	// }
+	try
+	{
+		std::filesystem::create_directories(savePath);
+	}
+	catch (const std::exception &e)
+	{
+	 	std::cerr << "Error creating directory: " << savePath << std::endl;
+	}
+
+	this->save(savePath);
+
+	std::cout << "Start training..." << std::endl;
 
 	while (1)
 	{
 		float loss = 0.0;
+
+		auto startTime = std::chrono::steady_clock::now();
 
 		for (int k = 0; k < totalNumberImage; k++)
 		{
@@ -111,7 +107,6 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
 				xt::view(data, 1) = xt::view(train0, k/2);
 
-				this->dropDense();
 				this->iter(data, label);
 			}
 			else
@@ -120,21 +115,27 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
 				xt::view(data, 1) = xt::view(train1, k/2);
 
-				this->dropDense();
 				this->iter(data, label);
 			}
 
 			loss += MSE(this->nn[this->nn.size() - 1]->output, label);
+
+			if (k % 10000 == 0)	{
+				std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
+			}
 		}
 
+		auto endTime = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
+
 		nbEpoch++;
-		// this->save(savePath);
+		this->save(savePath);
 		
-		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/totalNumberImage << std::endl;
+		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
 
-		result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
+		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
-		if (nbEpoch % 5 == 0 && !continueTraining())
+		if (nbEpoch % 3 == 0 && !continueTraining())
 		{
 			break;
 		}
@@ -151,13 +152,18 @@ void NeuralNetwork::eval(const std::string path)
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
+	std::cout << "Loading dataset..." << std::endl;
+
 	xt::xarray<bool> eval0 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL / 2);
 	xt::xarray<bool> eval1 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL / 2);
 	float eval = 0;
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 
-	std::cout << "eval for positive" << std::endl;
+	std::cout << "Start evaluation..." << std::endl;
+
+	std::cout << "Positive..." << std::endl;
+
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval1, i);
@@ -169,13 +175,15 @@ void NeuralNetwork::eval(const std::string path)
 		}
 
 		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
+		
 		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
 		{
 			eval++;
 		}
 	}
 
-	std::cout << "eval for negative" << std::endl;
+	std::cout << "Negative..." << std::endl;
+
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval0, i);
@@ -185,6 +193,7 @@ void NeuralNetwork::eval(const std::string path)
 		{
 			this->nn[j]->forward(this->nn[j - 1]->output);
 		}
+
 		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
 
 		if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
@@ -193,8 +202,9 @@ void NeuralNetwork::eval(const std::string path)
 		}
 	}
 
-	float total = eval / ALL_IMAGE_EVAL;
-	std::cout << "accuracy : " << total * 100.0 << "%" << std::endl;
+	float accuracy = (eval / ALL_IMAGE_EVAL) * 100.0;
+	std::cout << "accuracy : " << accuracy << "%" << std::endl;
+	this->accuracy = accuracy;
 }
 
 void NeuralNetwork::detect(xt::xarray<float> input) {}
@@ -212,8 +222,9 @@ void NeuralNetwork::load(const std::string path)
 	inputFile >> this->name;
 	inputFile >> this->nbEpoch;
 	inputFile >> size;
-	inputFile >> this->learningRate;
-	inputFile >> this->dropRate;
+	inputFile >> this->learningRate;	
+	inputFile >> this->accuracy;	
+
 
 	std::string buffer;
 
@@ -297,7 +308,7 @@ void NeuralNetwork::load(const std::string path)
 
 			layerFile.open(tmpStr);
 
-			int inputShape, outputShape, norm, flat;
+			int inputShape, outputShape, norm, flat, dropRate;
 			layerFile >> inputShape;
 			layerFile >> outputShape;
 			ActivationType type;
@@ -311,9 +322,10 @@ void NeuralNetwork::load(const std::string path)
 				type = ACTIVATION_NO_TYPE;
 			}
 
+			layerFile >> dropRate;
 			layerFile >> norm;
 			layerFile >> flat;
-			Dense *dense = new Dense{inputShape, outputShape, type, (bool)norm, (bool)flat};
+			Dense *dense = new Dense{inputShape, outputShape, type, dropRate, (bool)norm, (bool)flat};
 
 			tmpStr = path + "/" + buffer + "_weights.npy";
 			dense->weights = xt::load_npy<float>(tmpStr);
@@ -330,7 +342,7 @@ void NeuralNetwork::load(const std::string path)
 
 			layerFile.open(tmpStr);
 
-			int inputShape, outputShape, norm;
+			int inputShape, outputShape, norm, dropRate;
 			layerFile >> inputShape;
 			layerFile >> outputShape;
 			ActivationType type;
@@ -344,8 +356,9 @@ void NeuralNetwork::load(const std::string path)
 				type = ACTIVATION_NO_TYPE;
 			}
 
+			layerFile >> dropRate;
 			layerFile >> norm;
-			Output *out = new Output{inputShape, outputShape, type, (bool)norm};
+			Output *out = new Output{inputShape, outputShape, type, dropRate, (bool)norm};
 
 			tmpStr = path + "/" + buffer + "_weights.npy";
 
@@ -362,6 +375,8 @@ void NeuralNetwork::load(const std::string path)
 	}
 
 	inputFile.close();
+
+	std::cout << "Loading done..." << std::endl;
 }
 
 void NeuralNetwork::save(const std::string path) const
@@ -376,7 +391,7 @@ void NeuralNetwork::save(const std::string path) const
 	nnFile << this->nbEpoch << std::endl;
 	nnFile << this->nn.size() << std::endl;
 	nnFile << this->learningRate << std::endl;
-	nnFile << this->dropRate << std::endl;
+	nnFile << this->accuracy << std::endl;
 
 	for (int i = 0; i < this->nn.size(); ++i)
 	{
@@ -388,6 +403,7 @@ void NeuralNetwork::save(const std::string path) const
 			outputFile << dense->inputShape << std::endl;
 			outputFile << dense->outputShape << std::endl;
 			outputFile << dense->activation->name << std::endl;
+			outputFile << dense->dropRate << std::endl;
 			outputFile << dense->normalize << std::endl;
 			outputFile << dense->flatten << std::endl;
 			outputFile.close();
@@ -408,6 +424,7 @@ void NeuralNetwork::save(const std::string path) const
 			outputFile << output->inputShape << std::endl;
 			outputFile << output->outputShape << std::endl;
 			outputFile << output->activation->name << std::endl;
+			outputFile << output->dropRate << std::endl;
 			outputFile << output->normalize << std::endl;
 			outputFile.close();
 
@@ -457,4 +474,6 @@ void NeuralNetwork::save(const std::string path) const
 	}
 
 	nnFile.close();
+
+	std::cout << "Saving done..." << std::endl;
 }

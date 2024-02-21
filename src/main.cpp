@@ -27,10 +27,10 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2({1, 48, 48}, "test", 0.001, 0);
+	NeuralNetwork nn = CNN2({1, 48, 48}, "topo2", 0.0001);
 
 	// NeuralNetwork nn;
-	// nn.load("../saves/test");
+	// nn.load("../saves/topo2");
 
 	// std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
 
@@ -38,9 +38,9 @@ int main() {
 
 	// nn.iter(image, xt::xarray<float>{0, 1});
 
-	nn.train("../assets/processed/train", 150000);
+	nn.train("../../processed/train", 150000);
 
-	nn.eval("../assets/processed/eval");
+	nn.eval("../../processed/eval");
 
 	saveConfirm(nn, false);
 

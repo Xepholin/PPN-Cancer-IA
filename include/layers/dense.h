@@ -20,6 +20,7 @@ class Dense : public ILayer
         // Height -Width
         xt::xarray<float> weights;
 
+		int dropRate = 0;
         xt::xarray<bool> drop;
 
         xt::xarray<float> bias;
@@ -46,7 +47,7 @@ class Dense : public ILayer
 		*/
         Dense(int inputShape, int outputShape,
 			  ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-			  bool normalize = false, bool flatten = false)	{
+			  int dropRate = 0, bool normalize = false, bool flatten = false)	{
 			name = "Dense";
 
             this->inputShape = inputShape;
@@ -57,7 +58,8 @@ class Dense : public ILayer
             this->input = xt::empty<float>({inputShape});
 			this->bOutput = xt::empty<float>({outputShape});
 			this->bias = xt::random::randn<float>({outputShape});
-
+			
+			this->dropRate = dropRate;
             drop = xt::zeros<bool>({inputShape});
 
             this->activationType = activationType;
@@ -75,14 +77,14 @@ class Dense : public ILayer
 
                 case ActivationType::ACTIVATION_RELU:
                     this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
-					this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-                    // this->heWeightsInit();
+					// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+                    this->heWeightsInit();
                     break;
 
                 case ActivationType::ACTIVATION_SOFTMAX:
                     this->activation = new Softmax(outputShape);
-					this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
-                    // this->XGWeightsInit();
+					// this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0/inputShape);
+                    this->XGWeightsInit();
                     break;
                     
                 default:
@@ -102,7 +104,7 @@ class Dense : public ILayer
 
         void print() const override;
 
-        void dropout(uint16_t dropRate);
+        void dropout();
 
         void printDropout(uint16_t dropRate) const;
 

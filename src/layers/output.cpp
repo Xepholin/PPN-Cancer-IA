@@ -8,6 +8,8 @@ void Output::forward(xt::xarray<float> input)
 {
 	this->input = input;
 
+	this->dropout();
+
 	for (int j = 0; j < this->outputShape; ++j)
     {
         float dotResult = 0;
@@ -102,6 +104,19 @@ void Output::print() const
 {
     std::cout << "Output: " << this->output.shape()[0] << " fully connected neurons"
               << "\n          |\n          v" << std::endl;
+}
+
+void Output::dropout() {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	for (int i = 0; i < this->weights.shape()[0]; ++i) {
+		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen)) {
+			this->drop(i) = true;
+		} else {
+			this->drop(i) = false;
+		}
+	}
 }
 
 void Output::heWeightsInit()    {

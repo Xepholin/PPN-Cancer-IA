@@ -12,6 +12,8 @@ void Dense::forward(xt::xarray<float> input) {
 		this->input = input;
 	}
 
+	this->dropout();
+
 	for (int j = 0; j < this->outputShape; ++j) {
 		float dotResult = 0;
 		for (int i = 0; i < this->inputShape; ++i) {
@@ -106,7 +108,7 @@ void Dense::printDropout(uint16_t dropRate) const {
 			  << "\n          v" << std::endl;
 }
 
-void Dense::dropout(uint16_t dropRate) {
+void Dense::dropout() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 

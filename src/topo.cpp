@@ -42,18 +42,56 @@
 
 // }
 
-NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, uint16_t dropRate)	{
+NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate)	{
 
     NeuralNetwork model;
 	model.name = name;
 	model.learningRate = learningRate;
-    model.dropRate = dropRate;
 
-    Dense *dense1 = new Dense(48*48, 8, relu, false, true);
 
-    Output *output = new Output(dense1->output.size(), 2, softmax);
+    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{16, 3, 3, 1, 0}, relu};
 
+	// ------------------------------------------------------------------------------
+
+    Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
+
+    // ------------------------------------------------------------------------------
+    Convolution* conv2 = new Convolution{1, pool_1->outputShape, std::tuple{32, 3, 3, 1, 0}, relu};
+
+	// ------------------------------------------------------------------------------
+
+    Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
+
+    // ------------------------------------------------------------------------------
+    Convolution* conv3 = new Convolution{1, pool_2->outputShape, std::tuple{64, 3, 3, 1, 0}, relu};
+
+	// ------------------------------------------------------------------------------
+
+    Pooling* pool_3 = new Pooling{conv3->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+
+    // ------------------------------------------------------------------------------
+
+    Dense *dense1 = new Dense(pool_3->output.size(), 64, relu, 25, false, true);
+    Dense *dense2 = new Dense(dense1->output.size(), 64, relu, 25);
+    Dense *dense3 = new Dense(dense2->output.size(), 64, relu, 25);
+
+	// ------------------------------------------------------------------------------
+
+    Output *output = new Output(dense3->output.size(), 2, softmax);
+
+    // ------------------------------------------------------------------------------
+
+    model.add(conv1);
+    model.add(pool_1);
+    model.add(conv2);
+    model.add(pool_2);
+    model.add(conv3);
+    model.add(pool_3);
     model.add(dense1);
+    model.add(dense2);
+    model.add(dense3);
     model.add(output);
 
     return model;
@@ -64,7 +102,6 @@ NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, std::string name, float
     NeuralNetwork nn;
 	nn.name = name;
     nn.learningRate = learningRate;
-    nn.dropRate = dropRate;
 
     int fil1 = 6;
     int fil2 = 16;
