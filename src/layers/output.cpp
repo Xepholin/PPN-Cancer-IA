@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <xtensor/xmath.hpp>
 
 #include "output.h"
 #include "tools.h"
@@ -14,17 +15,18 @@ void Output::forward(xt::xarray<float> input)
 
 	// std::cout << output << std::endl;
 
-	this->bOutput = this->output;
-
-    if (this->normalize)
-	{
-        this->output = normalized(this->input);
-    }
+	this->baOutput = this->output;
 
     if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
         this->activation->forward(this->output);
         this->output = this->activation->output;
     }
+
+	this->bnOutput = this->output;
+
+	if (this->normalize)	{
+		this->norm();
+	}
 
 	// std::cout << "Output forward\n" << std::endl;
 	// std::cout << "input:\n" << this->input << std::endl;
@@ -42,23 +44,29 @@ xt::xarray<float> Output::backward(
     xt::xarray<float> label,
     float learningRate)
 {
-    xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
+    xt::xarray<float> normGradient = xt::empty<float>({outputShape});
+
+	for (int i = 0; i < outputShape; ++i)	{
+		normGradient(i) = (2.0 * (output(i) - label(i)));
+
+		this->gammasGradient(i) = this->gammasGradient(i) + (normGradient(i) * bnOutput(i));
+		this->betasGradient(i) = this->betasGradient(i) + normGradient(i);
+	}
+
+	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
     // Calculer le gradient pour chaque neurone de sortie
     for (int i = 0; i < outputShape; ++i)
     {
-        layerGradient(i) = this->activation->prime(bOutput(i)) * (2.0 * (output(i) - label(i)));
+        layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * normGradient(i);
     }
-
-    xt::xarray<float> weightsGradient = xt::empty<float>({outputShape, inputShape});
-    xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
     // Calculer les gradients des poids et des biais
     for (int i = 0; i < inputShape; ++i)
     {
         for (int j = 0; j < outputShape; ++j)
         {
-            weightsGradient(j, i) = input(i) * layerGradient(j);
+            this->weightsGradient(j, i) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
             // Application du taux d'apprentissage déplacée ici
         }
     }
@@ -66,7 +74,7 @@ xt::xarray<float> Output::backward(
     // Mise à jour des poids et des biais
     for (int i = 0; i < outputShape; ++i)
     {
-        biasGradient(i) = layerGradient(i);
+        this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
     }
 
     xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
@@ -82,10 +90,18 @@ xt::xarray<float> Output::backward(
         inputGradient(i) = sum;
     }
 
-	this->weightsGradient = this->weightsGradient + weightsGradient;
-    this->biasGradient = this->biasGradient + biasGradient;
-
     return inputGradient;
+}
+
+void Output::norm()	{
+	auto mean = xt::mean(this->output);
+	auto std = xt::stddev(this->output);
+
+	this->output = (this->output - mean) / (std + 10e-6);
+
+	for(int i = 0; i < outputShape; ++i)	{
+		this->output(i) = (this->output(i) * this->gammas(i)) + this->betas(i);
+	}
 }
 
 

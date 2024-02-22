@@ -27,6 +27,12 @@ class Dense : public ILayer
         xt::xarray<float> bias;
         xt::xarray<float> biasGradient;
 
+        xt::xarray<float> gammas;
+        xt::xarray<float> gammasGradient;
+
+        xt::xarray<float> betas;
+        xt::xarray<float> betasGradient;
+
         ActivationType activationType;
         Activation *activation;
 
@@ -34,7 +40,8 @@ class Dense : public ILayer
 
         bool flatten;
 
-		xt::xarray<float> bOutput;
+		xt::xarray<float> baOutput;
+		xt::xarray<float> bnOutput;
 
 		/**
 		 * @brief Constructeur de la classe Dense.
@@ -58,10 +65,19 @@ class Dense : public ILayer
 
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
-			this->bOutput = xt::empty<float>({outputShape});
+			this->baOutput = xt::empty<float>({outputShape});
+			this->bnOutput = xt::empty<float>({outputShape});
+
 			this->weightsGradient = xt::zeros<float>({outputShape, inputShape});
+
 			this->bias = xt::random::randn<float>({outputShape});
 			this->biasGradient = xt::zeros<float>({outputShape});
+
+			this->gammas = xt::ones<float>({outputShape});
+			this->gammasGradient = xt::zeros<float>({outputShape});
+
+			this->betas = xt::zeros<float>({outputShape});
+			this->betasGradient = xt::zeros<float>({outputShape});
 			
 			this->dropRate = dropRate;
             drop = xt::zeros<bool>({inputShape});
@@ -105,6 +121,8 @@ class Dense : public ILayer
         virtual xt::xarray<float> backward(
 				xt::xarray<float> gradient,
 				float learningRate);
+
+		void norm();
 
         void print() const override;
 

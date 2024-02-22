@@ -27,12 +27,19 @@ public:
 	xt::xarray<float> bias;
 	xt::xarray<float> biasGradient;
 
+	xt::xarray<float> gammas;
+	xt::xarray<float> gammasGradient;
+
+	xt::xarray<float> betas;
+	xt::xarray<float> betasGradient;
+
 	ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
 	Activation *activation;
 
 	bool normalize = false;
 
-	xt::xarray<float> bOutput;
+	xt::xarray<float> baOutput;
+	xt::xarray<float> bnOutput;
 
 	/**
 	 * @brief Constructeur de la classe Output.
@@ -55,10 +62,19 @@ public:
 
 		this->input = xt::empty<float>({inputShape});
 		this->output = xt::empty<float>({outputShape});
-		this->bOutput = xt::empty<float>({outputShape});
+		this->baOutput = xt::empty<float>({outputShape});
+		this->bnOutput = xt::empty<float>({outputShape});
+
 		this->weightsGradient = xt::zeros<float>({outputShape, inputShape});
+
 		this->bias = xt::random::randn<float>({outputShape});
 		this->biasGradient = xt::zeros<float>({outputShape});
+
+		this->gammas = xt::ones<float>({outputShape});
+		this->gammasGradient = xt::zeros<float>({outputShape});
+
+		this->betas = xt::zeros<float>({outputShape});
+		this->betasGradient = xt::zeros<float>({outputShape});
 
 		this->dropRate = dropRate;
 		drop = xt::zeros<bool>({inputShape});
@@ -101,6 +117,8 @@ public:
 	virtual xt::xarray<float> backward(
 		xt::xarray<float> label,
     	float learningRate);
+
+	void norm();
 
 	void print() const override;
 

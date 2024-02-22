@@ -54,6 +54,14 @@ void NeuralNetwork::batch(int batchSize)	{
 
 			output->weightsGradient.fill(0.0);
 			output->biasGradient.fill(0.0);
+
+			if (output->normalize)	{
+				output->gammas = output->gammas + (-learningRate) * (output->gammasGradient / (float)batchSize);
+				output->betas = output->betas + (-learningRate) * (output->betasGradient / (float)batchSize);
+
+				output->gammasGradient.fill(0.0);
+				output->betasGradient.fill(0.0);
+			}
 		}
 		else if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))
 		{
@@ -62,6 +70,14 @@ void NeuralNetwork::batch(int batchSize)	{
 
 			dense->weightsGradient.fill(0.0);
 			dense->biasGradient.fill(0.0);
+
+			if (dense->normalize)	{
+				dense->gammas = dense->gammas + (-learningRate) * (dense->gammasGradient / (float)batchSize);
+				dense->betas = dense->betas + (-learningRate) * (dense->betasGradient / (float)batchSize);
+
+				dense->gammasGradient.fill(0.0);
+				dense->betasGradient.fill(0.0);
+			}
 		}
 		else	{
 			break;

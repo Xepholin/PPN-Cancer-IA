@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <random>
+#include <xtensor/xmath.hpp>
 
 #include "tools.h"
 
@@ -16,15 +17,17 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->output = dot_product_fma(this->weights,this->input) + bias;
 
-	this->bOutput = this->output;
-
-	if (this->normalize) {
-		this->output = normalized(this->output);
-	}
+	this->baOutput = this->output;
 
 	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
+	}
+
+	this->bnOutput = this->output;
+
+	if (this->normalize)	{
+		this->norm();
 	}
 
 	// std::cout << "Dense forward\n" << std::endl;
@@ -42,28 +45,31 @@ void Dense::forward(xt::xarray<float> input) {
 xt::xarray<float> Dense::backward(
     xt::xarray<float> gradient,
     float learningRate) 
-{    
-    xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
+{
+
+	for (int i = 0; i < outputShape; ++i)	{
+		this->gammasGradient(i) = this->gammasGradient(i) + (gradient(i) * bnOutput(i));
+		this->betasGradient(i) = this->betasGradient(i) + gradient(i);
+	}
+
+	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
     // Calculer le gradient pour chaque neurone de sortie
     for (int i = 0; i < outputShape; ++i) {
-        layerGradient(i) = this->activation->prime(bOutput(i)) * gradient(i);
+        layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * gradient(i);
     }
-
-    xt::xarray<float> weightsGradient = xt::empty<float>({outputShape, inputShape});
-    xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
     // Calculer les gradients des poids et des biais
     for (int i = 0; i < inputShape; ++i) {
         for (int j = 0; j < outputShape; ++j) {
-            weightsGradient(j, i) = input(i) * layerGradient(j);
+            this->weightsGradient(j, i) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
             // Application du taux d'apprentissage déplacée ici
         }
     }
 
     // Mise à jour des poids et des biais
     for (int i = 0; i < outputShape; ++i) {
-        biasGradient(i) = layerGradient(i);
+        this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
     }
 
     xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
@@ -77,10 +83,18 @@ xt::xarray<float> Dense::backward(
         inputGradient(i) = sum;
     }
 
-	this->weightsGradient = this->weightsGradient + weightsGradient;
-    this->biasGradient = this->biasGradient + biasGradient;
-
     return inputGradient;
+}
+
+void Dense::norm()	{
+	auto mean = xt::mean(this->output);
+	auto std = xt::stddev(this->output);
+
+	this->output = (this->output - mean) / (std + 10e-6);
+
+	for(int i = 0; i < outputShape; ++i)	{
+		this->output(i) = (this->output(i) * this->gammas(i)) + this->betas(i);
+	}
 }
 
 void Dense::print() const {
