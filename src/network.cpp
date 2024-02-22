@@ -23,48 +23,58 @@ void NeuralNetwork::add(ILayer *layer)
 	return;
 }
 
-void NeuralNetwork::miniBatch(int size)
-{
-	for (int i = 1; i < size; ++i)
-	{
-		// this->train(xt::view(batch, i), trueLabels);
-	}
-}
-
-void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label)
-{
+void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 	this->nn[0]->forward(input);
 
-	for (int i = 1; i < this->nn.size(); ++i)
-	{
+	for (int i = 1; i < this->nn.size(); ++i) {
 		this->nn[i]->forward(this->nn[i - 1]->output);
 	}
-
-	// std::cout << "output: " << this->nn[this->nn.size() - 1]->output << std::endl;
-
-	float loss = MSE(this->nn[this->nn.size() - 1]->output, label);
-
-	// std::cout << loss << std::endl;
 
 	xt::xarray<float> recycling;
 
 	recycling = this->nn[this->nn.size() - 1]->backward(label, this->learningRate);
 
-	for (int i = this->nn.size() - 2; i >= 0; --i)
-	{
-		if (this->nn[i]->name == "Dense")
-		{
+	for (int i = this->nn.size() - 2; i >= 0; --i) {
+		if (this->nn[i]->name == "Dense") {
 			recycling = this->nn[i]->backward(recycling, this->learningRate);
 		}
-		else
-		{
+		else	{
 			break;
 		}
 	}
 }
 
-std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage)
+void NeuralNetwork::batch(int batchSize)	{
+	for (int i = this->nn.size() - 1; i >= 0; --i)
+	{
+		if (Output *output = dynamic_cast<Output *>(this->nn[i]))
+		{
+			output->weights = output->weights + (-learningRate) * (output->weightsGradient / (float)batchSize);
+			output->bias = output->bias + (-learningRate) * (output->biasGradient / (float)batchSize);
+
+			output->weightsGradient.fill(0.0);
+			output->biasGradient.fill(0.0);
+		}
+		else if (Dense *dense = dynamic_cast<Dense *>(this->nn[i]))
+		{
+			dense->weights = dense->weights + (-learningRate) * (dense->weightsGradient / (float)batchSize);
+			dense->bias = dense->bias + (-learningRate) * (dense->biasGradient / (float)batchSize);
+
+			dense->weightsGradient.fill(0.0);
+			dense->biasGradient.fill(0.0);
+		}
+		else	{
+			break;
+		}
+	}
+}
+
+std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage, int batchSize)
 {
+	if (batchSize > totalNumberImage)	{
+		perror("BatchSize > totalNumberImage");
+	}
+
 	std::vector<std::tuple<int, float>> result;
 
 	std::string p0 = path + "/0";
@@ -78,18 +88,18 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
 	xt::xarray<float> label = xt::empty<float>({2});
 
-	std::string savePath = "../saves/" + this->name;
+	// std::string savePath = "../saves/" + this->name;
 
-	try
-	{
-		std::filesystem::create_directories(savePath);
-	}
-	catch (const std::exception &e)
-	{
-	 	std::cerr << "Error creating directory: " << savePath << std::endl;
-	}
+	// try
+	// {
+	// 	std::filesystem::create_directories(savePath);
+	// }
+	// catch (const std::exception &e)
+	// {
+	//  	std::cerr << "Error creating directory: " << savePath << std::endl;
+	// }
 
-	this->save(savePath);
+	// this->save(savePath);
 
 	std::cout << "Start training..." << std::endl;
 
@@ -104,38 +114,37 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 			if (k & 1)
 			{
 				label = {0, 1};
-				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
-				xt::view(data, 1) = xt::view(train0, k/2);
-
-				this->iter(data, label);
+				xt::view(image, 1) = xt::view(train0, k/2);
 			}
 			else
 			{
 				label = {1, 0};
-				xt::xarray<float> data = xt::empty<float>({1, 48, 48});
-				xt::view(data, 1) = xt::view(train1, k/2);
-
-				this->iter(data, label);
+				xt::view(image, 1) = xt::view(train1, k/2);
 			}
+
+			this->iter(image, label);
 
 			loss += MSE(this->nn[this->nn.size() - 1]->output, label);
 
-			if (k % 10000 == 0)	{
-				std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
+			if (k % batchSize == 0 && k != 0)	{
+				this->batch(batchSize);
+				// std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
 			}
 		}
+
+		this->batch(batchSize);
 
 		auto endTime = std::chrono::steady_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
 
 		nbEpoch++;
-		this->save(savePath);
+		// this->save(savePath);
 		
-		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
+		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
-		if (nbEpoch % 3 == 0 && !continueTraining())
+		if (nbEpoch % 5 == 0 && !continueTraining())
 		{
 			break;
 		}
@@ -162,26 +171,6 @@ void NeuralNetwork::eval(const std::string path)
 
 	std::cout << "Start evaluation..." << std::endl;
 
-	std::cout << "Positive..." << std::endl;
-
-	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
-	{
-		xt::view(image, 1) = xt::view(eval1, i);
-		this->nn[0]->forward(image);
-
-		for (int j = 1; j < this->nn.size(); ++j)
-		{
-			this->nn[j]->forward(this->nn[j - 1]->output);
-		}
-
-		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
-		
-		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
-		{
-			eval++;
-		}
-	}
-
 	std::cout << "Negative..." << std::endl;
 
 	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
@@ -197,6 +186,26 @@ void NeuralNetwork::eval(const std::string path)
 		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
 
 		if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
+		{
+			eval++;
+		}
+	}
+
+	std::cout << "Positive..." << std::endl;
+
+	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
+	{
+		xt::view(image, 1) = xt::view(eval1, i);
+		this->nn[0]->forward(image);
+
+		for (int j = 1; j < this->nn.size(); ++j)
+		{
+			this->nn[j]->forward(this->nn[j - 1]->output);
+		}
+
+		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
+		
+		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
 		{
 			eval++;
 		}

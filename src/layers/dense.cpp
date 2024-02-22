@@ -50,7 +50,7 @@ xt::xarray<float> Dense::backward(
         layerGradient(i) = this->activation->prime(bOutput(i)) * gradient(i);
     }
 
-    xt::xarray<float> weightsGradient = xt::empty<float>({outputShape,inputShape});
+    xt::xarray<float> weightsGradient = xt::empty<float>({outputShape, inputShape});
     xt::xarray<float> biasGradient = xt::empty<float>({outputShape});
 
     // Calculer les gradients des poids et des biais
@@ -66,9 +66,6 @@ xt::xarray<float> Dense::backward(
         biasGradient(i) = layerGradient(i);
     }
 
-    weights = weights - learningRate * weightsGradient;
-    bias = bias - learningRate * biasGradient;
-
     xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 
     // Accumulation correcte du gradient d'entrée
@@ -79,6 +76,9 @@ xt::xarray<float> Dense::backward(
         }
         inputGradient(i) = sum;
     }
+
+	this->weightsGradient = this->weightsGradient + weightsGradient;
+    this->biasGradient = this->biasGradient + biasGradient;
 
     return inputGradient;
 }

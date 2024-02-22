@@ -19,11 +19,13 @@ class Dense : public ILayer
 
         // Height -Width
         xt::xarray<float> weights;
+        xt::xarray<float> weightsGradient;
 
 		int dropRate = 0;
         xt::xarray<bool> drop;
 
         xt::xarray<float> bias;
+        xt::xarray<float> biasGradient;
 
         ActivationType activationType;
         Activation *activation;
@@ -57,7 +59,9 @@ class Dense : public ILayer
             this->output = xt::empty<float>({outputShape});
             this->input = xt::empty<float>({inputShape});
 			this->bOutput = xt::empty<float>({outputShape});
+			this->weightsGradient = xt::zeros<float>({outputShape, inputShape});
 			this->bias = xt::random::randn<float>({outputShape});
+			this->biasGradient = xt::zeros<float>({outputShape});
 			
 			this->dropRate = dropRate;
             drop = xt::zeros<bool>({inputShape});
@@ -99,8 +103,8 @@ class Dense : public ILayer
         virtual void forward(xt::xarray<float> input) override;
 
         virtual xt::xarray<float> backward(
-        	xt::xarray<float> gradient,
-            float learningRate);
+				xt::xarray<float> gradient,
+				float learningRate);
 
         void print() const override;
 

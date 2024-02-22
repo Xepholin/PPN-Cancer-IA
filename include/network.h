@@ -17,6 +17,7 @@ public:
     float learningRate;
     int nbEpoch = 0;
 	float accuracy = 0.0;
+	int batchSize = 1;
 
     NeuralNetwork() = default;
 
@@ -32,11 +33,11 @@ public:
 
     void dropDense();
 
-    void miniBatch(int size);
+	void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
-    void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
+	void batch(int batchSize);
 
-    std::vector<std::tuple<int, float>> train(const std::string path, int totalNumberImage);
+    std::vector<std::tuple<int, float>> train(const std::string path, int totalNumberImage, int batchSize);
 
     void detect(xt::xarray<float> input);
 
