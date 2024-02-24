@@ -160,7 +160,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
-		if (nbEpoch % 5 == 0 && !continueTraining())
+		if (nbEpoch % 30 == 0 && !continueTraining())
 		{
 			break;
 		}

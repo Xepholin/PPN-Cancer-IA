@@ -123,16 +123,16 @@ float MSE(xt::xarray<float> output, xt::xarray<float> trueValue)
 	return err;
 }
 
-float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue)
-{
-	float err = 0.0;
-	xt::xarray<float> outputLog = xt::log(output);
-	for (int i = 0; i < output.size(); ++i)
-	{
-		err -= trueValue(i) * outputLog(i);
-	}
-
-	return err;
+float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue) {
+    float err = 0.0;
+    for (int i = 0; i < output.size(); ++i) {
+        // on suppose ici que trueValue est encodé en one-hot, où seulement un élément est 1, les autres sont 0
+        if (trueValue(i) == 1) {
+            err -= std::log(output(i) + 1e-9); 
+            // Ajoute un petit nombre 1e-9 pour éviter un log négatif infini
+        }
+    }
+    return err;
 }
 
 int continueTraining()
