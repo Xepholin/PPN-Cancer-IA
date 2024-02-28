@@ -60,7 +60,7 @@ target_include_directories(main.exe PRIVATE
 )
 
 find_package(PNG REQUIRED)
-target_link_libraries(main.exe PRIVATE PNG::PNG openblas)
+target_link_libraries(main.exe PRIVATE PNG::PNG blas)
 
 
 # # Include Google Test

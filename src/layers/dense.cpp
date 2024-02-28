@@ -3,6 +3,7 @@
 #include <iostream>
 #include <random>
 #include <xtensor/xmath.hpp>
+#include <cblas.h>
 
 #include "tools.h"
 
@@ -15,18 +16,9 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->dropout();
 
-for (int j = 0; j < this->outputShape; ++j) {
-		float dotResult = 0;
-		for (int i = 0; i < this->inputShape; ++i) {
-			if (drop(i) == true) {
-				continue;
-			}
+	cblas_sgemv(CblasRowMajor, CblasTrans, this->inputShape, this->outputShape, 1.0, this->weights.data(), this->outputShape, this->input.data(), 1, 0.0, this->output.data(), 1);	
+	this->output += bias;
 
-			dotResult += weights(i, j) * this->input(i);
-		}
-
-		this->output(j) = dotResult + bias(j);
-	}
 	this->baOutput = this->output;
 
 	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
@@ -121,13 +113,13 @@ void Dense::dropout() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
+	
 	for (int i = 0; i < this->weights.shape()[0]; ++i) {
 		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen)) {
-			this->drop(i) = true;
-		} else {
-			this->drop(i) = false;
+			this->input(i) = 0;
 		}
 	}
+	
 }
 
 void Dense::heWeightsInit() {

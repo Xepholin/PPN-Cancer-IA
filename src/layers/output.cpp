@@ -12,24 +12,9 @@ void Output::forward(xt::xarray<float> input) {
 	this->input = input;
 
 	this->dropout();
-
-	// cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, this->outputShape, 1, this->inputShape, 1.0, this->weights.data(), this->inputShape, this->input.data(), 1, 0, this->output.data(), 1.0);
-	// this->output += bias;
 	
-	for (int j = 0; j < this->outputShape; ++j) {
-		float dotResult = 0;
-		for (int i = 0; i < this->inputShape; ++i) {
-			if (drop(i) == true) {
-				continue;
-			}
-
-			dotResult += weights(i, j) * this->input(i);
-		}
-
-		this->output(j) = dotResult + bias(j);
-	}
-
-	std::cout << output << std::endl;
+	cblas_sgemv(CblasRowMajor, CblasTrans, this->inputShape, this->outputShape, 1.0, this->weights.data(), this->outputShape, this->input.data(), 1, 0.0, this->output.data(), 1);	
+	this->output += bias;
 
 	this->baOutput = this->output;
 
@@ -124,9 +109,7 @@ void Output::dropout() {
 
 	for (int i = 0; i < this->weights.shape()[0]; ++i) {
 		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen)) {
-			this->drop(i) = true;
-		} else {
-			this->drop(i) = false;
+			this->input(i) = 0;
 		}
 	}
 }
