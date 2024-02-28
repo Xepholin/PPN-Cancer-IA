@@ -63,7 +63,7 @@ xt::xarray<float> Output::backward(
 	// Calculer les gradients des poids et des biais
 	for (int i = 0; i < inputShape; ++i) {
 		for (int j = 0; j < outputShape; ++j) {
-			this->weightsGradient(i, j) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
+			this->weightsGradient(i, j) = this->weightsGradient(i, j) + (input(i) * layerGradient(j));
 			// Application du taux d'apprentissage déplacée ici
 		}
 	}
