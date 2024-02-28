@@ -32,6 +32,8 @@ std::ostream& operator<<(std::ostream& out, const ActivationType value)
             return out << "relu.";
         case ActivationType::ACTIVATION_SOFTMAX:
             return out << "softmax.";
+        case ActivationType::ACTIVATION_SIGMOID:
+            return out << "sigmoid.";
         default:
             return out << "unknown type.";
     }

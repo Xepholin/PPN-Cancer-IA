@@ -151,16 +151,18 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 		this->batch(batchSize);
 
 		auto endTime = std::chrono::steady_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
+		auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
 
 		nbEpoch++;
 		// this->save(savePath);
 		
 		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
 
+		this->eval("../../processed/eval");
+
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
-		if (nbEpoch % 30 == 0 && !continueTraining())
+		if (nbEpoch % 10 == 0 && !continueTraining())
 		{
 			break;
 		}
@@ -199,7 +201,7 @@ void NeuralNetwork::eval(const std::string path)
 			this->nn[j]->forward(this->nn[j - 1]->output);
 		}
 
-		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
+		// std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
 
 		if (this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1))
 		{
@@ -219,7 +221,7 @@ void NeuralNetwork::eval(const std::string path)
 			this->nn[j]->forward(this->nn[j - 1]->output);
 		}
 
-		std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
+		// std::cout << this->nn[this->nn.size() - 1]->output<<std::endl;
 		
 		if (this->nn[this->nn.size() - 1]->output(0) > this->nn[this->nn.size() - 1]->output(1))
 		{

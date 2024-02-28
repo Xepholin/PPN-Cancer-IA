@@ -1,30 +1,46 @@
+#include "output.h"
+
+#include <cblas.h>
+
 #include <iostream>
 #include <random>
 #include <xtensor/xmath.hpp>
 
-#include "output.h"
 #include "tools.h"
 
-void Output::forward(xt::xarray<float> input)
-{
+void Output::forward(xt::xarray<float> input) {
 	this->input = input;
-	
+
 	this->dropout();
 
-	this->output = dot_product_fma(this->weights,this->input) + bias;
+	// cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, this->outputShape, 1, this->inputShape, 1.0, this->weights.data(), this->inputShape, this->input.data(), 1, 0, this->output.data(), 1.0);
+	// this->output += bias;
+	
+	for (int j = 0; j < this->outputShape; ++j) {
+		float dotResult = 0;
+		for (int i = 0; i < this->inputShape; ++i) {
+			if (drop(i) == true) {
+				continue;
+			}
 
-	// std::cout << output << std::endl;
+			dotResult += weights(i, j) * this->input(i);
+		}
+
+		this->output(j) = dotResult + bias(j);
+	}
+
+	std::cout << output << std::endl;
 
 	this->baOutput = this->output;
 
-    if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
-        this->activation->forward(this->output);
-        this->output = this->activation->output;
-    }
+	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
+		this->activation->forward(this->output);
+		this->output = this->activation->output;
+	}
 
 	this->bnOutput = this->output;
 
-	if (this->normalize)	{
+	if (this->normalize) {
 		this->norm();
 	}
 
@@ -33,7 +49,7 @@ void Output::forward(xt::xarray<float> input)
 	// std::cout << "weights:\n" << this->weights << std::endl;
 	// std::cout << "bias:\n" << this->bias << std::endl;
 	// std::cout << "output:\n" << this->output << std::endl;
-	
+
 	// std::cout << std::endl;
 	// std::cout << std::endl;
 	// std::cout << std::endl;
@@ -41,12 +57,11 @@ void Output::forward(xt::xarray<float> input)
 }
 
 xt::xarray<float> Output::backward(
-    xt::xarray<float> label,
-    float learningRate)
-{
-    xt::xarray<float> normGradient = xt::empty<float>({outputShape});
+	xt::xarray<float> label,
+	float learningRate) {
+	xt::xarray<float> normGradient = xt::empty<float>({outputShape});
 
-	for (int i = 0; i < outputShape; ++i)	{
+	for (int i = 0; i < outputShape; ++i) {
 		normGradient(i) = (2.0 * (output(i) - label(i)));
 
 		this->gammasGradient(i) = this->gammasGradient(i) + (normGradient(i) * bnOutput(i));
@@ -55,60 +70,52 @@ xt::xarray<float> Output::backward(
 
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
-    // Calculer le gradient pour chaque neurone de sortie
-    for (int i = 0; i < outputShape; ++i)
-    {
-        layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * normGradient(i);
-    }
+	// Calculer le gradient pour chaque neurone de sortie
+	for (int i = 0; i < outputShape; ++i) {
+		layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * normGradient(i);
+	}
 
-    // Calculer les gradients des poids et des biais
-    for (int i = 0; i < inputShape; ++i)
-    {
-        for (int j = 0; j < outputShape; ++j)
-        {
-            this->weightsGradient(j, i) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
-            // Application du taux d'apprentissage déplacée ici
-        }
-    }
+	// Calculer les gradients des poids et des biais
+	for (int i = 0; i < inputShape; ++i) {
+		for (int j = 0; j < outputShape; ++j) {
+			this->weightsGradient(i, j) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
+			// Application du taux d'apprentissage déplacée ici
+		}
+	}
 
-    // Mise à jour des poids et des biais
-    for (int i = 0; i < outputShape; ++i)
-    {
-        this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
-    }
+	// Mise à jour des poids et des biais
+	for (int i = 0; i < outputShape; ++i) {
+		this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
+	}
 
-    xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
+	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 
-    // Accumulation correcte du gradient d'entrée
-    for (int i = 0; i < inputShape; ++i)
-    {
-        float sum = 0;
-        for (int j = 0; j < outputShape; ++j)
-        {
-            sum += weights(j, i) * layerGradient(j);
-        }
-        inputGradient(i) = sum;
-    }
+	// Accumulation correcte du gradient d'entrée
+	for (int i = 0; i < inputShape; ++i) {
+		float sum = 0;
+		for (int j = 0; j < outputShape; ++j) {
+			sum += weights(i, j) * layerGradient(j);
+		}
+		inputGradient(i) = sum;
+	}
 
-    return inputGradient;
+	return inputGradient;
 }
 
-void Output::norm()	{
+void Output::norm() {
 	auto mean = xt::mean(this->output);
 	auto std = xt::stddev(this->output);
 
 	this->output = (this->output - mean) / (std + 10e-6);
 
-	for(int i = 0; i < outputShape; ++i)	{
+	for (int i = 0; i < outputShape; ++i) {
 		this->output(i) = (this->output(i) * this->gammas(i)) + this->betas(i);
 	}
 }
 
-
-void Output::print() const
-{
-    std::cout << "Output: " << this->output.shape()[0] << " fully connected neurons"
-              << "\n          |\n          v" << std::endl;
+void Output::print() const {
+	std::cout << "Output: " << this->output.shape()[0] << " fully connected neurons"
+			  << "\n          |\n          v" << std::endl;
 }
 
 void Output::dropout() {
@@ -124,14 +131,14 @@ void Output::dropout() {
 	}
 }
 
-void Output::heWeightsInit()    {
-    float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
+void Output::heWeightsInit() {
+	float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
-    this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
+	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
 
 void Output::XGWeightsInit() {
-    float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
+	float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
-    this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
+	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }

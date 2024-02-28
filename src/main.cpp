@@ -24,10 +24,10 @@
 
 int main() {
 	// Create nn
-	xt::random::seed(time(nullptr));
+	// xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.0001);
+	NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.001);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo2");
@@ -38,7 +38,7 @@ int main() {
 
 	// nn.iter(image, xt::xarray<float>{0, 1});
 
-	nn.train("../../processed/train", 150000, 1000);
+	nn.train("../../processed/train", 150000, 1);
 
 	nn.eval("../../processed/eval");
 

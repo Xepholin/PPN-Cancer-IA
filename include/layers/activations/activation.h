@@ -6,13 +6,15 @@
 enum ActivationType {
     ACTIVATION_NO_TYPE,
     ACTIVATION_RELU,
-    ACTIVATION_SOFTMAX
+    ACTIVATION_SOFTMAX,
+    ACTIVATION_SIGMOID
 };
 
 std::ostream& operator<<(std::ostream& out, const ActivationType value);
 
 #define relu ActivationType::ACTIVATION_RELU
 #define softmax ActivationType::ACTIVATION_SOFTMAX
+#define sigmoid ActivationType::ACTIVATION_SIGMOID
 
 // Activation()
 class Activation : public ILayer

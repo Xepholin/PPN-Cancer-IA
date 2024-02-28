@@ -15,8 +15,18 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->dropout();
 
-	this->output = dot_product_fma(this->weights,this->input) + bias;
+for (int j = 0; j < this->outputShape; ++j) {
+		float dotResult = 0;
+		for (int i = 0; i < this->inputShape; ++i) {
+			if (drop(i) == true) {
+				continue;
+			}
 
+			dotResult += weights(i, j) * this->input(i);
+		}
+
+		this->output(j) = dotResult + bias(j);
+	}
 	this->baOutput = this->output;
 
 	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
@@ -62,7 +72,7 @@ xt::xarray<float> Dense::backward(
     // Calculer les gradients des poids et des biais
     for (int i = 0; i < inputShape; ++i) {
         for (int j = 0; j < outputShape; ++j) {
-            this->weightsGradient(j, i) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
+            this->weightsGradient(i, j) = this->weightsGradient(j, i) + (input(i) * layerGradient(j));
             // Application du taux d'apprentissage déplacée ici
         }
     }
@@ -78,7 +88,7 @@ xt::xarray<float> Dense::backward(
     for (int i = 0; i < inputShape; ++i) {
         float sum = 0;
         for (int j = 0; j < outputShape; ++j) {
-            sum += weights(j, i) * layerGradient(j);
+            sum += weights(i, j) * layerGradient(j);
         }
         inputGradient(i) = sum;
     }
@@ -123,11 +133,11 @@ void Dense::dropout() {
 void Dense::heWeightsInit() {
 	float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
-	this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
+	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
 
 void Dense::XGWeightsInit() {
 	float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
-	this->weights = xt::random::randn<float>({this->outputShape, this->inputShape}, 0, std);
+	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }

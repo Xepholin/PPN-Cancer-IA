@@ -5,7 +5,7 @@ project(PPN-CANCER-IA)
 set(CMAKE_CXX_STANDARD 17)
 
 # Enable debugging information
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -mavx -march=native -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -mavx -march=native -O3 -lcblas")
 
 # Main program source files
 set(MAIN_SOURCE_FILES
@@ -23,6 +23,7 @@ set(MAIN_SOURCE_FILES
 	src/layers/activations/activation.cpp
     src/layers/activations/relu.cpp
     src/layers/activations/softmax.cpp
+    src/layers/activations/sigmoid.cpp
 )
 
 # Header files
@@ -40,6 +41,7 @@ set(HEADER_FILES
 	include/layers/activations/activation.h
     include/layers/activations/relu.h
     include/layers/activations/softmax.h
+    include/layers/activations/sigmoid.h
 )
 
 # Main program executable
@@ -58,8 +60,7 @@ target_include_directories(main.exe PRIVATE
 )
 
 find_package(PNG REQUIRED)
-target_link_libraries(main.exe PRIVATE PNG::PNG)
-
+target_link_libraries(main.exe PRIVATE PNG::PNG openblas)
 
 
 # # Include Google Test
