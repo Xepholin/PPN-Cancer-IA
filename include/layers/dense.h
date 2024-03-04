@@ -7,6 +7,7 @@
 #include "softmax.h"
 #include "sigmoid.h"
 #include "tools.h"
+#include "loss.h"
 
 class Dense : public ILayer
 {
@@ -34,7 +35,6 @@ class Dense : public ILayer
         xt::xarray<float> betas;
         xt::xarray<float> betasGradient;
 
-        ActivationType activationType;
         Activation *activation;
 
 		bool normalize;
@@ -43,6 +43,8 @@ class Dense : public ILayer
 
 		xt::xarray<float> baOutput;
 		xt::xarray<float> bnOutput;
+
+		Loss lossType;
 
 		/**
 		 * @brief Constructeur de la classe Dense.
@@ -83,32 +85,30 @@ class Dense : public ILayer
 			this->dropRate = dropRate;
             drop = xt::zeros<bool>({inputShape});
 
-            this->activationType = activationType;
-
 			this->normalize = normalize;
 
             this->flatten = flatten;
 
-            switch (this->activationType)
+            switch (activationType)
             {
                 case ActivationType::ACTIVATION_NO_TYPE:
                     this->activation = new Activation;
                     this->weights = xt::random::randn<float>({inputShape,outputShape}, 0, 1.0/inputShape);
                     break;
 
-                case ActivationType::ACTIVATION_RELU:
+                case relu:
                     this->activation = new ReLu(std::tuple<int, int ,int>{1, 1, outputShape});
 					// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     this->heWeightsInit();
                     break;
 
-                case ActivationType::ACTIVATION_SOFTMAX:
+                case softmax:
                     this->activation = new Softmax(outputShape);
 					// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     this->XGWeightsInit();
                     break;
                     
-                case ActivationType::ACTIVATION_SIGMOID:
+                case sigmoid:
                     this->activation = new Sigmoid(outputShape);
 					// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0/inputShape);
                     this->XGWeightsInit();

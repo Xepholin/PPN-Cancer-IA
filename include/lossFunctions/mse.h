@@ -9,8 +9,10 @@ class MSE : public Loss {
 		name = "MSE";
 	}
 
+	~MSE() = default;
+
 	virtual float compute(xt::xarray<float> output, xt::xarray<int> label) override;
-	virtual float prime(float output, int label) override;
+	virtual xt::xarray<float> prime(xt::xarray<float> output, xt::xarray<int> label) override;
 };
 
 #endif

@@ -19,7 +19,7 @@ class Loss {
 	std::string name = "Loss Function";
 
 	virtual float compute(xt::xarray<float> output, xt::xarray<int> label);
-	virtual float prime(float output, int label);
+	virtual xt::xarray<float> prime(xt::xarray<float> output, xt::xarray<int> label);
 };
 
 #endif

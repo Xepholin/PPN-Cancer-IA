@@ -14,7 +14,9 @@ set(MAIN_SOURCE_FILES
     src/tools.cpp
     src/conv_op.cpp
     src/network.cpp
-    src/topo.cpp
+	src/lossFunctions/loss.cpp
+	src/lossFunctions/mse.cpp
+	src/lossFunctions/crossEntropy.cpp
 	src/layers/layer.cpp
     src/layers/convolution.cpp
     src/layers/pooling.cpp
@@ -32,7 +34,9 @@ set(HEADER_FILES
     include/tools.h
     include/conv_op.h
     include/network.h
-    include/topo.h
+	include/lossFunctions/loss.h
+	include/lossFunctions/mse.h
+	include/lossFunctions/crossEntropy.h
 	include/layers/layer.h
     include/layers/convolution.h
     include/layers/pooling.h
@@ -49,6 +53,10 @@ add_executable(main.exe ${MAIN_SOURCE_FILES})
 
 target_include_directories(main.exe PRIVATE
     "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_include_directories(main.exe PRIVATE
+    "${PROJECT_SOURCE_DIR}/include/lossFunctions"
 )
 
 target_include_directories(main.exe PRIVATE

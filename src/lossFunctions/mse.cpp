@@ -1,5 +1,8 @@
 #include "mse.h"
 
+#include <xtensor/xrandom.hpp>
+#include <xtensor/xio.hpp>
+
 float MSE::compute(xt::xarray<float> output, xt::xarray<int> label) {
 	float err = 0.0;
 	for (int i = 0; i < output.size(); ++i) {
@@ -11,6 +14,13 @@ float MSE::compute(xt::xarray<float> output, xt::xarray<int> label) {
 	return err;
 }
 
-float MSE::prime(float output, int label) {
-	return (2.0 * (output - label));
+xt::xarray<float> MSE::prime(xt::xarray<float> output, xt::xarray<int> label) {
+	int outputSize = output.size();
+	xt::xarray<float> prime = xt::empty<float>({outputSize});
+
+	for (int i = 0; i < outputSize; ++i) {
+		prime(i) = (2.0 * (output(i) - label(i)));
+	}
+
+	return prime;
 }

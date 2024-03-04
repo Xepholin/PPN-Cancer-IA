@@ -24,7 +24,6 @@ class Convolution : public ILayer
         // nbFilter - Depth - Height - Width -
         xt::xarray<float> filters;
 
-        ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE;
         Activation *activation;
 
 		bool normalize = false;
@@ -53,7 +52,6 @@ class Convolution : public ILayer
             this->depth = depth; // Nombre d'image dans la couche actuelle
             this->inputShape = inputShape;
             this->filtersShape = filtersShape;
-            this->activationType = activationType;
 
             int inputDepth = std::get<0>(inputShape);
             int inputHeight = std::get<1>(inputShape);
@@ -71,20 +69,23 @@ class Convolution : public ILayer
             this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
             this->output = xt::empty<float>({filtersDepth, outputHeight, outputWidth});
-			this->activationType = activationType;
+
 			this->normalize = normalize;
 
-            switch (this->activationType)
+            switch (activationType)
             {
                 case ActivationType::ACTIVATION_NO_TYPE:
                     this->filters = kernelsGaussianDistro(filtersDepth, depth, filtersHeight, filtersWidth);
                     break;
-                case ActivationType::ACTIVATION_RELU:   {
+                case relu:   {
                     this->activation = new ReLu(outputShape);
                     this->heWeightsInit();
                     break;
                 }
-                case ActivationType::ACTIVATION_SOFTMAX:
+                case softmax:
+                    perror("Convolution Activation Type Error");
+                    break;
+                case sigmoid:
                     perror("Convolution Activation Type Error");
                     break;
                 default:

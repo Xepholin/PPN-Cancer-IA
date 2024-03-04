@@ -18,7 +18,7 @@ void Output::forward(xt::xarray<float> input) {
 
 	this->baOutput = this->output;
 
-	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
+	if (this->activation->name != "Activation") {
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
@@ -42,22 +42,19 @@ void Output::forward(xt::xarray<float> input) {
 }
 
 xt::xarray<float> Output::backward(
-	xt::xarray<float> label,
+	xt::xarray<float> gradient,
 	float learningRate) {
-	xt::xarray<float> normGradient = xt::empty<float>({outputShape});
 
 	for (int i = 0; i < outputShape; ++i) {
-		normGradient(i) = (2.0 * (output(i) - label(i)));
-
-		this->gammasGradient(i) = this->gammasGradient(i) + (normGradient(i) * bnOutput(i));
-		this->betasGradient(i) = this->betasGradient(i) + normGradient(i);
+		this->gammasGradient(i) = this->gammasGradient(i) + (gradient(i) * bnOutput(i));
+		this->betasGradient(i) = this->betasGradient(i) + gradient(i);
 	}
 
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
 	// Calculer le gradient pour chaque neurone de sortie
 	for (int i = 0; i < outputShape; ++i) {
-		layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * normGradient(i);
+		layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * gradient(i);
 	}
 
 	// Calculer les gradients des poids et des biais

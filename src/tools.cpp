@@ -93,47 +93,31 @@ xt::xarray<float> dot_product_fma(xt::xarray<float> weights, xt::xarray<float> i
 	return result;
 }
 
-xt::xarray<float> normalized(xt::xarray<float> input)
-{
+// float MSE(xt::xarray<float> output, xt::xarray<float> trueValue)
+// {
+// 	float err = 0.0;
+// 	for (int i = 0; i < output.size(); ++i)
 
-	float mean = xt::mean(input)();
-	float variance = xt::variance(input)();
+// 	{
+// 		err += ((output(i) - trueValue(i)) * (output(i) - trueValue(i)));
+// 	}
 
-	xt::xarray<float> normalized = (input - mean) / std::sqrt(variance + 1e-6);
+// 	err *= 1.0 / trueValue.size();
 
-	return normalized;
-}
+// 	return err;
+// }
 
-xt::xarray<float> flatten(xt::xarray<float> input)
-{
-	return xt::flatten(input);
-}
-
-float MSE(xt::xarray<float> output, xt::xarray<float> trueValue)
-{
-	float err = 0.0;
-	for (int i = 0; i < output.size(); ++i)
-
-	{
-		err += ((output(i) - trueValue(i)) * (output(i) - trueValue(i)));
-	}
-
-	err *= 1.0 / trueValue.size();
-
-	return err;
-}
-
-float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue) {
-    float err = 0.0;
-    for (int i = 0; i < output.size(); ++i) {
-        // on suppose ici que trueValue est encodé en one-hot, où seulement un élément est 1, les autres sont 0
-        if (trueValue(i) == 1) {
-            err -= std::log(output(i) + 1e-9); 
-            // Ajoute un petit nombre 1e-9 pour éviter un log négatif infini
-        }
-    }
-    return err;
-}
+// float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue) {
+//     float err = 0.0;
+//     for (int i = 0; i < output.size(); ++i) {
+//         // on suppose ici que trueValue est encodé en one-hot, où seulement un élément est 1, les autres sont 0
+//         if (trueValue(i) == 1) {
+//             err -= std::log(output(i) + 1e-9); 
+//             // Ajoute un petit nombre 1e-9 pour éviter un log négatif infini
+//         }
+//     }
+//     return err;
+// }
 
 int continueTraining()
 {
@@ -223,7 +207,7 @@ void display_network(NeuralNetwork nn)
 			std::cout << "   " << std::get<0>(conv->inputShape) << " " << std::get<1>(conv->inputShape) << " " << std::get<2>(conv->inputShape) << " " << std::endl;
 			std::cout << "   " << std::get<0>(conv->outputShape) << " " << std::get<1>(conv->outputShape) << " " << std::get<2>(conv->outputShape) << " " << std::endl;
 			std::cout << "   " << std::get<0>(conv->filtersShape) << " " << std::get<1>(conv->filtersShape) << " " << std::get<2>(conv->filtersShape) << " " << std::get<3>(conv->filtersShape) << " " << std::get<4>(conv->filtersShape) << std::endl;
-			std::cout << "   " << conv->activationType << std::endl;
+			std::cout << "   " << conv->activation->name << std::endl;
 			std::cout << "   " << conv->normalize << std::endl;
 		}
 		else if (Pooling *pool = dynamic_cast<Pooling *>(nn.nn[i]))
@@ -236,13 +220,13 @@ void display_network(NeuralNetwork nn)
 		{
 			std::cout << "   " << outp->inputShape << std::endl;
 			std::cout << "   " << outp->outputShape << std::endl;
-			std::cout << "   " << outp->activationType << std::endl;
+			std::cout << "   " << outp->activation->name << std::endl;
 		}
 		else if (Dense *dense = dynamic_cast<Dense *>(nn.nn[i]))
 		{
 			std::cout << "   " << dense->inputShape << std::endl;
 			std::cout << "   " << dense->outputShape << std::endl;
-			std::cout << "   " << dense->activationType << std::endl;
+			std::cout << "   " << dense->activation->name << std::endl;
 		}
 	}
 }

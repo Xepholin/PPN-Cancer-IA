@@ -24,6 +24,7 @@ void NeuralNetwork::add(ILayer *layer)
 }
 
 void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
+	int nnSize = this->nn.size() - 1;
 	this->nn[0]->forward(input);
 
 	for (int i = 1; i < this->nn.size(); ++i) {
@@ -32,10 +33,10 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 
 	xt::xarray<float> recycling;
 
-	recycling = this->nn[this->nn.size() - 1]->backward(label, this->learningRate);
+	recycling = lossFunction->prime(nn[nnSize]->output, label);
 
-	for (int i = this->nn.size() - 2; i >= 0; --i) {
-		if (this->nn[i]->name == "Dense") {
+	for (int i = nnSize; i >= 0; --i) {
+		if (this->nn[i]->name == "Output" || this->nn[i]->name == "Dense") {
 			recycling = this->nn[i]->backward(recycling, this->learningRate);
 		}
 		else	{
@@ -140,7 +141,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 			this->iter(image, label);
 
-			loss += MSE(this->nn[this->nn.size() - 1]->output, label);
+			loss += lossFunction->compute(this->nn[this->nn.size() - 1]->output, label);
 
 			if (k % batchSize == 0 && k != 0)	{
 				this->batch(batchSize);

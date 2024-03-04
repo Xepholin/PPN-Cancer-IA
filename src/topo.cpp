@@ -1,20 +1,17 @@
 #include <iostream>
-
 #include <tuple>
 #include <vector>
-
 #include <xtensor/xarray.hpp>
-#include <xtensor/xrandom.hpp>
 #include <xtensor/xio.hpp>
+#include <xtensor/xrandom.hpp>
 
-#include "convolution.h"
 #include "activation.h"
-#include "relu.h"
-#include "softmax.h"
-#include "pooling.h"
+#include "convolution.h"
 #include "dense.h"
 #include "output.h"
-#include "topo.h"
+#include "pooling.h"
+#include "relu.h"
+#include "softmax.h"
 
 // NeuralNetwork CNN()
 // {
@@ -42,72 +39,42 @@
 
 // }
 
-NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate)	{
-
-    NeuralNetwork model;
-	model.name = name;
-	model.learningRate = learningRate;
-
-	// ------------------------------------------------------------------------------
-	
-    // Convolution* conv1 = new Convolution{1, inputShape, std::tuple{6, 3, 3, 1, 0}, relu};
-    // Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, j0, PoolingType::POOLING_MAX};
-
-    // ------------------------------------------------------------------------------
-
-    Dense *dense1 = new Dense(48*48, 10, sigmoid, 0, true, true);
-
-	// ------------------------------------------------------------------------------
-
-    Output *output = new Output(dense1->outputShape, 2, sigmoid);
-
-    // ------------------------------------------------------------------------------
-
-	// model.add(conv1);
-	// model.add(pool_1);
-    model.add(dense1);
-    model.add(output);
-
-    return model;
-}
-
-NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, std::string name, float learningRate, uint16_t dropRate){
-
-    NeuralNetwork nn;
+NeuralNetwork CNN3(std::tuple<int, int, int> inputShape, std::string name, float learningRate, uint16_t dropRate) {
+	NeuralNetwork nn;
 	nn.name = name;
-    nn.learningRate = learningRate;
+	nn.learningRate = learningRate;
 
-    int fil1 = 6;
-    int fil2 = 16;
-    int fil3 = 16;
+	int fil1 = 6;
+	int fil2 = 16;
+	int fil3 = 16;
 
-    // ------------------------------------------------------------------------------
-	
-    Convolution* conv1 = new Convolution{1, inputShape, std::tuple{fil1, 6, 6, 1, 0}, relu};
-    Pooling* pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+	// ------------------------------------------------------------------------------
 
-    // ------------------------------------------------------sys------------------------
+	Convolution *conv1 = new Convolution{1, inputShape, std::tuple{fil1, 6, 6, 1, 0}, relu};
+	Pooling *pool_1 = new Pooling{conv1->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
 
-    Convolution* conv2 =  new Convolution{1, pool_1->outputShape, std::tuple{fil2, 5, 5, 1, 0}, relu};
-    Pooling* pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
+	// ------------------------------------------------------sys------------------------
 
-    // ------------------------------------------------------------------------------
+	Convolution *conv2 = new Convolution{1, pool_1->outputShape, std::tuple{fil2, 5, 5, 1, 0}, relu};
+	Pooling *pool_2 = new Pooling{conv2->outputShape, 2, 2, 0, PoolingType::POOLING_MAX};
 
-    Dense *dense1 = new Dense(pool_2->output.size(), 84, relu, false, true);
+	// ------------------------------------------------------------------------------
 
-    Dense *dense2 = new Dense(84, 32, relu);
+	Dense *dense1 = new Dense(pool_2->output.size(), 84, relu, false, true);
+
+	Dense *dense2 = new Dense(84, 32, relu);
 
 	Output *output = new Output(32, 2, softmax);
 
-    // ------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------
 
-    nn.add(conv1);
-    nn.add(pool_1);
-    nn.add(conv2);
-    nn.add(pool_2);
-    nn.add(dense1);
-    nn.add(dense2);
+	nn.add(conv1);
+	nn.add(pool_1);
+	nn.add(conv2);
+	nn.add(pool_2);
+	nn.add(dense1);
+	nn.add(dense2);
 	nn.add(output);
 
-    return nn;
+	return nn;
 }

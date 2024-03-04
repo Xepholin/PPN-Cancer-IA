@@ -21,7 +21,7 @@ void Dense::forward(xt::xarray<float> input) {
 
 	this->baOutput = this->output;
 
-	if (this->activationType != ActivationType::ACTIVATION_NO_TYPE) {
+	if (this->activation->name != "Activation") {
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
