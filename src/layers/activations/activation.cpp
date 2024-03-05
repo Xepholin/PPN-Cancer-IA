@@ -10,6 +10,7 @@ void Activation::forward(xt::xarray<float> input)
 xt::xarray<float> Activation::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Activation backward" << std::endl;
+	return 0;
 }
 
 float Activation::prime(float x)    {

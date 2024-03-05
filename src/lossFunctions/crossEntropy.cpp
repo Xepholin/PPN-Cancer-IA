@@ -1,5 +1,7 @@
 #include "crossEntropy.h"
 
+#include <math.h>
+
 #include <xtensor/xrandom.hpp>
 
 float CrossEntropy::compute(xt::xarray<float> output, xt::xarray<int> label) {
@@ -7,14 +9,14 @@ float CrossEntropy::compute(xt::xarray<float> output, xt::xarray<int> label) {
 	int labelSize = label.size();
 
 	if (labelSize == 2) {
-		for (int i = 0; i < output.size(); ++i) {
-			err += -(label(i) * std::log(output(i)) + (1 - label(i)) * std::log(1 - output(i)));
+		for (int i = 0; i < labelSize; ++i) {
+			err += -(label(i) * logf(output(i)) + (1.0 - label(i)) * logf(1.0 - output(i)));
 		}
 
-		err *= 1.0 / label.size();
+		err *= 1.0 / labelSize;
 	} else if (labelSize > 2) {
-		for (int i = 0; i < output.size(); ++i) {
-			err += (label(i) * std::log(output(i)));
+		for (int i = 0; i < labelSize; ++i) {
+			err += (label(i) * logf(output(i)));
 		}
 
 		err = -err;
@@ -31,11 +33,11 @@ xt::xarray<float> CrossEntropy::prime(xt::xarray<float> output, xt::xarray<int> 
 	xt::xarray<float> prime = xt::empty<float>({outputSize});
 
 	if (labelSize == 2) {
-		for (int i = 0; i < output.size(); ++i) {
-			prime(i) = -(label(i) / output(i)) + ((1 - label(i)) / (1 - output(i)));
+		for (int i = 0; i < outputSize; ++i) {
+			prime(i) = -(label(i) / output(i)) + ((1.0 - label(i)) / (1.0 - output(i)));
 		}
 	} else if (labelSize > 2) {
-		for (int i = 0; i < output.size(); ++i) {
+		for (int i = 0; i < outputSize; ++i) {
 			prime(i) = -(label(i) / output(i));
 		}
 	} else {

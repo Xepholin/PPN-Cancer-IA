@@ -6,12 +6,13 @@
 void Sigmoid::forward(xt::xarray<float> input)
 {
     this->input = input;
-	this->output = 1.0 / (1.0+ xt::exp(-input) );
+	this->output = 1.0 / (1.0 + xt::exp(-input) );
 }
 
 
 xt::xarray<float> Sigmoid::backward(xt::xarray<float> cost, float learningRate)   {
 	std::cout << "backward sigmoid" << std::endl;
+	return 0;
 }
 
 

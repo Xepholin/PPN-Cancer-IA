@@ -27,7 +27,7 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 	int nnSize = this->nn.size() - 1;
 	this->nn[0]->forward(input);
 
-	for (int i = 1; i < this->nn.size(); ++i) {
+	for (int i = 1; i < nnSize + 1; ++i) {
 		this->nn[i]->forward(this->nn[i - 1]->output);
 	}
 
@@ -163,7 +163,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
-		if (nbEpoch % 10 == 0 && !continueTraining())
+		if (nbEpoch % 5 == 0 && !continueTraining())
 		{
 			break;
 		}
@@ -187,12 +187,13 @@ void NeuralNetwork::eval(const std::string path)
 	float eval = 0;
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
+	int numImage = ALL_IMAGE_EVAL >> 1;
 
 	std::cout << "Start evaluation..." << std::endl;
 
 	std::cout << "Negative..." << std::endl;
 
-	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
+	for (int i = 0; i < numImage; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval0, i);
 		this->nn[0]->forward(image);
@@ -212,7 +213,7 @@ void NeuralNetwork::eval(const std::string path)
 
 	std::cout << "Positive..." << std::endl;
 
-	for (int i = 0; i < ALL_IMAGE_EVAL / 2; ++i)
+	for (int i = 0; i < numImage; ++i)
 	{
 		xt::view(image, 1) = xt::view(eval1, i);
 		this->nn[0]->forward(image);
@@ -246,13 +247,25 @@ void NeuralNetwork::load(const std::string path)
 
 	int size = 0;
 	std::string info;
+	LossType lossType;
 
 	inputFile >> this->name;
 	inputFile >> this->nbEpoch;
 	inputFile >> size;
+	inputFile >> this->batchSize;
 	inputFile >> this->learningRate;	
-	inputFile >> this->accuracy;	
+	inputFile >> info;
+	inputFile >> this->accuracy;
 
+	if (info.compare("MSE"))	{
+		this->lossFunction = new MSE();
+	}
+	else if (info.compare("Cross Entropy"))	{
+		this->lossFunction = new CrossEntropy();
+	}
+	else	{
+		perror("Error with the type of loss function when loading");
+	}
 
 	std::string buffer;
 
@@ -275,14 +288,26 @@ void NeuralNetwork::load(const std::string path)
 			std::tuple<int, int, int, int, int> filtersShape{a, b, c, d, e};
 
 			ActivationType type;
+			layerFile >> info;
 
 			if (info.compare("ReLu"))
 			{
 				type = relu;
 			}
-			else
+			else if (info.compare("Softmax"))
+			{
+				type = softmax;
+			}
+			else if (info.compare("Sigmoid"))
+			{
+				type = sigmoid;
+			}
+			else if (info.compare("Activation"))
 			{
 				type = ACTIVATION_NO_TYPE;
+			}
+			else	{
+				perror("Error with the type of activation when loading (conv)");
 			}
 
 			layerFile >> a;
@@ -339,15 +364,28 @@ void NeuralNetwork::load(const std::string path)
 			int inputShape, outputShape, norm, flat, dropRate;
 			layerFile >> inputShape;
 			layerFile >> outputShape;
+
 			ActivationType type;
+			layerFile >> info;
 
 			if (info.compare("ReLu"))
 			{
 				type = relu;
 			}
-			else
+			else if (info.compare("Softmax"))
+			{
+				type = softmax;
+			}
+			else if (info.compare("Sigmoid"))
+			{
+				type = sigmoid;
+			}
+			else if (info.compare("Activation"))
 			{
 				type = ACTIVATION_NO_TYPE;
+			}
+			else	{
+				perror("Error with the type of activation when loading (conv)");
 			}
 
 			layerFile >> dropRate;
@@ -373,15 +411,28 @@ void NeuralNetwork::load(const std::string path)
 			int inputShape, outputShape, norm, dropRate;
 			layerFile >> inputShape;
 			layerFile >> outputShape;
-			ActivationType type;
 
-			if (info.compare("Softmax"))
+			ActivationType type;
+			layerFile >> info;
+
+			if (info.compare("ReLu"))
+			{
+				type = relu;
+			}
+			else if (info.compare("Softmax"))
 			{
 				type = softmax;
 			}
-			else
+			else if (info.compare("Sigmoid"))
+			{
+				type = sigmoid;
+			}
+			else if (info.compare("Activation"))
 			{
 				type = ACTIVATION_NO_TYPE;
+			}
+			else	{
+				perror("Error with the type of activation when loading (conv)");
 			}
 
 			layerFile >> dropRate;
@@ -418,7 +469,9 @@ void NeuralNetwork::save(const std::string path) const
 	nnFile << this->name << std::endl;
 	nnFile << this->nbEpoch << std::endl;
 	nnFile << this->nn.size() << std::endl;
+	nnFile << this->batchSize << std::endl;
 	nnFile << this->learningRate << std::endl;
+	nnFile << this->lossFunction->name << std::endl;
 	nnFile << this->accuracy << std::endl;
 
 	for (int i = 0; i < this->nn.size(); ++i)

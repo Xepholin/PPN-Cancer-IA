@@ -8,7 +8,8 @@
 void reverseRows(xt::xarray<float> &matrix)
 {
     int n = matrix.shape()[0];
-    for (int i = 0; i < (n / 2); ++i)
+
+    for (int i = 0; i < (n >> 1); ++i)
     {
         for (int j = 0; j < n; ++j)
         {
@@ -74,15 +75,17 @@ xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> 
     int sizeNewMatriceY = (matrice.shape()[1] - sizeKernelY + 2 * padding) / stride + 1;
 
     xt::xarray<float> crossCorrelationMatrice{xt::empty<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
+	xt::xarray<float> a;
 
-    for(int i = 0 ; i < sizeNewMatriceX;++i)
+    for(int i = 0 ; i < sizeNewMatriceX; ++i)
     {
-        for(int j = 0 ; j < sizeNewMatriceY ;++j)
+		xt::xrange<int> rows(i, i + sizeKernelX);
+		
+        for(int j = 0 ; j < sizeNewMatriceY; ++j)
         {    
-            xt::xrange<int> rows(i, i + sizeKernelX);
             xt::xrange<int> cols(j, j + sizeKernelY);
 
-            xt::xarray<float> a = xt::view(matrice, rows, cols);
+            a = xt::view(matrice, rows, cols);
             crossCorrelationMatrice(i, j) = prodCrossCorelation(a, kernel);
 
         }
@@ -100,14 +103,17 @@ xt::xarray<float> matrixConvolution(xt::xarray<float> matrice, xt::xarray<float>
 
 xt::xarray<float> padMatrice(xt::xarray<float>  matrice, int padding){
 
-    int sizeNewMatriceX = matrice.shape()[0] + 2 * padding;
-    int sizeNewMatriceY = matrice.shape()[1] + 2 * padding;
+	int shape0 = matrice.shape()[0];
+	int shape1 = matrice.shape()[1];
+
+    int sizeNewMatriceX = shape0 + 2 * padding;
+    int sizeNewMatriceY = shape1 + 2 * padding;
 
     xt::xarray<float> paddedMatrice{xt::zeros<uint8_t>({sizeNewMatriceX, sizeNewMatriceY})};
 
-    for (int i = 0; i < matrice.shape()[0]; ++i)
+    for (int i = 0; i < shape0; ++i)
     {
-        for (int j = 0; j < matrice.shape()[1]; ++j)
+        for (int j = 0; j < shape1; ++j)
         {
             paddedMatrice(i+padding, j+padding) = matrice(i, j);
         }

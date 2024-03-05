@@ -10,6 +10,7 @@ void ReLu::forward(xt::xarray<float> input)
 xt::xarray<float> ReLu::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "ReLu backward" << std::endl;
+	return 0;
 }
 
 float ReLu::prime(float x)   {
