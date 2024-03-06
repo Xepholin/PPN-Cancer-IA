@@ -55,19 +55,20 @@ public:
 	 */
 	Output(int inputShape, int outputShape,
 		   ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
-		   int dropRate = 0, bool normalize = false) {
+		   int dropRate = 0, bool normalize = false)
+	{
 		name = "Output";
 
 		this->inputShape = inputShape;
 		this->outputShape = outputShape;
-		this->weightsShape = std::tuple<int, int>{inputShape,outputShape};
+		this->weightsShape = std::tuple<int, int>{inputShape, outputShape};
 
 		this->input = xt::empty<float>({inputShape});
 		this->output = xt::empty<float>({outputShape});
 		this->baOutput = xt::empty<float>({outputShape});
 		this->bnOutput = xt::empty<float>({outputShape});
 
-		this->weightsGradient = xt::zeros<float>({inputShape,outputShape});
+		this->weightsGradient = xt::zeros<float>({inputShape, outputShape});
 
 		this->bias = xt::random::randn<float>({outputShape});
 		this->biasGradient = xt::zeros<float>({outputShape});
@@ -87,7 +88,7 @@ public:
 		{
 		case ActivationType::ACTIVATION_NO_TYPE:
 			this->activation = new Activation;
-			this->weights = xt::random::randn<float>({inputShape,outputShape}, 0, 1.0 / inputShape);
+			this->weights = xt::random::randn<float>({inputShape, outputShape}, 0, 1.0 / inputShape);
 			break;
 
 		case relu:
@@ -101,7 +102,7 @@ public:
 			// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0 / inputShape);
 			this->XGWeightsInit();
 			break;
-			
+
 		case sigmoid:
 			this->activation = new Sigmoid(outputShape);
 			// this->weights = xt::random::randn<float>({outputShape, inputShape}, 0, 1.0 / inputShape);
@@ -122,7 +123,11 @@ public:
 
 	virtual xt::xarray<float> backward(
 		xt::xarray<float> label,
-    	float learningRate);
+		float learningRate);
+
+	xt::xarray<float> oldbackward(
+		xt::xarray<float> label,
+		float learningRate);
 
 	void norm();
 

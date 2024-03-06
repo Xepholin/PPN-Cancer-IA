@@ -4,8 +4,9 @@ project(PPN-CANCER-IA)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Enable debugging information
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -mavx -march=native -O3 -lcblas")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/mkl/include -L/opt/intel/mkl/lib -g -fopenmp -mavx -march=native -O3")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -lcblas -lpthread -lm")
+link_directories("/opt/intel/oneapi/mkl/2023.2.0/lib/intel64")
 
 # Main program source files
 set(MAIN_SOURCE_FILES
@@ -68,7 +69,7 @@ target_include_directories(main.exe PRIVATE
 )
 
 find_package(PNG REQUIRED)
-target_link_libraries(main.exe PRIVATE PNG::PNG blas)
+target_link_libraries(main.exe PRIVATE PNG::PNG blas mkl_intel_lp64 mkl_sequential mkl_core mkl_gnu_thread gomp)
 
 
 # # Include Google Test

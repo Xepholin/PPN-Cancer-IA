@@ -1,6 +1,6 @@
 #include "output.h"
 
-#include <cblas.h>
+#include <mkl.h>
 
 #include <iostream>
 #include <random>
@@ -41,7 +41,56 @@ void Output::forward(xt::xarray<float> input) {
 	// std::cout << std::endl;
 }
 
+
 xt::xarray<float> Output::backward(
+	xt::xarray<float> label,
+	float learningRate)
+{
+
+	xt::xarray<float> normGradient = xt::empty<float>({outputShape});
+
+	vsSub(this->outputShape, this->output.data(), label.data(), normGradient.data());
+	cblas_sscal(this->outputShape, 2.0, normGradient.data(), 1);
+ 
+	vsMul(this->outputShape, normGradient.data(), this->bnOutput.data(), this->bnOutput.data());
+	vsAdd(this->outputShape, bnOutput.data(),this->gammasGradient.data() ,this->gammasGradient.data());
+
+	vsAdd(this->outputShape, normGradient.data(), this->betasGradient.data(), this->betasGradient.data());
+
+
+
+	// Calculer le gradient pour chaque neurone de sortie
+	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
+	xt::xarray<float> primeVector = xt::empty<float>({outputShape});
+	for (int i = 0; i < outputShape; ++i)
+	{
+		primeVector(i) = this->activation->prime(baOutput(i));
+	}
+	vsMul(this->outputShape, this->gammas.data(), primeVector.data(), primeVector.data());
+	vsMul(this->outputShape, primeVector.data(), normGradient.data(), layerGradient.data());
+
+
+
+	// Calculer les gradients des poids et des biais
+	for (int i = 0; i < inputShape; ++i)
+	{
+		// Application du taux d'apprentissage déplacée ici
+		cblas_saxpy(this->outputShape, this->input(i), layerGradient.data(), 1, this->weightsGradient.data() + i * outputShape, 1);
+	}
+
+	// Mise à jour des poids et des biais
+	vsAdd(this->outputShape, layerGradient.data(), biasGradient.data(), biasGradient.data());
+
+	// Accumulation correcte du gradient d'entrée
+	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
+	cblas_sgemv(CblasRowMajor, CblasNoTrans, this->inputShape, this->outputShape, 1.0f, this->weights.data(), this->outputShape, layerGradient.data(), 1, 0.0f, inputGradient.data(), 1);
+
+	return inputGradient;
+}
+
+
+
+xt::xarray<float> Output::oldbackward(
 	xt::xarray<float> gradient,
 	float learningRate) {
 

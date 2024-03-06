@@ -23,10 +23,10 @@ void Convolution::forward(xt::xarray<float> input)
         }
     }
 
-	if (this->normalize)
-	{
-		this->output = normalized(this->output);
-	}
+	// if (this->normalize)
+	// {
+		// this->output = normalized(this->output);
+	// }
 
     if (this->activation->name != "Activation") {
         this->activation->forward(this->output);

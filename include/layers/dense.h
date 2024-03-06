@@ -128,6 +128,10 @@ class Dense : public ILayer
         virtual xt::xarray<float> backward(
 				xt::xarray<float> gradient,
 				float learningRate);
+                
+        xt::xarray<float> oldbackward(
+				xt::xarray<float> gradient,
+				float learningRate);
 
 		void norm();
 
