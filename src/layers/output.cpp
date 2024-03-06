@@ -43,19 +43,13 @@ void Output::forward(xt::xarray<float> input) {
 
 
 xt::xarray<float> Output::backward(
-	xt::xarray<float> label,
+	xt::xarray<float> gradient,
 	float learningRate)
 {
 
-	xt::xarray<float> normGradient = xt::empty<float>({outputShape});
-
-	vsSub(this->outputShape, this->output.data(), label.data(), normGradient.data());
-	cblas_sscal(this->outputShape, 2.0, normGradient.data(), 1);
- 
-	vsMul(this->outputShape, normGradient.data(), this->bnOutput.data(), this->bnOutput.data());
-	vsAdd(this->outputShape, bnOutput.data(),this->gammasGradient.data() ,this->gammasGradient.data());
-
-	vsAdd(this->outputShape, normGradient.data(), this->betasGradient.data(), this->betasGradient.data());
+	vsMul(this->outputShape, gradient.data(), bnOutput.data(), bnOutput.data());
+	vsAdd(this->outputShape, this->gammasGradient.data(), bnOutput.data(), this->gammasGradient.data());
+	vsAdd(this->outputShape, gradient.data(), this->betasGradient.data(), this->betasGradient.data());
 
 
 
@@ -67,7 +61,7 @@ xt::xarray<float> Output::backward(
 		primeVector(i) = this->activation->prime(baOutput(i));
 	}
 	vsMul(this->outputShape, this->gammas.data(), primeVector.data(), primeVector.data());
-	vsMul(this->outputShape, primeVector.data(), normGradient.data(), layerGradient.data());
+	vsMul(this->outputShape, primeVector.data(), gradient.data(), layerGradient.data());
 
 
 
