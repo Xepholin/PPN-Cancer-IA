@@ -20,6 +20,7 @@
 #include "relu.h"
 #include "softmax.h"
 #include "tools.h"
+#include "const.h"
 
 NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType) {
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType);
@@ -48,35 +49,29 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 }
 
 int main() {
-	// Create nn
-	// xt::random::seed(time(nullptr));
-	xt::random::seed(42);
-
-	NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.0001, cross_entropy);
-
-	// NeuralNetwork nn;
-	// nn.load("../saves/topo2");
-
-	// std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
-
-	// xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm");
-
-	// nn.iter(image, xt::xarray<float>{0, 1});
-
-	nn.train("../../processed2/train", 150000, 16);
-
-	nn.eval("../../processed2/eval");
-
-	saveConfirm(nn, false);
-
+	// // xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	// Convolution* conv1 = new Convolution{1, {1, 5, 5}, std::tuple{1, 2, 2, 1, 0}, relu};
-	// xt::xarray<float> image = xt::random::rand<float>({1, 5, 5});
+	// NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.0001, cross_entropy);
 
-	// conv1->forward(image);
+	// // NeuralNetwork nn;
+	// // nn.load("../saves/topo2");
 
-	// std::cout << conv1->output << std::endl;
+	// // std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
+
+	// // xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm", 48);
+
+	// // nn.iter(image, xt::xarray<float>{0, 1});
+
+	// nn.train("../../processed2/train", 150000, 16);
+
+	// nn.eval("../../processed2/eval");
+
+	// saveConfirm(nn, false);
+
+	xt::xarray<float> images = importAllPNG("../assets/breast/eval", nbImagesEval);
+
+	std::cout << images << std::endl;
 
 	return 0;
 }

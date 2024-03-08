@@ -52,7 +52,7 @@ class NeuralNetwork {
 
 	void batch(int batchSize);
 
-	std::vector<std::tuple<int, float>> train(const std::string path, int totalNumberImage, int batchSize);
+	std::vector<std::tuple<int, float>> train(const std::string path, int batchSize);
 
 	void detect(xt::xarray<float> input);
 

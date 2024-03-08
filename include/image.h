@@ -36,4 +36,6 @@ xt::xarray<bool> importPBM(const char *path);
 
 xt::xarray<bool> importAllPBM(const char *path, int nbPBM);
 
+xt::xarray<float> importAllPNG(const char *path, int nbPNG);
+
 #endif

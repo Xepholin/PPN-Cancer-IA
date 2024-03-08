@@ -16,6 +16,7 @@
 #include "output.h"
 #include "pooling.h"
 #include "tools.h"
+#include "const.h"
 
 void NeuralNetwork::add(ILayer *layer)
 {
@@ -86,9 +87,9 @@ void NeuralNetwork::batch(int batchSize)	{
 	}
 }
 
-std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int totalNumberImage, int batchSize)
+std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int batchSize)
 {
-	if (batchSize > totalNumberImage)	{
+	if (batchSize > nbImagesTrain)	{
 		perror("BatchSize > totalNumberImage");
 	}
 
@@ -99,10 +100,10 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 	std::cout << "Loading dataset..." << std::endl;
 
-	xt::xarray<bool> train0 = importAllPBM(p0.c_str(), totalNumberImage / 2);
-	xt::xarray<bool> train1 = importAllPBM(p1.c_str(), totalNumberImage / 2);
+	xt::xarray<bool> train0 = importAllPBM(p0.c_str(), nbImagesTrain);
+	xt::xarray<bool> train1 = importAllPBM(p1.c_str(), nbImagesTrain);
 
-	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
+	xt::xarray<float> image = xt::empty<float>(IMAGE_TENSOR_DIM);
 	xt::xarray<float> label = xt::empty<float>({2});
 
 	// std::string savePath = "../saves/" + this->name;
@@ -129,7 +130,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 		auto startTime = std::chrono::steady_clock::now();
 
-		for (int k = 0; k < totalNumberImage; k++)
+		for (int k = 0; k < nbImagesTrain; k++)
 		{
 
 			if (k & 1)
@@ -161,7 +162,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 		nbEpoch++;
 		// this->save(savePath);
 		
-		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
+		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)nbImagesTrain << "(time: " << duration.count() << " minutes)" << std::endl;
 
 		this->eval("../../processed2/eval");
 
@@ -178,20 +179,17 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 void NeuralNetwork::eval(const std::string path)
 {
-
-#define ALL_IMAGE_EVAL 7000
-
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
 	std::cout << "Loading dataset..." << std::endl;
 
-	xt::xarray<bool> eval0 = importAllPBM(p0.c_str(), ALL_IMAGE_EVAL / 2);
-	xt::xarray<bool> eval1 = importAllPBM(p1.c_str(), ALL_IMAGE_EVAL / 2);
+	xt::xarray<bool> eval0 = importAllPBM(p0.c_str(), nbImagesEval / 2);
+	xt::xarray<bool> eval1 = importAllPBM(p1.c_str(), nbImagesEval / 2);
 	float eval = 0;
 
 	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
-	int numImage = ALL_IMAGE_EVAL >> 1;
+	int numImage = nbImagesEval >> 1;
 
 	std::cout << "Start evaluation..." << std::endl;
 
@@ -235,7 +233,7 @@ void NeuralNetwork::eval(const std::string path)
 		}
 	}
 
-	float accuracy = (eval / ALL_IMAGE_EVAL) * 100.0;
+	float accuracy = (eval / nbImagesEval) * 100.0;
 	std::cout << "accuracy : " << accuracy << "%" << std::endl;
 	this->accuracy = accuracy;
 }

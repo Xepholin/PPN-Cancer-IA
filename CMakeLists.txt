@@ -39,6 +39,7 @@ set(HEADER_FILES
     include/tools.h
     include/conv_op.h
     include/network.h
+	include/const.h
 	include/lossFunctions/loss.h
 	include/lossFunctions/mse.h
 	include/lossFunctions/crossEntropy.h

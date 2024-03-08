@@ -15,8 +15,8 @@
 
 #include "image.h"
 #include "conv_op.h"
-
-int SIZE_MATRICE = 48;
+#include "tools.h"
+#include "const.h"
 
 void Image::saveToPNG(const char *outputPath)
 {
@@ -430,7 +430,7 @@ xt::xarray<bool> importPBM(const char *path)
         perror("Erreur lors de l'ouverture du fichier.");
     }
 
-    xt::xarray<bool> PBM{xt::empty<bool>({SIZE_MATRICE, SIZE_MATRICE})};
+    xt::xarray<bool> PBM{xt::empty<bool>({PBMDim, PBMDim})};
 
     // saute 9 caractères (header .pbm)
     image.seekg(headerSize);
@@ -461,7 +461,7 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
     directory.push({path});
 
     // Define a placeholder for your result (modify as needed)
-    xt::xarray<bool> result{xt::empty<bool>({nbPBM, SIZE_MATRICE, SIZE_MATRICE})};
+    xt::xarray<bool> result{xt::empty<bool>({nbPBM, PBMDim, PBMDim})};
 
     int position = 0;
 
@@ -491,4 +491,45 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
     }
 
     return result;
+}
+
+xt::xarray<float> importAllPNG(const char *path, int nbPNG)	{
+	std::stack<std::string> directory;
+    directory.push({path});
+
+    // Define a placeholder for your result (modify as needed)
+    xt::xarray<float> result{xt::empty<float>({nbPNG, 3, PNGDim, PNGDim})};
+
+    int position = 0;
+
+    while (!directory.empty())
+    {
+        auto currentDir = directory.top();
+        directory.pop();
+
+        for (const auto &entry : std::filesystem::directory_iterator(currentDir))
+        {
+            std::string inputFullPath = entry.path().string();
+
+            // ignore "." and ".." to avoid infinite loops
+            if (entry.is_directory())
+            {
+                directory.push(inputFullPath);
+            }
+            // Check for a .png file
+            else if (entry.is_regular_file() && entry.path().extension() == ".png")
+            {
+				std::unique_ptr<Image> temp = pngData(inputFullPath.c_str());
+				Image image = *temp;
+				
+				xt::view(result, xt::range(position, position + 1), 0, xt::all(), xt::all()) = image.r;
+				xt::view(result, xt::range(position, position + 1), 1, xt::all(), xt::all()) = image.g;
+				xt::view(result, xt::range(position, position + 1), 2, xt::all(), xt::all()) = image.b;
+
+                position++;
+            }
+        }
+    }
+
+    return normalized(result);
 }
