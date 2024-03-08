@@ -23,6 +23,7 @@
 #include "const.h"
 
 NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType) {
+	int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType);
 
 	// ------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	Dense *dense1 = new Dense(/*pool_1->output.size()*/ 48*48, 64, relu, 25, true, true);
+	Dense *dense1 = new Dense(/*pool_1->output.size()*/ inputShapeTotal, 64, relu, 25, true, true);
 
 	// ------------------------------------------------------------------------------
 
@@ -49,29 +50,40 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 }
 
 int main() {
-	// // xt::random::seed(time(nullptr));
+	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	// NeuralNetwork nn = CNN2({1, 48, 48}, "topo3", 0.0001, cross_entropy);
+	NeuralNetwork nn = CNN2(IMAGE_TENSOR_DIM, "topo3", 0.0001, cross_entropy);
 
-	// // NeuralNetwork nn;
-	// // nn.load("../saves/topo2");
+	// NeuralNetwork nn;
+	// nn.load("../saves/topo2");
 
-	// // std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
+	// std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
 
-	// // xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm", 48);
+	// xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm", 48);
 
-	// // nn.iter(image, xt::xarray<float>{0, 1});
+	// nn.iter(image, xt::xarray<float>{0, 1});
 
-	// nn.train("../../processed2/train", 150000, 16);
+	if (PNGPBM == 0)	{
+		nn.train("../assets/breast/train", 1);
 
-	// nn.eval("../../processed2/eval");
+		nn.eval("../assets/breast/eval");
+	}
+	else	{
+		nn.train("../../processed1/train", 1);
 
-	// saveConfirm(nn, false);
+		nn.eval("../../processed1/eval");
+	}
 
-	xt::xarray<float> images = importAllPNG("../assets/breast/eval", nbImagesEval);
+	saveConfirm(nn, false);
 
-	std::cout << images << std::endl;
+	// xt::xarray<float> images = xt::random::rand<float>({3, 5, 5});
+	// xt::xarray<float> image = xt::empty<float>({5, 5});
+
+	// xt::view(image, 0) = xt::view(images, 0);
+	
+	// std::cout << images << '\n' << std::endl;
+	// std::cout << image << '\n' << std::endl;
 
 	return 0;
 }

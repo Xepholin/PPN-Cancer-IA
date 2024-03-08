@@ -4,15 +4,15 @@
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
 
-#define PRE_SIZE_MATRIX 50
+#include "const.h"
 
 class Image
 {
     public:
         // Matrices with size 50x50
-        xt::xarray<uint8_t> r{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
-        xt::xarray<uint8_t> g{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
-        xt::xarray<uint8_t> b{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
+        xt::xarray<uint8_t> r{xt::empty<uint8_t>({PNGDim, PNGDim})};
+        xt::xarray<uint8_t> g{xt::empty<uint8_t>({PNGDim, PNGDim})};
+        xt::xarray<uint8_t> b{xt::empty<uint8_t>({PNGDim, PNGDim})};
         
         void saveToPNG(const char* outputPath);
 };

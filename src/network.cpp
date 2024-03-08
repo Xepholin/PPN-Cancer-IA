@@ -98,10 +98,21 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
+	xt::xarray<float> train0;
+	xt::xarray<float> train1;
+
+	int numImages = nbImagesTrain >> 1;
+
 	std::cout << "Loading dataset..." << std::endl;
 
-	xt::xarray<bool> train0 = importAllPBM(p0.c_str(), nbImagesTrain);
-	xt::xarray<bool> train1 = importAllPBM(p1.c_str(), nbImagesTrain);
+	if (PNGPBM == 0)	{
+		train0 = importAllPNG(p0.c_str(), numImages);
+		train1 = importAllPNG(p1.c_str(), numImages);
+	}
+	else	{
+		train0 = importAllPBM(p0.c_str(), numImages);
+		train1 = importAllPBM(p1.c_str(), numImages);
+	}
 
 	xt::xarray<float> image = xt::empty<float>(IMAGE_TENSOR_DIM);
 	xt::xarray<float> label = xt::empty<float>({2});
@@ -125,6 +136,8 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 	{
 		xt::random::shuffle(train0);
 		xt::random::shuffle(train1);
+
+		std::cout << "nbEpoch: " << this->nbEpoch << std::endl;
 		
 		float loss = 0.0;
 
@@ -132,16 +145,15 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 		for (int k = 0; k < nbImagesTrain; k++)
 		{
-
 			if (k & 1)
 			{
 				label = {0, 1};
-				xt::view(image, 1) = xt::view(train0, k/2);
+				image = xt::view(train0, k >> 1);
 			}
 			else
 			{
 				label = {1, 0};
-				xt::view(image, 1) = xt::view(train1, k/2);
+				image = xt::view(train1, k >> 1);
 			}
 
 			this->iter(image, label);
@@ -162,9 +174,14 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 		nbEpoch++;
 		// this->save(savePath);
 		
-		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)nbImagesTrain << "(time: " << duration.count() << " minutes)" << std::endl;
+		std::cout << "loss: " << loss/(float)nbImagesTrain << "(time: " << duration.count() << " minutes)" << std::endl;
 
-		this->eval("../../processed2/eval");
+		if (PNGPBM == 0)	{
+			this->eval("../assets/breast/eval");
+		}
+		else	{
+			this->eval("../../processed1/eval");
+		}
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
@@ -182,14 +199,25 @@ void NeuralNetwork::eval(const std::string path)
 	std::string p0 = path + "/0";
 	std::string p1 = path + "/1";
 
+	xt::xarray<float> eval0;
+	xt::xarray<float> eval1;
+
+	int numImage = nbImagesEval >> 1;
+
 	std::cout << "Loading dataset..." << std::endl;
 
-	xt::xarray<bool> eval0 = importAllPBM(p0.c_str(), nbImagesEval / 2);
-	xt::xarray<bool> eval1 = importAllPBM(p1.c_str(), nbImagesEval / 2);
+	if (PNGPBM == 0)	{
+		eval0 = importAllPNG(p0.c_str(), numImage);
+		eval1 = importAllPNG(p1.c_str(), numImage);
+	}
+	else	{
+		eval0 = importAllPBM(p0.c_str(), numImage);
+		eval1 = importAllPBM(p1.c_str(), numImage);
+	}
+
 	float eval = 0;
 
-	xt::xarray<float> image = xt::empty<float>({1, 48, 48});
-	int numImage = nbImagesEval >> 1;
+	xt::xarray<float> image = xt::empty<float>(IMAGE_TENSOR_DIM);
 
 	std::cout << "Start evaluation..." << std::endl;
 
@@ -197,7 +225,10 @@ void NeuralNetwork::eval(const std::string path)
 
 	for (int i = 0; i < numImage; ++i)
 	{
-		xt::view(image, 1) = xt::view(eval0, i);
+		image = xt::view(eval0, i);
+		std::cout << eval0 << '\n' << std::endl;
+		std::cout << image << '\n' << std::endl;
+		exit(0);
 		this->nn[0]->forward(image);
 
 		for (int j = 1; j < this->nn.size(); ++j)
@@ -217,7 +248,7 @@ void NeuralNetwork::eval(const std::string path)
 
 	for (int i = 0; i < numImage; ++i)
 	{
-		xt::view(image, 1) = xt::view(eval1, i);
+		image = xt::view(eval1, i);
 		this->nn[0]->forward(image);
 
 		for (int j = 1; j < this->nn.size(); ++j)
@@ -234,7 +265,7 @@ void NeuralNetwork::eval(const std::string path)
 	}
 
 	float accuracy = (eval / nbImagesEval) * 100.0;
-	std::cout << "accuracy : " << accuracy << "%" << std::endl;
+	std::cout << "accuracy : " << accuracy << "%\n" << std::endl;
 	this->accuracy = accuracy;
 }
 

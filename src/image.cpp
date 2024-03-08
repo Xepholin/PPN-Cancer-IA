@@ -52,7 +52,7 @@ void Image::saveToPNG(const char *outputPath)
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
     std::vector<png_bytep> row_pointers(height);
-    for (int y = 0; y < PRE_SIZE_MATRIX; y++)
+    for (int y = 0; y < PNGDim; y++)
     {
         row_pointers[y] = reinterpret_cast<png_bytep>(&r(y, 0));
     }
@@ -226,15 +226,15 @@ Image readByteFile(const char *filename, Image a)
 
 xt::xarray<float> toGrayScale(Image a)
 {
-    xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
+    xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PNGDim, PNGDim})};
 
 	uint8_t red = 0;
 	uint8_t green = 0;
 	uint8_t blue = 0;
 
-    for (int y = 0; y < PRE_SIZE_MATRIX; ++y)
+    for (int y = 0; y < PNGDim; ++y)
     {
-        for (int x = 0; x < PRE_SIZE_MATRIX; ++x)
+        for (int x = 0; x < PNGDim; ++x)
         {
             red = a.r(y, x);
             green = a.g(y, x);
@@ -418,8 +418,8 @@ void generateAllPBM(const char *folderConvPath, const char *folderOutput)
 
 xt::xarray<bool> importPBM(const char *path)
 {
-    const int width = 48;
-    const int height = 48;
+    const int width = PBMDim;
+    const int height = PBMDim;
     const int rowSize = 6;
     const int headerSize = 9;
     int pixelValue = 0;
@@ -444,7 +444,7 @@ xt::xarray<bool> importPBM(const char *path)
             for (int k = 7; k >= 0 && j * 8 + 7 - k < width; --k) {
                 pixelValue = (byte >> k) & 1;
 
-                PBM(i, j * 8 + 7 - k) = pixelValue;
+                PBM(i, j * 8 + 7 - k) = !pixelValue;
                 count++;
             }
         }
