@@ -63,9 +63,9 @@ int main() {
 
 	// nn.iter(image, xt::xarray<float>{0, 1});
 
-	nn.train("../../processed/train", 150000, 16);
+	nn.train("../../processed2/train", 150000, 16);
 
-	nn.eval("../../processed/eval");
+	nn.eval("../../processed2/eval");
 
 	saveConfirm(nn, false);
 

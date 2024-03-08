@@ -122,12 +122,16 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 
 	while (1)
 	{
+		xt::random::shuffle(train0);
+		xt::random::shuffle(train1);
+		
 		float loss = 0.0;
 
 		auto startTime = std::chrono::steady_clock::now();
 
 		for (int k = 0; k < totalNumberImage; k++)
 		{
+
 			if (k & 1)
 			{
 				label = {0, 1};
@@ -159,7 +163,7 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 		
 		std::cout << "nbEpoch: " << this->nbEpoch << '\n' << "loss: " << loss/(float)totalNumberImage << "(time: " << duration.count() << " minutes)" << std::endl;
 
-		this->eval("../../processed/eval");
+		this->eval("../../processed2/eval");
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});
 
