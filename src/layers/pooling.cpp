@@ -6,11 +6,14 @@
 void Pooling::forward(xt::xarray<float> input)
 {
     this->input = input;
+	int outputShape = this->output.shape()[0];
+	xt::xarray<float> tmpMat;
+	xt::xarray<float> convolution_result;
 
-    for (int i = 0; i < this->output.shape()[0]; ++i)
+    for (int i = 0; i < outputShape; ++i)
     {
-        xt::xarray<float> tmpMat = xt::view(input, i);
-        xt::xarray<float> convolution_result = poolingMatrice(tmpMat);
+        tmpMat = xt::view(input, i);
+        convolution_result = poolingMatrice(tmpMat);
         xt::view(output, i) = convolution_result;
     }
 }
@@ -18,6 +21,7 @@ void Pooling::forward(xt::xarray<float> input)
 xt::xarray<float> Pooling::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Pooling backward" << std::endl;
+	return 0;
 }
 
 void Pooling::print() const
@@ -51,10 +55,10 @@ xt::xarray<float> Pooling::poolingMatrice(xt::xarray<float> matrix)
 
     for (int i = 0; i < sizeNewMatriceX; ++i)
     {
+		xt::xrange<int> rows(i + i * incr, i + i * incr + sizePooling);
 
         for (int j = 0; j < sizeNewMatriceY; ++j)
         {
-            xt::xrange<int> rows(i + i * incr, i + i * incr + sizePooling);
             xt::xrange<int> cols(j + j * incr, j + j * incr + sizePooling);
 
             xt::xarray<float> a = xt::view(matrix, rows, cols);

@@ -130,13 +130,19 @@ std::unique_ptr<Image> pngData(const char *filename)
         }
         png_read_image(png, pointers);
 
+		uint8_t red = 0;
+		uint8_t green = 0;
+		uint8_t blue = 0;
+
+		int size = width * channels;
+
         for (int y = 0; y < height; ++y)
         {
-            for (int x = 0; x < width * channels; x += channels)
+            for (int x = 0; x < size; x += channels)
             {
-                uint8_t red = pointers[y][x];
-                uint8_t green = pointers[y][x + 1];
-                uint8_t blue = pointers[y][x + 2];
+                red = pointers[y][x];
+                green = pointers[y][x + 1];
+                blue = pointers[y][x + 2];
 
                 // Access RGB values
                 image.r(y, x / channels) = red;
@@ -168,8 +174,6 @@ Image readByteFile(const char *filename, Image a)
         std::cerr << "Error opening file: " << filename << std::endl;
         return a;
     }
-
-    std::cout << std::hex << std::setw(2) << std::setfill('0');
 
     char byte;
     int count = 0;
@@ -224,13 +228,17 @@ xt::xarray<float> toGrayScale(Image a)
 {
     xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PRE_SIZE_MATRIX, PRE_SIZE_MATRIX})};
 
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+
     for (int y = 0; y < PRE_SIZE_MATRIX; ++y)
     {
         for (int x = 0; x < PRE_SIZE_MATRIX; ++x)
         {
-            uint8_t red = a.r(y, x);
-            uint8_t green = a.g(y, x);
-            uint8_t blue = a.b(y, x);
+            red = a.r(y, x);
+            green = a.g(y, x);
+            blue = a.b(y, x);
 
             // NTSC formula
             //  uint8_t gray = static_cast<uint8_t>(0.299 * red + 0.587 * green + 0.114 * blue);
@@ -324,11 +332,13 @@ void saveEdgetoPBM(const char *outputPath, const xt::xarray<bool> boolMatrix)
                << width << " " << height << " ";
 
     // on prend par bloc de 8 bits(1octet)
+	char byte = 0;
     for (int i = 0; i < height; ++i)
     {
         for (int j = 0; j < width; j += 8)
         {
-            char byte = 0;
+            byte = 0;
+			
             for (int k = 0; (k < 8) && ((j + k) < width); ++k)
             {
                 byte += boolMatrix(i, j + k) << (7 - k);

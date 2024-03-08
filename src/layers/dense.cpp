@@ -104,10 +104,14 @@ xt::xarray<float> Dense::oldbackward(
         layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * gradient(i);
     }
 
+	float inputValue = 0.0;
+
     // Calculer les gradients des poids et des biais
     for (int i = 0; i < inputShape; ++i) {
+		inputValue = input(i);
+
         for (int j = 0; j < outputShape; ++j) {
-            this->weightsGradient(i, j) = this->weightsGradient(i, j) + (input(i) * layerGradient(j));
+            this->weightsGradient(i, j) = this->weightsGradient(i, j) + (inputValue * layerGradient(j));
             // Application du taux d'apprentissage déplacée ici
         }
     }
@@ -119,14 +123,20 @@ xt::xarray<float> Dense::oldbackward(
 
     xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 
-    // Accumulation correcte du gradient d'entrée
-    for (int i = 0; i < inputShape; ++i) {
-        float sum = 0;
-        for (int j = 0; j < outputShape; ++j) {
-            sum += weights(i, j) * layerGradient(j);
-        }
-        inputGradient(i) = sum;
-    }
+    // // Accumulation correcte du gradient d'entrée
+    // for (int i = 0; i < inputShape; ++i) {
+    //     float sum = 0;
+    //     for (int j = 0; j < outputShape; ++j) {
+    //         sum += weights(i, j) * layerGradient(j);
+    //     }
+    //     inputGradient(i) = sum;
+    // }
+
+	for (int i = 0; i < inputShape; ++i)	{
+		for (int j = 0; j < outputShape; ++j)	{
+			inputGradient(i) = weights(i, j) * layerGradient(j);
+		}
+	}
 
     return inputGradient;
 }

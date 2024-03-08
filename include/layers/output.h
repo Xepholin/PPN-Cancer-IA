@@ -41,8 +41,6 @@ public:
 	xt::xarray<float> baOutput;
 	xt::xarray<float> bnOutput;
 
-	Loss *lossFunction;
-
 	/**
 	 * @brief Constructeur de la classe Output.
 	 *

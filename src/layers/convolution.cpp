@@ -10,17 +10,23 @@ void Convolution::forward(xt::xarray<float> input)
     // std::cout << "input\n" << this->input << '\n' << std::endl;
     // std::cout << "filters\n" << this->filters << '\n' << std::endl;
 
-    for (int i = 0; i < this->filters.shape()[0]; ++i)
+	xt::xarray<float> convolution_result;
+	xt::xarray<float> tmpMat;
+	xt::xarray<float> tmpFilter;
+
+	int shape0 = this->filters.shape()[0];
+	int shape1 = this->filters.shape()[1];
+
+    for (int i = 0; i < shape0; ++i)
     {
-
-        for (int j = 0; j < this->filters.shape()[1]; ++j)
+        for (int j = 0; j < shape1; ++j)
         {
-            xt::xarray<float> tmpMat = xt::view(input, j);
-            xt::xarray<float> tmpFilter = xt::view(this->filters, i, j);
-            xt::xarray<float> convolution_result = matrixConvolution(tmpMat, tmpFilter, std::get<3>(this->filtersShape), std::get<4>(this->filtersShape));
-
-            xt::view(output, i) = convolution_result;
+           	tmpMat = xt::view(input, j);
+            tmpFilter = xt::view(this->filters, i, j);
+            convolution_result = matrixConvolution(tmpMat, tmpFilter, std::get<3>(this->filtersShape), std::get<4>(this->filtersShape));
         }
+
+		xt::view(output, i) = convolution_result;
     }
 
 	// if (this->normalize)
@@ -39,6 +45,7 @@ void Convolution::forward(xt::xarray<float> input)
 xt::xarray<float> Convolution::backward(xt::xarray<float> cost, float learningRate)
 {
     std::cout << "Convolution backward" << std::endl;
+	return 0;
 }
 
 void Convolution::print() const
