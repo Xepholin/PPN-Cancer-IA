@@ -350,11 +350,40 @@ void saveEdgetoPBM(const char *outputPath, const xt::xarray<bool> boolMatrix)
     outputFile.close();
 }
 
+void generatePBM(const char *src, const char *dest)	{
+	std::ifstream inputFile(src, std::ios::binary);
 
-void generateAllPBM(const char *folderConvPath, const char *folderOutput)
+	if (inputFile.is_open())
+	{
+		// Pass the char* to the pngData function
+		auto result = pngData(src);
+
+		if (result)
+		{
+			Image image = *result;
+
+			xt::xarray<float> grayMatrice = toGrayScale(image);
+
+			xt::xarray<bool> boolG = toSobel(grayMatrice);
+
+			// Remove the ".png" extension and append ".pbm"
+			std::string outputFilePath = dest;
+			outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
+
+			saveEdgetoPBM(outputFilePath.c_str(), boolG);
+		}
+	}
+	else
+	{
+		std::cerr << "Error opening file: " << src << std::endl;
+	}
+}
+
+
+void generateAllPBM(const char *src, const char *dest)
 {
     std::stack<std::pair<std::string, std::string>> directories;
-    directories.push({folderConvPath, folderOutput});
+    directories.push({src, dest});
 
     while (!directories.empty())
     {
@@ -367,50 +396,25 @@ void generateAllPBM(const char *folderConvPath, const char *folderOutput)
         }
         catch (const std::exception &e)
         {
-            std::cerr << "Error creating directory: " << folderConvPath << std::endl;
+            std::cerr << "Error creating directory: " << src << std::endl;
             return;
         }
 
         for (const auto &entry : std::filesystem::directory_iterator(currentInputDir))
         {
-            std::string inputFullPath = entry.path().string();
-            std::string outputFullPath = currentOutputDir + "/" + entry.path().filename().string();
+            std::string inputPath = entry.path().string();
+            std::string outputPath = currentOutputDir + "/" + entry.path().filename().string();
 
             // ignore "." and ".." to avoid infinite loops
             if (entry.is_directory())
             {
-                directories.push({inputFullPath, outputFullPath});
+                directories.push({inputPath, outputPath});
             }
             // Check for a .png file
             else if (entry.is_regular_file() && entry.path().extension() == ".png")
             {
-                std::ifstream inputFile(inputFullPath, std::ios::binary);
-
-                if (inputFile.is_open())
-                {
-                    // Pass the char* to the pngData function
-                    char *charFilePath = const_cast<char *>(inputFullPath.c_str());
-                    auto result = pngData(charFilePath);
-
-                    if (result)
-                    {
-                        Image image = *result;
-
-                        xt::xarray<float> grayMatrice = toGrayScale(image);
-
-                        xt::xarray<bool> boolG = toSobel(grayMatrice);
-
-                        // Remove the ".png" extension and append ".pbm"
-                        std::string outputFilePath = outputFullPath;
-                        outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
-
-                        saveEdgetoPBM(outputFilePath.c_str(), boolG);
-                    }
-                }
-                else
-                {
-                    std::cerr << "Error opening file: " << inputFullPath << std::endl;
-                }
+				// std::cout << "here" << std::endl;
+                generatePBM(inputPath.c_str(), outputPath.c_str());
             }
         }
     }
@@ -472,17 +476,17 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
 
         for (const auto &entry : std::filesystem::directory_iterator(currentDir))
         {
-            std::string inputFullPath = entry.path().string();
+            std::string inputPath = entry.path().string();
 
             // ignore "." and ".." to avoid infinite loops
             if (entry.is_directory())
             {
-                directory.push(inputFullPath);
+                directory.push(inputPath);
             }
             // Check for a .png file
             else if (entry.is_regular_file() && entry.path().extension() == ".pbm")
             {
-                xt::xarray<bool> newPBM = importPBM(inputFullPath.c_str());
+                xt::xarray<bool> newPBM = importPBM(inputPath.c_str());
                 xt::view(result, xt::range(position, position + 1), xt::all(), xt::all()) = newPBM;
 
                 position++;
@@ -509,17 +513,17 @@ xt::xarray<float> importAllPNG(const char *path, int nbPNG)	{
 
         for (const auto &entry : std::filesystem::directory_iterator(currentDir))
         {
-            std::string inputFullPath = entry.path().string();
+            std::string inputPath = entry.path().string();
 
             // ignore "." and ".." to avoid infinite loops
             if (entry.is_directory())
             {
-                directory.push(inputFullPath);
+                directory.push(inputPath);
             }
             // Check for a .png file
             else if (entry.is_regular_file() && entry.path().extension() == ".png")
             {
-				std::unique_ptr<Image> temp = pngData(inputFullPath.c_str());
+				std::unique_ptr<Image> temp = pngData(inputPath.c_str());
 				Image image = *temp;
 				
 				xt::view(result, xt::range(position, position + 1), 0, xt::all(), xt::all()) = xt::abs(image.r - 255.0);
