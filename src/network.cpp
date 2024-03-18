@@ -177,10 +177,10 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path)
 		std::cout << "loss: " << loss/(float)nbImagesTrain << "(time: " << duration.count() << " minutes)" << std::endl;
 
 		if (PNGPBM == 0)	{
-			this->eval("../assets/breast/eval");
+			this->eval(evalPathPNG);
 		}
 		else	{
-			this->eval("../../processed1/eval");
+			this->eval(evalPathPBM);
 		}
 
 		// result.push_back(std::tuple<int, float>{nbEpoch, MSE(this->nn[this->nn.size() - 1]->output, label)});

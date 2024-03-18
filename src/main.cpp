@@ -40,8 +40,8 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 	// ------------------------------------------------------------------------------
 
 	Dense *dense1 = new Dense(/*pool_1->output.size()*/ inputShapeTotal, 128, relu, 25, true, true);
-	// Dense *dense2 = new Dense(dense1->outputShape, 128, relu, 25, true);
-	// Dense *dense3 = new Dense(dense2->outputShape, 128, relu, 25, true);
+	Dense *dense2 = new Dense(dense1->outputShape, 128, relu, 25, true);
+	Dense *dense3 = new Dense(dense2->outputShape, 128, relu, 25, true);
 
 	// ------------------------------------------------------------------------------
 
@@ -56,11 +56,32 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 	// model.add(conv3);
 	// model.add(pool_3);
 	model.add(dense1);
-	// model.add(dense2);
-	// model.add(dense3);
+	model.add(dense2);
+	model.add(dense3);
 	model.add(output);
 
 	return model;
+}
+
+NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize)
+{
+    int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
+	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
+
+    // ------------------------------------------------------------------------------
+
+    Dense *dense1 = new Dense(inputShapeTotal, 64, relu, 25, true, true);
+
+    // ------------------------------------------------------------------------------
+
+    Output *output = new Output(dense1->outputShape, 2, softmax);
+
+    // ------------------------------------------------------------------------------
+
+    model.add(dense1);
+    model.add(output);
+
+    return model;
 }
 
 int main() {
@@ -79,12 +100,12 @@ int main() {
 	// nn.iter(image, xt::xarray<float>{0, 1});
 
 	if (PNGPBM == 0)	{
-		nn.train("../assets/breast/train");
-		nn.eval("../assets/breast/eval");
+		nn.train(trainPathPNG);
+		nn.eval(evalPathPNG);
 	}
 	else	{
-		nn.train("../../processed1/train");
-		nn.eval("../../processed1/eval");
+		nn.train(trainPathPBM);
+		nn.eval(evalPathPBM);
 	}
 
 	saveConfirm(nn, false);
