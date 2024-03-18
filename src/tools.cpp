@@ -181,7 +181,6 @@ void saveConfirm(NeuralNetwork nn, bool loaded)
 
 void display_network(NeuralNetwork nn)
 {
-
 	for (int i = 0; i < nn.nn.size(); ++i)
 	{
 		std::cout << nn.nn[i]->name << std::endl;

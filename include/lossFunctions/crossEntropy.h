@@ -8,7 +8,7 @@ class CrossEntropy : public Loss {
 	int labelSize = 0;
 
 	CrossEntropy() {
-		name = "Cross Entropy";
+		name = "CrossEntropy";
 	}
 
 	~CrossEntropy() = default;

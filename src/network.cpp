@@ -46,7 +46,7 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 	}
 }
 
-void NeuralNetwork::batch(int batchSize)	{
+void NeuralNetwork::batch()	{
 	for (int i = this->nn.size() - 1; i >= 0; --i)
 	{
 		if (Output *output = dynamic_cast<Output *>(this->nn[i]))
@@ -87,7 +87,7 @@ void NeuralNetwork::batch(int batchSize)	{
 	}
 }
 
-std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path, int batchSize)
+std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path)
 {
 	if (batchSize > nbImagesTrain)	{
 		perror("BatchSize > totalNumberImage");
@@ -161,12 +161,12 @@ std::vector<std::tuple<int, float>> NeuralNetwork::train(const std::string path,
 			loss += lossFunction->compute(this->nn[this->nn.size() - 1]->output, label);
 
 			if (k % batchSize == 0 && k != 0)	{
-				this->batch(batchSize);
+				this->batch();
 				// std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
 			}
 		}
 
-		this->batch(batchSize);
+		this->batch();
 
 		auto endTime = std::chrono::steady_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
@@ -226,9 +226,6 @@ void NeuralNetwork::eval(const std::string path)
 	for (int i = 0; i < numImage; ++i)
 	{
 		image = xt::view(eval0, i);
-		std::cout << eval0 << '\n' << std::endl;
-		std::cout << image << '\n' << std::endl;
-		exit(0);
 		this->nn[0]->forward(image);
 
 		for (int j = 1; j < this->nn.size(); ++j)
@@ -290,15 +287,25 @@ void NeuralNetwork::load(const std::string path)
 	inputFile >> info;
 	inputFile >> this->accuracy;
 
+
 	if (info.compare("MSE"))	{
 		this->lossFunction = new MSE();
 	}
 	else if (info.compare("Cross Entropy"))	{
+		std::cout << "here" << std::endl;
 		this->lossFunction = new CrossEntropy();
 	}
 	else	{
 		perror("Error with the type of loss function when loading");
 	}
+
+	std::cout << this->name << std::endl;
+	std::cout << this->nbEpoch << std::endl;
+	std::cout << size << std::endl;
+	std::cout << this->batchSize << std::endl;
+	std::cout << this->learningRate << std::endl;
+	std::cout << info << std::endl;
+	std::cout << this->accuracy << std::endl;
 
 	std::string buffer;
 

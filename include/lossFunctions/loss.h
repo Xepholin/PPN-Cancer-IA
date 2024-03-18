@@ -16,7 +16,7 @@ std::ostream& operator<<(std::ostream& out, const LossType value);
 
 class Loss {
    public:
-	std::string name = "Loss Function";
+	std::string name = "LossFunction";
 
 	virtual float compute(xt::xarray<float> output, xt::xarray<int> label);
 	virtual xt::xarray<float> prime(xt::xarray<float> output, xt::xarray<int> label);

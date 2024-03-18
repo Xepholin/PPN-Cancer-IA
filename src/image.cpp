@@ -522,9 +522,9 @@ xt::xarray<float> importAllPNG(const char *path, int nbPNG)	{
 				std::unique_ptr<Image> temp = pngData(inputFullPath.c_str());
 				Image image = *temp;
 				
-				xt::view(result, xt::range(position, position + 1), 0, xt::all(), xt::all()) = image.r;
-				xt::view(result, xt::range(position, position + 1), 1, xt::all(), xt::all()) = image.g;
-				xt::view(result, xt::range(position, position + 1), 2, xt::all(), xt::all()) = image.b;
+				xt::view(result, xt::range(position, position + 1), 0, xt::all(), xt::all()) = xt::abs(image.r - 255.0);
+				xt::view(result, xt::range(position, position + 1), 1, xt::all(), xt::all()) = xt::abs(image.g - 255.0);
+				xt::view(result, xt::range(position, position + 1), 2, xt::all(), xt::all()) = xt::abs(image.b - 255.0);
 
                 position++;
             }

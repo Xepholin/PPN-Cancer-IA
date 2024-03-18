@@ -24,9 +24,10 @@ class NeuralNetwork {
 
 	NeuralNetwork() = default;
 
-	NeuralNetwork(std::string name, float learningRate = 0.1, LossType lossType = mse) {
+	NeuralNetwork(std::string name, float learningRate = 0.1, LossType lossType = mse, int batchSize = 1) {
 		this->name = name;
 		this->learningRate = learningRate;
+		this->batchSize = batchSize;
 
 		switch (lossType) {
 			case mse:
@@ -50,9 +51,9 @@ class NeuralNetwork {
 
 	void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
 
-	void batch(int batchSize);
+	void batch();
 
-	std::vector<std::tuple<int, float>> train(const std::string path, int batchSize);
+	std::vector<std::tuple<int, float>> train(const std::string path);
 
 	void detect(xt::xarray<float> input);
 

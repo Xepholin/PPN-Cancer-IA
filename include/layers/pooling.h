@@ -22,6 +22,7 @@ class Pooling : public ILayer
         std::tuple<int, int, int> inputShape{0, 0, 0};
         std::tuple<int, int, int> outputShape{0, 0, 0};
 
+		int depth = 0;
         int size = 1;
         int stride = 1;
         int padding = 0;
@@ -46,7 +47,7 @@ class Pooling : public ILayer
 			
             this->inputShape = inputShape;
 
-            int depth = std::get<0>(inputShape);
+            this->depth = std::get<0>(inputShape);
             int height = std::get<1>(inputShape);
             int width = std::get<2>(inputShape);
 
