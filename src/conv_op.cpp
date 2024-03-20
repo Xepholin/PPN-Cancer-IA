@@ -95,8 +95,8 @@ xt::xarray<float> crossCorrelation(xt::xarray<float> matrice, xt::xarray<float> 
 }
 
 xt::xarray<float> matrixConvolution(xt::xarray<float> matrice, xt::xarray<float> kernel, int stride, int padding)
-{
-    rotateMatrix(kernel);
+{	
+	rotateMatrix(kernel);
     return crossCorrelation(matrice, kernel, stride, padding );
 }
 

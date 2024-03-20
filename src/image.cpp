@@ -464,8 +464,7 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
     std::stack<std::string> directory;
     directory.push({path});
 
-    // Define a placeholder for your result (modify as needed)
-    xt::xarray<bool> result{xt::empty<bool>({nbPBM, PBMDim, PBMDim})};
+    xt::xarray<bool> result{xt::empty<bool>({nbPBM, 1, PBMDim, PBMDim})};
 
     int position = 0;
 
@@ -487,7 +486,7 @@ xt::xarray<bool> importAllPBM(const char *path, int nbPBM)
             else if (entry.is_regular_file() && entry.path().extension() == ".pbm")
             {
                 xt::xarray<bool> newPBM = importPBM(inputPath.c_str());
-                xt::view(result, xt::range(position, position + 1), xt::all(), xt::all()) = newPBM;
+                xt::view(result, xt::range(position, position + 1), 1, xt::all(), xt::all()) = newPBM;
 
                 position++;
             }

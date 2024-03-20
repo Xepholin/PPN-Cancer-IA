@@ -20,7 +20,9 @@ const std::string evalPathPNG = "../assets/breast/eval";
 const std::string trainPathPBM = "../../processed1/train";
 const std::string evalPathPBM = "../../processed1/eval";
 
-// std::tuple<int, int, int> IMAGE_TENSOR_DIM = {3, PNGDim, PNGDim};
+const std::string savePath = "../saves";
+
+// #define IMAGE_TENSOR_DIM {3, PNGDim, PNGDim}
 #define IMAGE_TENSOR_DIM {1, PBMDim, PBMDim}
 
 #endif

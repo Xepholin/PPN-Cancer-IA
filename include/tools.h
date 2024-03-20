@@ -12,13 +12,11 @@ xt::xarray<float> normalized(xt::xarray<float> input);
 
 xt::xarray<float> flatten(xt::xarray<float> input);
 
-// float MSE(xt::xarray<float> output, xt::xarray<float> trueValue);
+int confirm();
 
-// float crossEntropy(xt::xarray<float> output, xt::xarray<int> trueValue);
+std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSet(std::string path, xt::xarray<float> label, int nbData);
 
-int continueTraining();
-
-void saveConfirm(NeuralNetwork nn, bool loaded);
+std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSets(std::string path, int nbTotalData);
 
 void display_network(NeuralNetwork nn);
 

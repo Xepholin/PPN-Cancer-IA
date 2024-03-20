@@ -6,7 +6,9 @@
 #include <xtensor/xarray.hpp>
 #include <xtensor/xcsv.hpp>
 #include <xtensor/xio.hpp>
+#include <xtensor/xview.hpp>
 #include <xtensor/xrandom.hpp>
+#include <xtensor/xmanipulation.hpp>
 
 #include "activation.h"
 #include "conv_op.h"
@@ -22,14 +24,14 @@
 #include "tools.h"
 #include "const.h"
 
-NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize) {
+NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize, float validSplit, bool shuffle) {
 	int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
-	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
+	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize, validSplit, shuffle);
 
 	// ------------------------------------------------------------------------------
 
-	// Convolution* conv1 = new Convolution{3, inputShape, std::tuple{16, 4, 4, 1, 0}, relu};
-	// Pooling* pool_1 = new Pooling{conv1->outputShape, 3, 3, PoolingType::POOLING_MAX};
+	Convolution* conv1 = new Convolution{1, inputShape, std::tuple{16, 4, 4, 1, 0}, relu};
+	Pooling* pool_1 = new Pooling{conv1->outputShape, 3, 3, PoolingType::POOLING_MAX};
 
 	// Convolution* conv2 = new Convolution{pool_1->depth, pool_1->outputShape, std::tuple{32, 4, 4, 1, 0}, relu};
 	// Pooling* pool_2 = new Pooling{conv2->outputShape, 3, 3, PoolingType::POOLING_MAX};
@@ -39,9 +41,9 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	Dense *dense1 = new Dense(/*pool_1->output.size()*/ inputShapeTotal, 128, relu, 25, true, true);
-	Dense *dense2 = new Dense(dense1->outputShape, 128, relu, 25, true);
-	Dense *dense3 = new Dense(dense2->outputShape, 128, relu, 25, true);
+	Dense *dense1 = new Dense(pool_1->output.size(), 256, relu, 25, true, true);
+	// Dense *dense2 = new Dense(dense1->outputShape, 256, relu, 25, true);
+	// Dense *dense3 = new Dense(dense2->outputShape, 256, relu, 25, true);
 
 	// ------------------------------------------------------------------------------
 
@@ -49,28 +51,28 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	// model.add(conv1);
-	// model.add(pool_1);
+	model.add(conv1);
+	model.add(pool_1);
 	// model.add(conv2);
 	// model.add(pool_2);
 	// model.add(conv3);
 	// model.add(pool_3);
 	model.add(dense1);
-	model.add(dense2);
-	model.add(dense3);
+	// model.add(dense2);
+	// model.add(dense3);
 	model.add(output);
 
 	return model;
 }
 
-NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize)
+NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize, float validSplit, bool shuffle)
 {
     int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
-	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
+	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize, validSplit, shuffle);
 
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(inputShapeTotal, 64, relu, 25, true, true);
+    Dense *dense1 = new Dense(inputShapeTotal, 256, relu, 25, true, true);
 
     // ------------------------------------------------------------------------------
 
@@ -88,7 +90,7 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2(IMAGE_TENSOR_DIM, "topo5", 0.0001, cross_entropy, 32);
+	NeuralNetwork nn = CNN2(IMAGE_TENSOR_DIM, "topo7", 0.0001, cross_entropy, 32, 0.0, true);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo5");
@@ -99,24 +101,34 @@ int main() {
 
 	// nn.iter(image, xt::xarray<float>{0, 1});
 
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
+
 	if (PNGPBM == 0)	{
-		nn.train(trainPathPNG);
-		nn.eval(evalPathPNG);
+		trainSamples = loadingSets(trainPathPNG, nbImagesTrain);
+		testSamples = loadingSets(evalPathPNG, nbImagesEval);
 	}
 	else	{
-		nn.train(trainPathPBM);
-		nn.eval(evalPathPBM);
+		trainSamples = loadingSets(trainPathPBM, nbImagesTrain);
+		testSamples = loadingSets(evalPathPBM, nbImagesEval);
 	}
 
-	saveConfirm(nn, false);
+	nn.train(trainSamples, 0.0, testSamples, 100, 5);
 
-	// xt::xarray<float> images = xt::random::rand<float>({3, 5, 5});
-	// xt::xarray<float> image = xt::empty<float>({5, 5});
+	std::cout << "Save ?" << std::endl;
 
-	// xt::view(image, 0) = xt::view(images, 0);
+	if (confirm())	{
+		nn.save();
+	}
+
+	// xt::xarray<float> images = xt::random::rand<float>({5, 5, 5});
 	
+	// xt::xarray<float> split1 = xt::view(images, xt::range(0, 3));
+	// xt::xarray<float> split2 = xt::view(images, xt::range(3, 5));
+
 	// std::cout << images << '\n' << std::endl;
-	// std::cout << image << '\n' << std::endl;
+	// std::cout << split1 << '\n' << std::endl;
+	// std::cout << split2 << '\n' << std::endl;
 
 	return 0;
 }

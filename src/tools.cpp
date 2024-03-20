@@ -11,6 +11,8 @@
 #include "dense.h"
 #include "pooling.h"
 #include "output.h"
+#include "image.h"
+#include "const.h"
 
 xt::xarray<float> kernelsGaussianDistro(int depth, int nbKernels, int height, int width)
 {
@@ -102,47 +104,14 @@ xt::xarray<float> normalized(xt::xarray<float> input)
 	return normalized;
 }
 
-int continueTraining()
+int confirm()
 {
-	int train = 0;
+	std::string path;
+	std::string save;
 
 	while (1)
 	{
-		std::string stop;
-
-		std::cout << "continue ? [y/n]" << std::endl;
-		getline(std::cin, stop);
-		std::transform(stop.begin(), stop.end(), stop.begin(),
-					   [](unsigned char c)
-					   { return std::tolower(c); });
-
-		if (!stop.compare("y"))
-		{
-			train = 1;
-			break;
-		}
-		else if (!stop.compare("n"))
-		{
-			train = 0;
-			break;
-		}
-		else
-		{
-			std::cout << "mauvaise commande" << std::endl;
-			continue;
-		}
-	}
-
-	return train;
-}
-
-void saveConfirm(NeuralNetwork nn, bool loaded)
-{
-	while (1)
-	{
-		std::string save;
-
-		std::cout << "save ? [y/n]" << std::endl;
+		std::cout << "confirmation ? [y/n]" << std::endl;
 		getline(std::cin, save);
 		std::transform(save.begin(), save.end(), save.begin(),
 					   [](unsigned char c)
@@ -150,33 +119,63 @@ void saveConfirm(NeuralNetwork nn, bool loaded)
 
 		if (!save.compare("y"))
 		{
-			std::string path;
-
-			path = "../saves/" + nn.name;
-
-			try
-			{
-				std::filesystem::create_directories(path);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Error creating directory: " << path << std::endl;
-				return;
-			}
-
-			nn.save(path);
-			
-			break;
+			return 1;
 		}
 		else if (!save.compare("n"))
 		{
-			break;
+			return 0;
 		}
 		else
 		{
 			continue;
 		}
 	}
+}
+
+std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSet(std::string path, xt::xarray<float> label, int nbData)	{
+	xt::xarray<float> dataset;
+	xt::xarray<float> image;
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> set;
+
+	if (PNGPBM == 0)	{
+		dataset = importAllPNG(path.c_str(), nbData);
+	}
+	else	{
+		dataset = importAllPBM(path.c_str(), nbData);
+	}
+
+	std::tuple<xt::xarray<float>, xt::xarray<float>> stored;
+
+	int datasetSize = dataset.shape()[0];
+
+	for(int i = 0; i < datasetSize; ++i)	{
+		image = xt::view(dataset, i);
+
+		stored = {image, label};
+		set.push_back(stored);
+	}
+
+	return set;
+}
+
+std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSets(std::string path, int nbTotalData)	{
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> sets;
+
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> set0;
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> set1;
+
+	int nbData = nbTotalData >> 1;
+
+	std::cout << "Loading dataset..." << std::endl;
+
+	set0 = loadingSet(path + "/0", {0, 1}, nbData);
+	set1 = loadingSet(path + "/1", {1, 0}, nbData);
+
+	sets.reserve(set0.size() + set1.size());
+	sets.insert(sets.end(), set0.begin(), set0.end());
+	sets.insert(sets.end(), set1.begin(), set1.end());
+
+	return sets;
 }
 
 void display_network(NeuralNetwork nn)
