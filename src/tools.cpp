@@ -144,6 +144,8 @@ std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSet(std::st
 		dataset = importAllPBM(path.c_str(), nbData);
 	}
 
+	xt::random::shuffle(dataset);
+
 	std::tuple<xt::xarray<float>, xt::xarray<float>> stored;
 
 	int datasetSize = dataset.shape()[0];

@@ -63,8 +63,8 @@ class Convolution : public ILayer
             int filtersStride = std::get<3>(filtersShape);
             int filtersPadding = std::get<4>(filtersShape);
 
-            int outputHeight = (inputHeight - filtersHeight + 2 * filtersPadding) / filtersStride + 1;
-            int outputWidth = (inputWidth - filtersWidth + 2 * filtersPadding) / filtersStride + 1;
+            int outputHeight = ((inputHeight - filtersHeight + 2 * filtersPadding) / filtersStride) + 1;
+            int outputWidth = ((inputWidth - filtersWidth + 2 * filtersPadding) / filtersStride) + 1;
 
             this->outputShape = std::tuple<int, int, int>(filtersDepth, outputHeight, outputWidth);
             this->input = xt::empty<float>({inputDepth, inputHeight, inputWidth});
@@ -84,12 +84,15 @@ class Convolution : public ILayer
                 }
                 case softmax:
                     perror("Convolution Activation Type Error");
+					exit(0);
                     break;
                 case sigmoid:
                     perror("Convolution Activation Type Error");
+					exit(0);
                     break;
                 default:
                     perror("Convolution Activation Type Error");
+					exit(0);
             }
         }
 

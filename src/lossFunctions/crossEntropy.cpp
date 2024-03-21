@@ -22,6 +22,7 @@ float CrossEntropy::compute(xt::xarray<float> output, xt::xarray<int> label) {
 		err = -err;
 	} else {
 		perror("Wrong label size Compute");
+		exit(0);
 	}
 
 	return err;
@@ -42,6 +43,7 @@ xt::xarray<float> CrossEntropy::prime(xt::xarray<float> output, xt::xarray<int> 
 		}
 	} else {
 		perror("Wrong label size Prime");
+		exit(0);
 	}
 
 	return prime;

@@ -41,7 +41,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	Dense *dense1 = new Dense(pool_1->output.size(), 16, relu, 25, true, true);
+	Dense *dense1 = new Dense(inputShapeTotal, 8, relu, 25, true, true);
 	// Dense *dense2 = new Dense(dense1->outputShape, 256, relu, 25, true);
 	// Dense *dense3 = new Dense(dense2->outputShape, 256, relu, 25, true);
 
@@ -113,7 +113,7 @@ int main() {
 		testSamples = loadingSets(evalPathPBM, nbImagesEval);
 	}
 
-	nn.train(trainSamples, 0.0, testSamples, 100, 5);
+	nn.train(trainSamples, testSamples, 100, 5);
 
 	std::cout << "Save ?" << std::endl;
 

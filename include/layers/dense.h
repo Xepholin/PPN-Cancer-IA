@@ -116,6 +116,7 @@ class Dense : public ILayer
                     
                 default:
                     perror("Dense Activation Type Error");
+					exit(0);
             }
         }
 

@@ -80,14 +80,21 @@ void NeuralNetwork::batch() {
 	}
 }
 
-void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, float validationSplit, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience) {
+void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience) {
 	if (batchSize > nbImagesTrain) {
 		perror("BatchSize > totalNumberImage");
+		exit(0);
 	}
 
-	if (validationSplit != 0.0 && !validSamples.empty()) {
-		perror("Split validation != 0 avec des échantillons de validation");
-	}
+	// if (validationSplit != 0.0)	{
+	// 	perror("Pas disponible !");
+	// 	exit(0);
+	// }
+
+	// if (validationSplit != 0.0 && !validSamples.empty()) {
+	// 	perror("Split validation != 0 avec des échantillons de validation");
+	// 	exit(0);
+	// }
 
 	std::random_device rd;
 	float trainLoss = 0.0;
@@ -108,17 +115,33 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 	int trainSize = 0;
 
-	if (validationSplit != 0.0) {
-		int ratio = nbImagesTrain * validationSplit;
+	// if (validationSplit != 0.0) {
+	// 	int ratio = nbImagesTrain * validationSplit;
+	// 	int balance = ratio >> 1;
 
-		valid.begin() = samples.begin();
-		valid.end() = samples.begin() + ratio;
-		train.begin() = samples.begin() + ratio;
-		train.end() = samples.end();
-	} else {
-		train = samples;
-		valid = validSamples;
-	}
+	// 	valid.reserve(ratio);
+	// 	train.reserve(nbImagesTrain - ratio);
+		
+	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> part1(samples.begin(), samples.begin() + balance);
+	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> part2(samples.end() - balance, samples.end());
+
+	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>>::const_iterator first = samples.begin() + balance;
+	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>>::const_iterator last = samples.end() - balance;
+
+	// 	valid.insert(valid.end(), part1.begin(), part1.end());
+	// 	valid.insert(valid.end(), part2.begin(), part2.end());
+
+	// 	std::cout << valid.size() << std::endl;
+	// 	std::cout << valid.capacity() << std::endl;
+
+	// 	train.assign(first, last);
+
+	// 	std::cout << train.size() << std::endl;
+	// 	std::cout << train.capacity() << std::endl;
+	// }
+
+	train = std::move(samples);
+	valid = std::move(validSamples);
 
 	trainSize = train.size();
 
@@ -286,6 +309,7 @@ void NeuralNetwork::load(const std::string path) {
 		this->lossFunction = new CrossEntropy();
 	} else {
 		perror("Error with the type of loss function when loading");
+		exit(0);
 	}
 
 	std::cout << this->name << std::endl;
@@ -327,6 +351,7 @@ void NeuralNetwork::load(const std::string path) {
 				type = ACTIVATION_NO_TYPE;
 			} else {
 				perror("Error with the type of activation when loading (conv)");
+				exit(0);
 			}
 
 			layerFile >> a;
@@ -388,6 +413,7 @@ void NeuralNetwork::load(const std::string path) {
 				type = ACTIVATION_NO_TYPE;
 			} else {
 				perror("Error with the type of activation when loading (conv)");
+				exit(0);
 			}
 
 			layerFile >> dropRate;
@@ -425,6 +451,7 @@ void NeuralNetwork::load(const std::string path) {
 				type = ACTIVATION_NO_TYPE;
 			} else {
 				perror("Error with the type of activation when loading (conv)");
+				exit(0);
 			}
 
 			layerFile >> dropRate;
@@ -545,6 +572,7 @@ void NeuralNetwork::save() const {
 			outputFile.close();
 		} else {
 			perror("Cette couche n'existe pas !");
+			exit(0);
 		}
 	}
 

@@ -432,6 +432,7 @@ xt::xarray<bool> importPBM(const char *path)
 
     if (!image.is_open()) {
         perror("Erreur lors de l'ouverture du fichier.");
+		exit(0);
     }
 
     xt::xarray<bool> PBM{xt::empty<bool>({PBMDim, PBMDim})};

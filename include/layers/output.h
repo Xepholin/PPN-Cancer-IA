@@ -109,6 +109,7 @@ public:
 
 		default:
 			perror("Dense Activation Type Error");
+			exit(0);
 		}
 	}
 
