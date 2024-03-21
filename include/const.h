@@ -6,7 +6,7 @@
 #include <string>
 
 // PNG = 0 / PBM sinon
-const int PNGPBM = 1;
+const int PNGPBM = 0;
 
 const int nbImagesTrain = 150000;
 const int nbImagesEval = 7000;
@@ -22,7 +22,7 @@ const std::string evalPathPBM = "../../processed1/eval";
 
 const std::string savePath = "../saves";
 
-// #define IMAGE_TENSOR_DIM {3, PNGDim, PNGDim}
-#define IMAGE_TENSOR_DIM {1, PBMDim, PBMDim}
+#define IMAGE_TENSOR_DIM {3, PNGDim, PNGDim}
+// #define IMAGE_TENSOR_DIM {1, PBMDim, PBMDim}
 
 #endif

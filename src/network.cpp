@@ -330,7 +330,7 @@ void NeuralNetwork::load(const std::string path) {
 			}
 
 			layerFile >> a;
-			Convolution *conv = new Convolution{1, inputShape, filtersShape, type, (bool)a};
+			Convolution *conv = new Convolution{inputShape, filtersShape, type, (bool)a};
 
 			tmpStr = path + "/" + buffer + "_filters.npy";
 

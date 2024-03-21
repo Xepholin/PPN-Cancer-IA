@@ -42,14 +42,14 @@ class Convolution : public ILayer
 		 * @param activationType Le type d'activation à appliquer après la convolution (par défaut, pas d'activation).
 		 * @param normalize Indique si la normalisation doit être appliquée après la convolution (par défaut, désactivée).
 		*/
-        Convolution(int depth, std::tuple<int, int, int> inputShape, 
+        Convolution(std::tuple<int, int, int> inputShape, 
                     std::tuple<int, int, int, int, int> filtersShape, 
                     ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
 					bool normalize = false)
         {
 			name = "Convolution";
 
-            this->depth = depth; // Nombre d'image dans la couche actuelle
+            this->depth = std::get<0>(inputShape); // Nombre d'image dans la couche actuelle
             this->inputShape = inputShape;
             this->filtersShape = filtersShape;
 

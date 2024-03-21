@@ -30,7 +30,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	Convolution* conv1 = new Convolution{1, inputShape, std::tuple{16, 4, 4, 1, 0}, relu};
+	Convolution* conv1 = new Convolution{inputShape, std::tuple{2, 4, 4, 1, 0}, relu};
 	Pooling* pool_1 = new Pooling{conv1->outputShape, 3, 3, PoolingType::POOLING_MAX};
 
 	// Convolution* conv2 = new Convolution{pool_1->depth, pool_1->outputShape, std::tuple{32, 4, 4, 1, 0}, relu};
@@ -41,7 +41,7 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 
 	// ------------------------------------------------------------------------------
 
-	Dense *dense1 = new Dense(pool_1->output.size(), 256, relu, 25, true, true);
+	Dense *dense1 = new Dense(pool_1->output.size(), 16, relu, 25, true, true);
 	// Dense *dense2 = new Dense(dense1->outputShape, 256, relu, 25, true);
 	// Dense *dense3 = new Dense(dense2->outputShape, 256, relu, 25, true);
 
