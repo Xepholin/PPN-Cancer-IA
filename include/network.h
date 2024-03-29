@@ -58,7 +58,7 @@ class NeuralNetwork {
 
 	void batch();
 
-	void train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience);
+	void train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience, float threshold);
 
 	void detect(xt::xarray<float> input);
 

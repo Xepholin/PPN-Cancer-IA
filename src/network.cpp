@@ -80,7 +80,7 @@ void NeuralNetwork::batch() {
 	}
 }
 
-void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience) {
+void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience, float threshold) {
 	if (batchSize > nbImagesTrain) {
 		perror("BatchSize > totalNumberImage");
 		exit(0);
@@ -185,7 +185,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 		nbEpoch++;
 		trainLoss = trainLoss / (float)trainSize;
 
-		std::cout << "loss: " << trainLoss << "(time: " << duration.count() << " sec)" << std::endl;
+		std::cout << "loss: " << trainLoss << " (time: " << duration.count() << " sec)" << std::endl;
 
 		std::cout << "Evaluation avec Validation" << std::endl;
 
@@ -207,6 +207,9 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 				if (confirm()) {
 					break;
 				}
+				else	{
+					count1 = 0;
+				}
 			}
 		} else {
 			minValidLoss = actualValidLoss;
@@ -216,7 +219,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 			count1 = 0;
 		}
 
-		if (std::fabs(actualValidLoss - trainLoss) > std::fabs(meanValidLoss - meanTrainLoss)) {
+		if (std::fabs(actualValidLoss - trainLoss) > std::fabs(meanValidLoss - meanTrainLoss) && std::fabs(actualValidLoss - trainLoss) > threshold) {
 			count2++;
 
 			if (count2 == patience) {
@@ -224,6 +227,9 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 				if (confirm()) {
 					break;
+				}
+				else	{
+					count2 = 0;
 				}
 			}
 		} else {

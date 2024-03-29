@@ -72,15 +72,19 @@ NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, floa
 
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(inputShapeTotal, 256, relu, 25, true, true);
+    Dense *dense1 = new Dense(inputShapeTotal, 256, relu, 30, true, true);
+    Dense *dense2 = new Dense(256, 256, relu, 30, true);
+    Dense *dense3 = new Dense(256, 256, relu, 30, true);
 
     // ------------------------------------------------------------------------------
 
-    Output *output = new Output(dense1->outputShape, 2, softmax);
+    Output *output = new Output(dense3->outputShape, 2, softmax);
 
     // ------------------------------------------------------------------------------
 
     model.add(dense1);
+    model.add(dense2);
+    model.add(dense3);
     model.add(output);
 
     return model;
@@ -90,7 +94,7 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN2(IMAGE_TENSOR_DIM, "topo7", 0.0001, cross_entropy, 32, 0.0, true);
+	NeuralNetwork nn = CNN10(IMAGE_TENSOR_DIM, "topo1", 0.0001, cross_entropy, 16, 0.0, true);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo5");
@@ -113,7 +117,7 @@ int main() {
 		testSamples = loadingSets(evalPathPBM, nbImagesEval);
 	}
 
-	nn.train(trainSamples, testSamples, 100, 5);
+	nn.train(trainSamples, testSamples, 100, 5, 0.2);
 
 	std::cout << "Save ?" << std::endl;
 
