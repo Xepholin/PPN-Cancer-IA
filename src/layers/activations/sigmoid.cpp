@@ -16,10 +16,19 @@ xt::xarray<float> Sigmoid::backward(xt::xarray<float> cost, float learningRate) 
 }
 
 
-float Sigmoid::prime(float x) // x
+// xt::xarray<float> Sigmoid::prime(xt::xarray<float> input) // x
+// {
+
+// 	float sig = 1.0 / (1.0+ std::exp(-x));
+//     return sig *(1-sig);
+// }
+
+
+xt::xarray<float> Sigmoid::prime(xt::xarray<float> input) // x
 {
-	float sig = 1.0 / (1.0+ std::exp(-x));
-    return sig *(1-sig);
+
+    auto ret = 1.0 /(1.0 + xt::exp(-input) );
+    return ret *(1-ret);
 }
 
 void Sigmoid::print() const

@@ -8,24 +8,27 @@
 
 #include "tools.h"
 
-void Output::forward(xt::xarray<float> input) {
+void Output::forward(xt::xarray<float> input)
+{
 	this->input = input;
 
 	this->dropout();
-	
-	cblas_sgemv(CblasRowMajor, CblasTrans, this->inputShape, this->outputShape, 1.0, this->weights.data(), this->outputShape, this->input.data(), 1, 0.0, this->output.data(), 1);	
+
+	cblas_sgemv(CblasRowMajor, CblasTrans, this->inputShape, this->outputShape, 1.0, this->weights.data(), this->outputShape, this->input.data(), 1, 0.0, this->output.data(), 1);
 	this->output += bias;
 
 	this->baOutput = this->output;
 
-	if (this->activation->name != "Activation") {
+	if (this->activation->name != "Activation")
+	{
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
 
 	this->bnOutput = this->output;
 
-	if (this->normalize) {
+	if (this->normalize)
+	{
 		this->norm();
 	}
 
@@ -41,7 +44,6 @@ void Output::forward(xt::xarray<float> input) {
 	// std::cout << std::endl;
 }
 
-
 xt::xarray<float> Output::backward(
 	xt::xarray<float> gradient,
 	float learningRate)
@@ -51,19 +53,14 @@ xt::xarray<float> Output::backward(
 	vsAdd(this->outputShape, this->gammasGradient.data(), bnOutput.data(), this->gammasGradient.data());
 	vsAdd(this->outputShape, gradient.data(), this->betasGradient.data(), this->betasGradient.data());
 
-
-
 	// Calculer le gradient pour chaque neurone de sortie
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 	xt::xarray<float> primeVector = xt::empty<float>({outputShape});
-	for (int i = 0; i < outputShape; ++i)
-	{
-		primeVector(i) = this->activation->prime(baOutput(i));
-	}
+
+	primeVector = this->activation->prime(baOutput);
+
 	vsMul(this->outputShape, this->gammas.data(), primeVector.data(), primeVector.data());
 	vsMul(this->outputShape, primeVector.data(), gradient.data(), layerGradient.data());
-
-
 
 	// Calculer les gradients des poids et des biais
 	for (int i = 0; i < inputShape; ++i)
@@ -82,13 +79,13 @@ xt::xarray<float> Output::backward(
 	return inputGradient;
 }
 
-
-
 xt::xarray<float> Output::oldbackward(
 	xt::xarray<float> gradient,
-	float learningRate) {
+	float learningRate)
+{
 
-	for (int i = 0; i < outputShape; ++i) {
+	for (int i = 0; i < outputShape; ++i)
+	{
 		this->gammasGradient(i) = this->gammasGradient(i) + (gradient(i) * bnOutput(i));
 		this->betasGradient(i) = this->betasGradient(i) + gradient(i);
 	}
@@ -96,24 +93,25 @@ xt::xarray<float> Output::oldbackward(
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 
 	// Calculer le gradient pour chaque neurone de sortie
-	for (int i = 0; i < outputShape; ++i) {
-		layerGradient(i) = this->activation->prime(baOutput(i)) * this->gammas(i) * gradient(i);
-	}
+	layerGradient = this->activation->prime(baOutput) * this->gammas * gradient;
 
 	float inputValue = 0.0;
 
 	// Calculer les gradients des poids et des biais
-	for (int i = 0; i < inputShape; ++i) {
+	for (int i = 0; i < inputShape; ++i)
+	{
 		inputValue = input(i);
 
-		for (int j = 0; j < outputShape; ++j) {
+		for (int j = 0; j < outputShape; ++j)
+		{
 			this->weightsGradient(i, j) = this->weightsGradient(i, j) + (inputValue * layerGradient(j));
 			// Application du taux d'apprentissage déplacée ici
 		}
 	}
 
 	// Mise à jour des poids et des biais
-	for (int i = 0; i < outputShape; ++i) {
+	for (int i = 0; i < outputShape; ++i)
+	{
 		this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
 	}
 
@@ -128,8 +126,10 @@ xt::xarray<float> Output::oldbackward(
 	// 	inputGradient(i) = sum;
 	// }
 
-	for (int i = 0; i < inputShape; ++i)	{
-		for (int j = 0; j < outputShape; ++j)	{
+	for (int i = 0; i < inputShape; ++i)
+	{
+		for (int j = 0; j < outputShape; ++j)
+		{
 			inputGradient(i) = weights(i, j) * layerGradient(j);
 		}
 	}
@@ -137,40 +137,52 @@ xt::xarray<float> Output::oldbackward(
 	return inputGradient;
 }
 
-void Output::norm() {
+void Output::norm()
+{
 	auto mean = xt::mean(this->output);
 	auto std = xt::stddev(this->output);
 
 	this->output = (this->output - mean) / (std + 10e-6);
 
-	for (int i = 0; i < outputShape; ++i) {
+	for (int i = 0; i < outputShape; ++i)
+	{
 		this->output(i) = (this->output(i) * this->gammas(i)) + this->betas(i);
 	}
 }
 
-void Output::print() const {
+void Output::print() const
+{
 	std::cout << "Output: " << this->output.shape()[0] << " fully connected neurons"
 			  << "\n          |\n          v" << std::endl;
 }
 
-void Output::dropout() {
-	std::random_device rd;
-	std::mt19937 gen(rd());
+void Output::dropout()
+{
+	// std::random_device rd;
+	// std::mt19937 gen(rd());
 
-	for (int i = 0; i < this->weights.shape()[0]; ++i) {
-		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen)) {
-			this->input(i) = 0;
-		}
-	}
+	// for (int i = 0; i < this->weights.shape()[0]; ++i)
+	// {
+	// 	if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen))
+	// 	{
+	// 		this->input(i) = 0;
+	// 	}
+	// }
+
+	xt::xarray<int> rand = xt::random::randint({input.shape()[0]}, 1, 100);
+	this->input = xt::where(dropRate >= rand, 0, input);
+
 }
 
-void Output::heWeightsInit() {
+void Output::heWeightsInit()
+{
 	float std = sqrt(2.0 / (static_cast<float>(this->inputShape)));
 
 	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);
 }
 
-void Output::XGWeightsInit() {
+void Output::XGWeightsInit()
+{
 	float std = sqrt(2.0 / (static_cast<float>(this->inputShape) + this->outputShape));
 
 	this->weights = xt::random::randn<float>({this->inputShape, this->outputShape}, 0, std);

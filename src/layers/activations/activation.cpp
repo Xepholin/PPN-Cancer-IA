@@ -13,9 +13,9 @@ xt::xarray<float> Activation::backward(xt::xarray<float> cost, float learningRat
 	return 0;
 }
 
-float Activation::prime(float x)    {
+xt::xarray<float> Activation::prime(xt::xarray<float> input)    {
     std::cout << "Activation prime" << std::endl;
-    return 0.0;
+    return input;
 }
 
 void Activation::print() const

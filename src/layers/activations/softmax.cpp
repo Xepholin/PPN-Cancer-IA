@@ -27,16 +27,29 @@ xt::xarray<float> Softmax::backward(xt::xarray<float> cost, float learningRate) 
 }
 
 
-float Softmax::prime(float x) // x
+// xt::xarray<float> Softmax::prime(xt::xarray<float> x) // x
+// {
+//     float exp_x = std::exp(x);
+//     float expSum = xt::sum(xt::exp(this->input))();
+
+//     // Calculate softmax
+//     float softmax_x = exp_x / expSum;
+
+//     // Calculate softmax prime
+//     float softmax_prime_x = softmax_x * (1.0f - softmax_x);
+
+//     return softmax_prime_x;
+// }
+
+xt::xarray<float> Softmax::prime(xt::xarray<float> input) // x
 {
-    float exp_x = std::exp(x);
     float expSum = xt::sum(xt::exp(this->input))();
 
     // Calculate softmax
-    float softmax_x = exp_x / expSum;
+    auto softmax_x = xt::exp(input) / expSum;
 
     // Calculate softmax prime
-    float softmax_prime_x = softmax_x * (1.0f - softmax_x);
+    auto softmax_prime_x = softmax_x * (1.0f - softmax_x);
 
     return softmax_prime_x;
 }
