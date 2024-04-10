@@ -32,7 +32,7 @@ class Activation : public ILayer
 
         virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
-        virtual float prime(float x);
+        virtual xt::xarray<float> prime(xt::xarray<float> input);
 
         virtual void print() const override;
 };

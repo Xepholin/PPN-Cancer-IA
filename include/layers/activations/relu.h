@@ -39,7 +39,7 @@ class ReLu : public Activation
         
         virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 
-        virtual float prime(float x) override;
+        virtual xt::xarray<float> prime(xt::xarray<float> input) override;
 
         void print() const override;
         
