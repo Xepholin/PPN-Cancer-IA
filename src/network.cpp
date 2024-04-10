@@ -23,7 +23,7 @@ void NeuralNetwork::add(ILayer *layer) {
 	return;
 }
 
-void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
+void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label, float batchSize) {
 	int nnSize = this->nn.size() - 1;
 	this->nn[0]->forward(input);
 
@@ -34,6 +34,8 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label) {
 	xt::xarray<float> recycling;
 
 	recycling = lossFunction->prime(nn[nnSize]->output, label);
+
+	recycling /= batchSize;
 
 	for (int i = nnSize; i >= 0; --i) {
 		if (this->nn[i]->name == "Output" || this->nn[i]->name == "Dense") {
@@ -167,7 +169,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 			image = std::get<0>(train[i]);
 			label = std::get<1>(train[i]);
 
-			this->iter(image, label);
+			this->iter(image, label, batchSize);
 
 			trainLoss += lossFunction->compute(this->nn[this->nn.size() - 1]->output, label);
 
@@ -237,6 +239,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 		}
 
 		if (nbEpoch % epochs == 0) {
+			exit(0);
 			std::cout << "Le nombre d'époque a été atteint... STOP ?" << std::endl;
 
 			if (confirm()) {

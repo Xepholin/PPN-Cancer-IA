@@ -7,6 +7,7 @@
 #include <xtensor/xmath.hpp>
 
 #include "tools.h"
+#include "const.h"
 
 void Output::forward(xt::xarray<float> input) {
 	this->input = input;
@@ -52,7 +53,6 @@ xt::xarray<float> Output::backward(
 	vsAdd(this->outputShape, gradient.data(), this->betasGradient.data(), this->betasGradient.data());
 
 
-
 	// Calculer le gradient pour chaque neurone de sortie
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
 	xt::xarray<float> primeVector = xt::empty<float>({outputShape});
@@ -60,10 +60,9 @@ xt::xarray<float> Output::backward(
 	{
 		primeVector(i) = this->activation->prime(baOutput(i));
 	}
+
 	vsMul(this->outputShape, this->gammas.data(), primeVector.data(), primeVector.data());
 	vsMul(this->outputShape, primeVector.data(), gradient.data(), layerGradient.data());
-
-
 
 	// Calculer les gradients des poids et des biais
 	for (int i = 0; i < inputShape; ++i)

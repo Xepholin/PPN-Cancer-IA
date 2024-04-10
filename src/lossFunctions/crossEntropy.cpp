@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include <xtensor/xrandom.hpp>
+#include <xtensor/xio.hpp>
 
 float CrossEntropy::compute(xt::xarray<float> output, xt::xarray<int> label) {
 	float err = 0.0;
@@ -12,14 +13,10 @@ float CrossEntropy::compute(xt::xarray<float> output, xt::xarray<int> label) {
 		for (int i = 0; i < labelSize; ++i) {
 			err += -(label(i) * logf(output(i)) + (1.0 - label(i)) * logf(1.0 - output(i)));
 		}
-
-		err *= 1.0 / labelSize;
 	} else if (labelSize > 2) {
 		for (int i = 0; i < labelSize; ++i) {
-			err += (label(i) * logf(output(i)));
+			err += -(label(i) * logf(output(i)));
 		}
-
-		err = -err;
 	} else {
 		perror("Wrong label size Compute");
 		exit(0);

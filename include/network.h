@@ -54,7 +54,7 @@ class NeuralNetwork {
 
 	void dropDense();
 
-	void iter(xt::xarray<float> input, xt::xarray<int> trueLabel);
+	void iter(xt::xarray<float> input, xt::xarray<int> trueLabel, float trainSize);
 
 	void batch();
 

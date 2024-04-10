@@ -72,19 +72,15 @@ NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, floa
 
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(inputShapeTotal, 256, relu, 30, true, true);
-    Dense *dense2 = new Dense(256, 256, relu, 30, true);
-    Dense *dense3 = new Dense(256, 256, relu, 30, true);
+    Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 30, true, true);
 
     // ------------------------------------------------------------------------------
 
-    Output *output = new Output(dense3->outputShape, 2, softmax);
+    Output *output = new Output(dense1->outputShape, 2, softmax);
 
     // ------------------------------------------------------------------------------
 
     model.add(dense1);
-    model.add(dense2);
-    model.add(dense3);
     model.add(output);
 
     return model;
@@ -117,13 +113,13 @@ int main() {
 		testSamples = loadingSets(evalPathPBM, nbImagesEval);
 	}
 
-	nn.train(trainSamples, testSamples, 100, 5, 0.2);
+	nn.train(trainSamples, testSamples, 5, 5, 0.2);
 
-	std::cout << "Save ?" << std::endl;
+	// std::cout << "Save ?" << std::endl;
 
-	if (confirm())	{
-		nn.save();
-	}
+	// if (confirm())	{
+	// 	nn.save();
+	// }
 
 	// xt::xarray<float> images = xt::random::rand<float>({5, 5, 5});
 	
