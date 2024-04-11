@@ -74,8 +74,9 @@ target_include_directories(main.exe PRIVATE
 )
 
 find_package(PNG REQUIRED)
-target_link_libraries(main.exe PRIVATE PNG::PNG blas mkl_intel_lp64 mkl_sequential mkl_core mkl_gnu_thread gomp)
+find_package(xtensor REQUIRED)
 
+target_link_libraries(main.exe PRIVATE PNG::PNG blas mkl_intel_lp64 mkl_sequential mkl_core mkl_gnu_thread gomp xtensor xtensor::optimize)
 
 # # Include Google Test
 # find_package(GTest REQUIRED)
