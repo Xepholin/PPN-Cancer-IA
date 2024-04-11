@@ -72,34 +72,32 @@ NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, floa
 
     // ------------------------------------------------------------------------------
 
-    Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 30, true, true);
+    Dense *dense1 = new Dense(inputShapeTotal, 64, relu, 25, true, true);
+
+    // ------------------------------------------------------------------------------
+    Dense *dense2 = new Dense(dense1->outputShape, 64, relu, 25, true);
 
     // ------------------------------------------------------------------------------
 
-    Output *output = new Output(dense1->outputShape, 2, softmax);
+    Output *output = new Output(dense2->outputShape, 2, softmax);
 
     // ------------------------------------------------------------------------------
 
     model.add(dense1);
+    model.add(dense2);
     model.add(output);
 
     return model;
 }
 
 int main() {
-	xt::random::seed(time(nullptr));
-	// xt::random::seed(42);
+	// xt::random::seed(time(nullptr));
+	xt::random::seed(42);
 
-	NeuralNetwork nn = CNN10(IMAGE_TENSOR_DIM, "topo1", 0.0001, cross_entropy, 16, 0.0, true);
+	NeuralNetwork nn = CNN10(IMAGE_TENSOR_DIM, "topo1", 0.001, cross_entropy, 32, 0.0, true);
 
 	// NeuralNetwork nn;
-	// nn.load("../saves/topo5");
-
-	// std::cout << "nbEpoch: " << nn.nbEpoch << std::endl;
-
-	// xt::xarray<float> image = importPBM("../../image/8863_idx5_x101_y1201_class0.pbm", 48);
-
-	// nn.iter(image, xt::xarray<float>{0, 1});
+	// nn.load("../saves/topo1");
 
 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
@@ -113,7 +111,7 @@ int main() {
 		testSamples = loadingSets(evalPathPBM, nbImagesEval);
 	}
 
-	nn.train(trainSamples, testSamples, 5, 5, 0.2);
+	nn.train(trainSamples, testSamples, 100, 5, 0.2);
 
 	// std::cout << "Save ?" << std::endl;
 

@@ -56,7 +56,7 @@ class NeuralNetwork {
 
 	void iter(xt::xarray<float> input, xt::xarray<int> trueLabel, float trainSize);
 
-	void batch();
+	void batch(float size);
 
 	void train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience, float threshold);
 

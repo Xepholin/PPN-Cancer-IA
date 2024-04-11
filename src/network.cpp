@@ -46,32 +46,32 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label, float b
 	}
 }
 
-void NeuralNetwork::batch() {
+void NeuralNetwork::batch(float size) {
 	for (int i = this->nn.size() - 1; i >= 0; --i) {
 		if (Output *output = dynamic_cast<Output *>(this->nn[i])) {
-			output->weights = output->weights + (-learningRate) * (output->weightsGradient / (float)batchSize);
-			output->bias = output->bias + (-learningRate) * (output->biasGradient / (float)batchSize);
+			output->weights = output->weights + (-learningRate) * (output->weightsGradient / size);
+			output->bias = output->bias + (-learningRate) * (output->biasGradient / size);
 
 			output->weightsGradient.fill(0.0);
 			output->biasGradient.fill(0.0);
 
 			if (output->normalize) {
-				output->gammas = output->gammas + (-learningRate) * (output->gammasGradient / (float)batchSize);
-				output->betas = output->betas + (-learningRate) * (output->betasGradient / (float)batchSize);
+				output->gammas = output->gammas + (-learningRate) * (output->gammasGradient / size);
+				output->betas = output->betas + (-learningRate) * (output->betasGradient / size);
 
 				output->gammasGradient.fill(0.0);
 				output->betasGradient.fill(0.0);
 			}
 		} else if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
-			dense->weights = dense->weights + (-learningRate) * (dense->weightsGradient / (float)batchSize);
-			dense->bias = dense->bias + (-learningRate) * (dense->biasGradient / (float)batchSize);
+			dense->weights = dense->weights + (-learningRate) * (dense->weightsGradient / size);
+			dense->bias = dense->bias + (-learningRate) * (dense->biasGradient / size);
 
 			dense->weightsGradient.fill(0.0);
 			dense->biasGradient.fill(0.0);
 
 			if (dense->normalize) {
-				dense->gammas = dense->gammas + (-learningRate) * (dense->gammasGradient / (float)batchSize);
-				dense->betas = dense->betas + (-learningRate) * (dense->betasGradient / (float)batchSize);
+				dense->gammas = dense->gammas + (-learningRate) * (dense->gammasGradient / size);
+				dense->betas = dense->betas + (-learningRate) * (dense->betasGradient / size);
 
 				dense->gammasGradient.fill(0.0);
 				dense->betasGradient.fill(0.0);
@@ -151,6 +151,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 	xt::xarray<float> label;
 
 	int dim1 = image.shape()[0];
+	int r = trainSize % batchSize;
 
 	std::cout << "Start training..." << std::endl;
 
@@ -174,12 +175,14 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 			trainLoss += lossFunction->compute(this->nn[this->nn.size() - 1]->output, label);
 
 			if (i % batchSize == 0 && i != 0) {
-				this->batch();
+				this->batch((float)batchSize);
 				// std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
 			}
 		}
 
-		this->batch();
+		if (r > 0)	{
+			this->batch((float)r);
+		}
 
 		auto endTime = std::chrono::steady_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
@@ -311,23 +314,14 @@ void NeuralNetwork::load(const std::string path) {
 	inputFile >> this->validSplit;
 	inputFile >> this->shuffle;
 
-	if (info.compare("MSE")) {
+	if (!info.compare("MSE")) {
 		this->lossFunction = new MSE();
-	} else if (info.compare("Cross Entropy")) {
-		std::cout << "here" << std::endl;
+	} else if (!info.compare("CrossEntropy")) {
 		this->lossFunction = new CrossEntropy();
 	} else {
 		perror("Error with the type of loss function when loading");
 		exit(0);
 	}
-
-	std::cout << this->name << std::endl;
-	std::cout << this->nbEpoch << std::endl;
-	std::cout << size << std::endl;
-	std::cout << this->batchSize << std::endl;
-	std::cout << this->learningRate << std::endl;
-	std::cout << info << std::endl;
-	std::cout << this->accuracy << std::endl;
 
 	std::string buffer;
 
