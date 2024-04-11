@@ -213,3 +213,29 @@ void display_network(NeuralNetwork nn)
 		}
 	}
 }
+
+
+static unsigned long xx = 123456789, yy = 362436069, zz = 521288629;
+
+void setseed_xorshf96(void)
+{
+	srand(time(NULL));
+	xx = rand();
+	yy = rand();
+	zz = rand();
+}
+
+u_int32_t xorshf96(void)
+{ // period 2^96-1
+	uint32_t t;
+	xx ^= xx << 16;
+	xx ^= xx >> 5;
+	xx ^= xx << 1;
+
+	t = xx;
+	xx = yy;
+	yy = zz;
+	zz = t ^ xx ^ yy;
+
+	return (u_int32_t) zz;
+}

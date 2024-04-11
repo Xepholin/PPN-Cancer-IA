@@ -5,6 +5,8 @@
 #include <iostream>
 #include <random>
 #include <xtensor/xmath.hpp>
+#include <xtensor/xrandom.hpp>
+#include <immintrin.h>
 
 #include "tools.h"
 #include "const.h"
@@ -53,7 +55,6 @@ xt::xarray<float> Output::backward(
 	vsMul(this->outputShape, gradient.data(), bnOutput.data(), bnOutput.data());
 	vsAdd(this->outputShape, this->gammasGradient.data(), bnOutput.data(), this->gammasGradient.data());
 	vsAdd(this->outputShape, gradient.data(), this->betasGradient.data(), this->betasGradient.data());
-
 
 	// Calculer le gradient pour chaque neurone de sortie
 	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
@@ -170,10 +171,30 @@ void Output::dropout()
 	// 		this->input(i) = 0;
 	// 	}
 	// }
+	
+	xt::xarray<int> rand = xt::random::randint({input.shape()[0]}, 0, 100);
 
-	xt::xarray<int> rand = xt::random::randint({input.shape()[0]}, 1, 100);
-	this->input = xt::where(dropRate >= rand, 0, input);
 
+	__m256i drop = _mm256_set1_epi32(dropRate);
+	int k = 0;
+	for (int i = 0; i < input.shape()[0] / 8; ++i)
+	{
+		__m256i ran_int = _mm256_loadu_epi32(rand.data()+i*8);
+		ran_int = _mm256_cmpgt_epi32(ran_int, drop);
+		__m256 inp = _mm256_and_ps((__m256)ran_int, _mm256_loadu_ps(this->input.data() + i * 8));
+
+		_mm256_storeu_ps(this->input.data() + i * 8, inp);
+		++k;
+	}
+
+	for (int i = 8 * k; i < input.shape()[0]; ++i)
+	{
+		if (dropRate >= rand(i))
+		{
+			this->input(i) = 0.0;
+		}
+	}
+	
 }
 
 void Output::heWeightsInit()
