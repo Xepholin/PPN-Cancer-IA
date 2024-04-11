@@ -90,11 +90,48 @@ NeuralNetwork CNN10(std::tuple<int, int, int> inputShape, std::string name, floa
     return model;
 }
 
+// 74%
+NeuralNetwork CNN11(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize,float validSplit, bool shuffle)
+{
+
+	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
+
+	// Convolution* conv1 = new Convolution{1, inputShape, std::tuple{6, 4, 4, 1, 0}, relu};
+	// Pooling* pool_1 = new Pooling{conv1->outputShape, 3, 3, PoolingType::POOLING_MAX};
+
+	// ------------------------------------------------------------------------------
+
+	// Convolution* conv2 = new Convolution{pool_1->depth, pool_1->outputShape, std::tuple{12, 4, 4, 1, 0}, relu};
+	// Pooling* pool_2 = new Pooling{conv2->outputShape, 3, 3, PoolingType::POOLING_MAX};
+
+	// ------------------------------------------------------------------------------
+
+	// Dense *dense1 = new Dense(pool_1->output.size(), 32, relu, 0, false, true);
+	Dense *dense1 = new Dense(48 * 48, 32, relu, 20, false, true);
+	Dense *dense2 = new Dense(32, 16, relu, 20, false, false);
+	Dense *dense3 = new Dense(16, 10, relu, 20, false, false);
+
+	// ------------------------------------------------------------------------------
+
+	Output *output = new Output(dense3->outputShape, 2, softmax);
+
+	// ------------------------------------------------------------------------------
+
+	// model.add(conv1);
+	// model.add(pool_1);
+	model.add(dense1);
+	model.add(dense2);
+	model.add(dense3);
+	model.add(output);
+
+	return model;
+}
+
 int main() {
 	// xt::random::seed(time(nullptr));
 	xt::random::seed(42);
 
-	NeuralNetwork nn = CNN10(IMAGE_TENSOR_DIM, "topo1", 0.001, cross_entropy, 32, 0.0, true);
+	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo1", 0.001, mse, 1, 0.0, true);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo1");
