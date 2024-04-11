@@ -4,6 +4,7 @@
 #include <random>
 #include <xtensor/xmath.hpp>
 #include <mkl.h>
+#include <immintrin.h>
 
 #include "tools.h"
 
@@ -180,9 +181,37 @@ void Dense::dropout()
 	// 		this->input(i) = 0;
 	// 	}
 	// }
+	xt::xarray<uint32_t> rand = xt::empty<uint32_t>({input.shape()[0]});
+	for (int i = 0; i < input.shape()[0]; ++i)
+	{
+		rand(i) = xorshf96();
+	}
+	rand %=100;
 
-	xt::xarray<int> rand = xt::random::randint({input.shape()[0]}, 1, 100);
-	this->input = xt::where(dropRate >= rand, 0, input);
+	__m256i drop = _mm256_set1_epi32(dropRate);
+	__m256i mask = _mm256_set1_epi32(1);
+
+	int k = 0;
+	for (int i = 0; i < input.shape()[0] / 8; ++i)
+	{
+		__m256i ran_int = _mm256_loadu_epi32(rand.data());
+		ran_int = _mm256_cmpgt_epi32(ran_int, drop);
+
+		__m256 ran_float = _mm256_cvtepi32_ps(_mm256_and_si256(ran_int, mask));
+
+		__m256 inp = _mm256_mul_ps(ran_float, _mm256_loadu_ps(this->input.data() + i * 8));
+
+		_mm256_storeu_ps(this->input.data() + i * 8, inp);
+		++k;
+	}
+
+	for (int i = 8 * k; i < input.shape()[0]; ++i)
+	{
+		if (dropRate >= rand(i))
+		{
+			this->input(i) = 0;
+		}
+	}
 }
 
 void Dense::heWeightsInit()

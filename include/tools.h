@@ -22,5 +22,8 @@ void display_network(NeuralNetwork nn);
 
 xt::xarray<float> dot_product_fma(xt::xarray<float> weights, xt::xarray<float> input);
 
+void setseed_xorshf96(void);
+u_int32_t xorshf96(void);
+
 
 #endif
