@@ -1,6 +1,7 @@
 #include <png.h>
 
 #include <vector>
+#include <algorithm>
 
 #include <fstream>
 #include <iomanip>
@@ -231,6 +232,7 @@ xt::xarray<float> toGrayScale(Image a)
 	uint8_t red = 0;
 	uint8_t green = 0;
 	uint8_t blue = 0;
+	uint8_t max_val = 0;
 
     for (int y = 0; y < PNGDim; ++y)
     {
@@ -240,10 +242,13 @@ xt::xarray<float> toGrayScale(Image a)
             green = a.g(y, x);
             blue = a.b(y, x);
 
+			max_val = std::max({red, green, blue}); 
+
             // NTSC formula
             //  uint8_t gray = static_cast<uint8_t>(0.299 * red + 0.587 * green + 0.114 * blue);
 
-            grayMatrice(y, x) = (red + green + blue) / 3;
+            // grayMatrice(y, x) = (red + green + blue) / 3;
+            grayMatrice(y, x) = max_val;
         }
     }
     return grayMatrice;
