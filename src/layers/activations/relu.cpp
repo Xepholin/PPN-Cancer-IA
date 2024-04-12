@@ -2,7 +2,7 @@
 
 #include "relu.h"
 
-void ReLu::forward(xt::xarray<float> input)
+void ReLu::forward(xt::xarray<float> input, bool training)
 {
     this->output = xt::where(input <= 0, 0.0, input);
 }

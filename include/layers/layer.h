@@ -19,7 +19,7 @@ class ILayer
         xt::xarray<float> input;
         xt::xarray<float> output;
 
-        virtual void forward(xt::xarray<float> input);
+        virtual void forward(xt::xarray<float> input, bool training = true);
 
         virtual xt::xarray<float> backward(
 				xt::xarray<float> gradient,

@@ -100,7 +100,7 @@ class Convolution : public ILayer
             delete this->activation;
         }
 
-        void forward(xt::xarray<float> input) override;
+        void forward(xt::xarray<float> input, bool training = true) override;
 
         xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
 

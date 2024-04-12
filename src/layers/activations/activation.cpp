@@ -2,7 +2,7 @@
 
 #include "activation.h"
 
-void Activation::forward(xt::xarray<float> input)
+void Activation::forward(xt::xarray<float> input, bool training)
 {
     std::cout << "Activation forward" << std::endl;
 }

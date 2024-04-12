@@ -61,7 +61,6 @@ class Dense : public ILayer
 			  ActivationType activationType = ActivationType::ACTIVATION_NO_TYPE,
 			  int dropRate = 0, bool normalize = false, bool flatten = false)	{
 			name = "Dense";
-
             this->inputShape = inputShape;
             this->outputShape = outputShape;
             this->weightsShape = std::tuple<int, int>{inputShape,outputShape};
@@ -124,7 +123,7 @@ class Dense : public ILayer
             delete this->activation;
         }
 
-        virtual void forward(xt::xarray<float> input) override;
+        virtual void forward(xt::xarray<float> input, bool training = true) override;
 
         virtual xt::xarray<float> backward(
 				xt::xarray<float> gradient,

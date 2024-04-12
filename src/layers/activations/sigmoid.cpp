@@ -3,7 +3,7 @@
 
 #include "sigmoid.h"
 
-void Sigmoid::forward(xt::xarray<float> input)
+void Sigmoid::forward(xt::xarray<float> input, bool training)
 {
     this->input = input;
 	this->output = 1.0 / (1.0 + xt::exp(-input) );

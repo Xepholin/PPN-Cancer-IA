@@ -2,7 +2,7 @@
 
 #include "layer.h"
 
-void ILayer::forward(xt::xarray<float> input)
+void ILayer::forward(xt::xarray<float> input, bool training)
 {
     std::cout << "forward ILayer" << std::endl;
 }

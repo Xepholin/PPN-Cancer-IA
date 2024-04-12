@@ -3,7 +3,7 @@
 #include "pooling.h"
 #include "conv_op.h"
 
-void Pooling::forward(xt::xarray<float> input)
+void Pooling::forward(xt::xarray<float> input, bool training)
 {
     this->input = input;
 	int outputShape = this->output.shape()[0];

@@ -5,7 +5,7 @@
 #include "conv_op.h"
 #include "tools.h"
 
-void Convolution::forward(xt::xarray<float> input) {
+void Convolution::forward(xt::xarray<float> input, bool training) {
 	this->input = input;
 	// std::cout << "input\n" << this->input << '\n' << std::endl;
 	// std::cout << "filters\n" << this->filters << '\n' << std::endl;

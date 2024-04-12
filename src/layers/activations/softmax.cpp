@@ -3,7 +3,7 @@
 
 #include "softmax.h"
 
-void Softmax::forward(xt::xarray<float> input)
+void Softmax::forward(xt::xarray<float> input, bool training)
 {
     this->input = input;
 

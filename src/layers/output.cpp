@@ -11,11 +11,13 @@
 #include "tools.h"
 #include "const.h"
 
-void Output::forward(xt::xarray<float> input)
+void Output::forward(xt::xarray<float> input, bool training)
 {
 	this->input = input;
 
-	this->dropout();
+	if (training)	{
+		this->dropout();
+	}
 
 	cblas_sgemv(CblasRowMajor, CblasTrans, this->inputShape, this->outputShape, 1.0, this->weights.data(), this->outputShape, this->input.data(), 1, 0.0, this->output.data(), 1);
 	this->output += bias;
@@ -161,40 +163,38 @@ void Output::print() const
 
 void Output::dropout()
 {
-	// std::random_device rd;
-	// std::mt19937 gen(rd());
+	std::random_device rd;
+	std::mt19937 gen(rd());
 
-	// for (int i = 0; i < this->weights.shape()[0]; ++i)
-	// {
-	// 	if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen))
-	// 	{
-	// 		this->input(i) = 0;
-	// 	}
-	// }
-	
-	xt::xarray<int> rand = xt::random::randint({input.shape()[0]}, 0, 100);
-
-
-	__m256i drop = _mm256_set1_epi32(dropRate);
-	int k = 0;
-	for (int i = 0; i < input.shape()[0] / 8; ++i)
+	for (int i = 0; i < this->weights.shape()[0]; ++i)
 	{
-		__m256i ran_int = _mm256_loadu_epi32(rand.data()+i*8);
-		ran_int = _mm256_cmpgt_epi32(ran_int, drop);
-		__m256 inp = _mm256_and_ps((__m256)ran_int, _mm256_loadu_ps(this->input.data() + i * 8));
-
-		_mm256_storeu_ps(this->input.data() + i * 8, inp);
-		++k;
-	}
-
-	for (int i = 8 * k; i < input.shape()[0]; ++i)
-	{
-		if (dropRate >= rand(i))
+		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen))
 		{
-			this->input(i) = 0.0;
+			this->input(i) = 0;
 		}
 	}
 	
+	// xt::xarray<int> rand = xt::random::randint({output.shape()[0]}, 0, 100);
+
+	// __m256i drop = _mm256_set1_epi32(dropRate);
+	// int k = 0;
+	// for (int i = 0; i < output.shape()[0] / 8; ++i)
+	// {
+	// 	__m256i ran_int = _mm256_loadu_epi32(rand.data()+i*8);
+	// 	ran_int = _mm256_cmpgt_epi32(ran_int, drop);
+	// 	__m256 inp = _mm256_and_ps((__m256)ran_int, _mm256_loadu_ps(this->output.data() + i * 8));
+
+	// 	_mm256_storeu_ps(this->output.data() + i * 8, inp);
+	// 	++k;
+	// }
+
+	// for (int i = 8 * k; i < output.shape()[0]; ++i)
+	// {
+	// 	if (dropRate >= rand(i))
+	// 	{
+	// 		this->input(i) = 0.0;
+	// 	}
+	// }
 }
 
 void Output::heWeightsInit()

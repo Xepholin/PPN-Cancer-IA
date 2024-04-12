@@ -62,6 +62,7 @@ void NeuralNetwork::batch(float size) {
 				output->gammasGradient.fill(0.0);
 				output->betasGradient.fill(0.0);
 			}
+
 		} else if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
 			dense->weights = dense->weights + (-learningRate) * (dense->weightsGradient / size);
 			dense->bias = dense->bias + (-learningRate) * (dense->biasGradient / size);
@@ -76,6 +77,7 @@ void NeuralNetwork::batch(float size) {
 				dense->gammasGradient.fill(0.0);
 				dense->betasGradient.fill(0.0);
 			}
+
 		} else {
 			break;
 		}
@@ -161,9 +163,9 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 			std::shuffle(train.begin(), train.end(), g);
 		}
 
-		std::cout << "nbEpoch: " << this->nbEpoch + 1 << std::endl;
-
 		trainLoss = 0.0;
+
+		std::cout << "nbEpoch: " << this->nbEpoch + 1 << std::endl;
 
 		auto startTime = std::chrono::steady_clock::now();
 		for (int i = 0; i < trainSize; i++) {
@@ -242,7 +244,6 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 		}
 
 		if (nbEpoch % epochs == 0) {
-			exit(0);
 			std::cout << "Le nombre d'époque a été atteint... STOP ?" << std::endl;
 
 			if (confirm()) {
@@ -268,10 +269,10 @@ float NeuralNetwork::eval(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 		image = std::get<0>(samples[i]);
 		label = std::get<1>(samples[i]);
 
-		this->nn[0]->forward(image);
+		this->nn[0]->forward(image, false);
 
 		for (int j = 1; j < this->nn.size(); ++j) {
-			this->nn[j]->forward(this->nn[j - 1]->output);
+			this->nn[j]->forward(this->nn[j - 1]->output, false);
 		}
 
 		if ((this->nn[this->nn.size() - 1]->output(0) < this->nn[this->nn.size() - 1]->output(1) && label(0) < label(1)) ||
