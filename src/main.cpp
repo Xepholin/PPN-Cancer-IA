@@ -112,11 +112,11 @@ int main() {
 
 	nn.train(trainSamples, testSamples, 100, 5, 0.2);
 
-	std::cout << "Save ?" << std::endl;
+	// std::cout << "Save ?" << std::endl;
 
-	if (confirm())	{
-		nn.save();
-	}
+	// if (confirm())	{
+	// 	nn.save();
+	// }
 
 	// xt::xarray<float> images = xt::random::rand<float>({5, 5, 5});
 	

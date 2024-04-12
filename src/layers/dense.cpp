@@ -175,9 +175,13 @@ void Dense::dropout()
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	for (int i = 0; i < this->weights.shape()[0]; ++i)
+	int rand = 0;
+
+	for (int i = 0; i < this->inputShape; ++i)
 	{
-		if (dropRate >= std::uniform_int_distribution<>(0, 100)(gen))
+		rand = std::uniform_int_distribution<>(0, 100)(gen);
+
+		if (dropRate >= rand)
 		{
 			this->input(i) = 0.0;
 		}
