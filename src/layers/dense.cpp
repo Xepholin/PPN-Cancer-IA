@@ -177,9 +177,9 @@ void Dense::dropout()
 
 	for (int i = 0; i < this->weights.shape()[0]; ++i)
 	{
-		if (dropRate >= std::uniform_int_distribution<>(1, 100)(gen))
+		if (dropRate >= std::uniform_int_distribution<>(0, 100)(gen))
 		{
-			this->input(i) = 0;
+			this->input(i) = 0.0;
 		}
 	}
 

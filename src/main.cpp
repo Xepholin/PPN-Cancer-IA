@@ -25,7 +25,7 @@
 #include "const.h"
 
 NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize, float validSplit, bool shuffle) {
-	int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
+	int inputShapeTotal = std::get<0>(inputShape) * std::get<1>(inputShape) * std::get<2>(inputShape); 
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize, validSplit, shuffle);
 
 	// ------------------------------------------------------------------------------
@@ -68,12 +68,12 @@ NeuralNetwork CNN2(std::tuple<int, int, int> inputShape, std::string name, float
 // 74%
 NeuralNetwork CNN11(std::tuple<int, int, int> inputShape, std::string name, float learningRate, LossType lossType, int batchSize,float validSplit, bool shuffle)
 {
-	int inputShapeTotal = std::get<0>(inputShape) + std::get<1>(inputShape) + std::get<2>(inputShape); 
+	int inputShapeTotal = std::get<0>(inputShape) * std::get<1>(inputShape) * std::get<2>(inputShape); 
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
 
-	Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 20, false, true);
-	Dense *dense2 = new Dense(dense1->outputShape, 16, relu, 20, false, false);
-	Dense *dense3 = new Dense(dense2->outputShape, 10, relu, 20, false, false);
+	Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 50, false, true);
+	Dense *dense2 = new Dense(dense1->outputShape, 16, relu, 50, false, false);
+	Dense *dense3 = new Dense(dense2->outputShape, 10, relu, 50, false, false);
 
 	// ------------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo1", 0.001, cross_entropy, 1, 0.0, true);
+	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo1", 0.001, mse, 1, 0.0, true);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo1");
