@@ -93,7 +93,7 @@ int main() {
 	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo1", 0.0001, cross_entropy, 16, 0.0, true);
+	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo1", 0.001, cross_entropy, 1, 0.0, true);
 
 	// NeuralNetwork nn;
 	// nn.load("../saves/topo1");
