@@ -172,7 +172,6 @@ void Output::dropout()
 	{
 		rand = std::uniform_int_distribution<>(0, 100)(gen);
 
-		std::cout << rand << std::endl;
 		if (dropRate >= rand)
 		{
 			this->input(i) = 0.0;

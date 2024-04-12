@@ -71,9 +71,9 @@ NeuralNetwork CNN11(std::tuple<int, int, int> inputShape, std::string name, floa
 	int inputShapeTotal = std::get<0>(inputShape) * std::get<1>(inputShape) * std::get<2>(inputShape); 
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize);
 
-	Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 50, false, true);
-	Dense *dense2 = new Dense(dense1->outputShape, 16, relu, 50, false, false);
-	Dense *dense3 = new Dense(dense2->outputShape, 10, relu, 50, false, false);
+	Dense *dense1 = new Dense(inputShapeTotal, 32, relu, 20, false, true);
+	Dense *dense2 = new Dense(dense1->outputShape, 16, relu, 20, false, false);
+	Dense *dense3 = new Dense(dense2->outputShape, 10, relu, 20, false, false);
 
 	// ------------------------------------------------------------------------------
 
