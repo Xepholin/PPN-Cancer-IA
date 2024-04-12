@@ -242,13 +242,13 @@ xt::xarray<float> toGrayScale(Image a)
             green = a.g(y, x);
             blue = a.b(y, x);
 
-			max_val = std::max({red, green, blue}); 
+			// max_val = std::max({red, green, blue}); 
 
             // NTSC formula
             //  uint8_t gray = static_cast<uint8_t>(0.299 * red + 0.587 * green + 0.114 * blue);
 
             // grayMatrice(y, x) = (red + green + blue) / 3;
-            grayMatrice(y, x) = max_val;
+            grayMatrice(y, x) = red;
         }
     }
     return grayMatrice;
