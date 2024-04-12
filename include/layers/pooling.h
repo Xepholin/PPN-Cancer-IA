@@ -69,7 +69,7 @@ class Pooling : public ILayer
 
         virtual void forward(xt::xarray<float> input, bool training = true) override;
 
-        xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
+        xt::xarray<float> backward(xt::xarray<float> gradient) override;
 
         void print() const override;
 

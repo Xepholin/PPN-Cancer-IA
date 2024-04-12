@@ -113,20 +113,13 @@ public:
 		}
 	}
 
-	~Output()
-	{
-		delete this->activation;
-	}
+	~Output() = default;
 
 	virtual void forward(xt::xarray<float> input, bool training = true) override;
 
-	virtual xt::xarray<float> backward(
-		xt::xarray<float> label,
-		float learningRate);
+	virtual xt::xarray<float> backward(xt::xarray<float> gradient);
 
-	xt::xarray<float> oldbackward(
-		xt::xarray<float> label,
-		float learningRate);
+	xt::xarray<float> oldbackward(xt::xarray<float> gradient);
 
 	void norm();
 

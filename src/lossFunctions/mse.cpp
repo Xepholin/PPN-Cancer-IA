@@ -4,8 +4,9 @@
 
 float MSE::compute(xt::xarray<float> output, xt::xarray<int> label) {
 	float err = 0.0;
+	int outputSize = output.size();
 
-	for (int i = 0; i < output.size(); ++i) {
+	for (int i = 0; i < outputSize; ++i) {
 		err += ((output(i) - label(i)) * (output(i) - label(i)));
 	}
 

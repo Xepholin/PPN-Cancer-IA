@@ -5,7 +5,7 @@ project(PPN-CANCER-IA)
 set(CMAKE_CXX_STANDARD 17)
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/mkl/include -L/opt/intel/mkl/lib -g -fopenmp -mavx -march=native -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/intel/oneapi/mkl/latest/include -L/opt/intel/mkl/lib -g -fopenmp -mavx -march=native -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -I/opt/intel/oneapi/mkl/latest/include -L/opt/intel/mkl/lib -g -fopenmp -mavx -march=native -O3")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -lcblas -lpthread -lm")
 

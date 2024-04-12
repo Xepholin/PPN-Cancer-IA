@@ -3,12 +3,11 @@
 
 #include "softmax.h"
 
-void Softmax::forward(xt::xarray<float> input, bool training)
+void Softmax::forward(xt::xarray<float> input, bool training __attribute__((unused)))
 {
     this->input = input;
 
     float expSum = xt::sum(xt::exp(this->input))();
-    float maxValue = xt::amax(this->input)();
 
 	int outputDim = this->output.shape()[0];
 	float exp_xi = 0.0;
@@ -21,7 +20,7 @@ void Softmax::forward(xt::xarray<float> input, bool training)
 }
 
 
-xt::xarray<float> Softmax::backward(xt::xarray<float> cost, float learningRate)   {
+xt::xarray<float> Softmax::backward(xt::xarray<float> cost __attribute__((unused)))   {
 	std::cout << "backward softmax" << std::endl;
 	return 0;
 }

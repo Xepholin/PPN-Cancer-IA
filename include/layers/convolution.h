@@ -96,13 +96,11 @@ class Convolution : public ILayer
             }
         }
 
-        ~Convolution()  {
-            delete this->activation;
-        }
+        ~Convolution() = default;
 
         void forward(xt::xarray<float> input, bool training = true) override;
 
-        xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
+        xt::xarray<float> backward(xt::xarray<float> gradient) override;
 
         void print() const override;
 

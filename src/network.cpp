@@ -39,7 +39,7 @@ void NeuralNetwork::iter(xt::xarray<float> input, xt::xarray<int> label, float b
 
 	for (int i = nnSize; i >= 0; --i) {
 		if (this->nn[i]->name == "Output" || this->nn[i]->name == "Dense") {
-			recycling = this->nn[i]->backward(recycling, this->learningRate);
+			recycling = this->nn[i]->backward(recycling);
 		} else {
 			break;
 		}
@@ -152,7 +152,6 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 	xt::xarray<float> image = xt::empty<float>(IMAGE_TENSOR_DIM);
 	xt::xarray<float> label;
 
-	int dim1 = image.shape()[0];
 	int r = trainSize % batchSize;
 
 	std::cout << "Start training..." << std::endl;
@@ -263,6 +262,8 @@ float NeuralNetwork::eval(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 	xt::xarray<float> image;
 	xt::xarray<float> label;
 
+	int nnSize = this->nn.size();
+
 	std::cout << "Start evaluation..." << std::endl;
 
 	for (int i = 0; i < samplesSize; ++i) {
@@ -271,7 +272,7 @@ float NeuralNetwork::eval(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 		this->nn[0]->forward(image, false);
 
-		for (int j = 1; j < this->nn.size(); ++j) {
+		for (int j = 1; j < nnSize; ++j) {
 			this->nn[j]->forward(this->nn[j - 1]->output, false);
 		}
 
@@ -292,7 +293,9 @@ float NeuralNetwork::eval(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 	return loss;
 }
 
-void NeuralNetwork::detect(xt::xarray<float> input) {}
+// void NeuralNetwork::detect(xt::xarray<float> input) {
+
+// }
 
 void NeuralNetwork::load(const std::string path) {
 	std::ifstream inputFile;
@@ -302,7 +305,6 @@ void NeuralNetwork::load(const std::string path) {
 
 	int size = 0;
 	std::string info;
-	LossType lossType;
 
 	inputFile >> this->name;
 	inputFile >> this->nbEpoch;
@@ -379,6 +381,7 @@ void NeuralNetwork::load(const std::string path) {
 			layerFile >> size;
 			layerFile >> stride;
 			layerFile >> padding;
+			layerFile >> info;
 
 			PoolingType type;
 
@@ -389,7 +392,10 @@ void NeuralNetwork::load(const std::string path) {
 			} else if (info.compare("avg.")) {
 				type = POOLING_AVG;
 			}
-			layerFile >> a;
+			else	{
+				type = POOLING_NO_TYPE;
+			}
+			
 			Pooling *pool = new Pooling{inputShape, size, stride, padding, type};
 
 			this->add(pool);
@@ -508,7 +514,9 @@ void NeuralNetwork::save() const {
 	nnFile << this->validSplit << std::endl;
 	nnFile << this->shuffle << std::endl;
 
-	for (int i = 0; i < this->nn.size(); ++i) {
+	int nnSize = this->nn.size();
+
+	for (int i = 0; i < nnSize; ++i) {
 		if (Dense *dense = dynamic_cast<Dense *>(this->nn[i])) {
 			tmpStr = path + "/dense" + std::to_string(i) + ".dat";
 			nnFile << "dense" << std::to_string(i) << std::endl;

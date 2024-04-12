@@ -230,17 +230,17 @@ xt::xarray<float> toGrayScale(Image a)
     xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PNGDim, PNGDim})};
 
 	uint8_t red = 0;
-	uint8_t green = 0;
-	uint8_t blue = 0;
-	uint8_t max_val = 0;
+	// uint8_t green = 0;
+	// uint8_t blue = 0;
+	// uint8_t max_val = 0;
 
     for (int y = 0; y < PNGDim; ++y)
     {
         for (int x = 0; x < PNGDim; ++x)
         {
             red = a.r(y, x);
-            green = a.g(y, x);
-            blue = a.b(y, x);
+            // green = a.g(y, x);
+            // blue = a.b(y, x);
 
 			// max_val = std::max({red, green, blue}); 
 

@@ -21,9 +21,7 @@ class ILayer
 
         virtual void forward(xt::xarray<float> input, bool training = true);
 
-        virtual xt::xarray<float> backward(
-				xt::xarray<float> gradient,
-    			float learningRate);
+        virtual xt::xarray<float> backward(xt::xarray<float> gradient);
 
         virtual void print() const;
 };

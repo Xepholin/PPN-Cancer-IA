@@ -3,14 +3,14 @@
 
 #include "sigmoid.h"
 
-void Sigmoid::forward(xt::xarray<float> input, bool training)
+void Sigmoid::forward(xt::xarray<float> input, bool training __attribute__((unused)))
 {
     this->input = input;
 	this->output = 1.0 / (1.0 + xt::exp(-input) );
 }
 
 
-xt::xarray<float> Sigmoid::backward(xt::xarray<float> cost, float learningRate)   {
+xt::xarray<float> Sigmoid::backward(xt::xarray<float> cost __attribute__((unused)))   {
 	std::cout << "backward sigmoid" << std::endl;
 	return 0;
 }

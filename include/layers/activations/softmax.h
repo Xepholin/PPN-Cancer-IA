@@ -31,7 +31,7 @@ class Softmax : public Activation {
 
 	virtual void forward(xt::xarray<float> input, bool training = true) override;
 
-	virtual xt::xarray<float> backward(xt::xarray<float> gradient, float learningRate) override;
+	virtual xt::xarray<float> backward(xt::xarray<float> gradient) override;
 
 	virtual xt::xarray<float> prime(xt::xarray<float> input) override;
 

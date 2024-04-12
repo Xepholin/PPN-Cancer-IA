@@ -5,7 +5,7 @@
 #include "conv_op.h"
 #include "tools.h"
 
-void Convolution::forward(xt::xarray<float> input, bool training) {
+void Convolution::forward(xt::xarray<float> input, bool training __attribute__((unused))) {
 	this->input = input;
 	// std::cout << "input\n" << this->input << '\n' << std::endl;
 	// std::cout << "filters\n" << this->filters << '\n' << std::endl;
@@ -39,7 +39,7 @@ void Convolution::forward(xt::xarray<float> input, bool training) {
 	// std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
-xt::xarray<float> Convolution::backward(xt::xarray<float> cost, float learningRate) {
+xt::xarray<float> Convolution::backward(xt::xarray<float> cost __attribute__((unused))) {
 	std::cout << "Convolution backward" << std::endl;
 	return 0;
 }
@@ -66,15 +66,12 @@ void Convolution::heWeightsInit() {
 }
 
 void Convolution::XGWeightsInit() {
-	int inputDepth = std::get<0>(this->inputShape);
-	int inputHeight = std::get<1>(this->inputShape);
-	int inputWidth = std::get<2>(this->inputShape);
-
 	int filtersDepth = std::get<0>(this->filtersShape);
 	int filtersHeight = std::get<1>(this->filtersShape);
 	int filtersWidth = std::get<2>(this->filtersShape);
 
 	float std = sqrt(2.0 / (static_cast<float>(this->input.size()) + this->output.size()));
+	
 	this->filters = xt::random::randn<float>({filtersDepth, depth,
 											  filtersHeight, filtersWidth},
 											 0, std);

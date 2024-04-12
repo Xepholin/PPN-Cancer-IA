@@ -2,18 +2,18 @@
 
 #include "activation.h"
 
-void Activation::forward(xt::xarray<float> input, bool training)
+void Activation::forward(xt::xarray<float> input __attribute__((unused)), bool training __attribute__((unused)))
 {
     std::cout << "Activation forward" << std::endl;
 }
 
-xt::xarray<float> Activation::backward(xt::xarray<float> cost, float learningRate)
+xt::xarray<float> Activation::backward(xt::xarray<float> cost __attribute__((unused)))
 {
     std::cout << "Activation backward" << std::endl;
 	return 0;
 }
 
-xt::xarray<float> Activation::prime(xt::xarray<float> input)    {
+xt::xarray<float> Activation::prime(xt::xarray<float> input __attribute__((unused)))    {
     std::cout << "Activation prime" << std::endl;
     return input;
 }

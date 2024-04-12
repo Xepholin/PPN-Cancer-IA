@@ -3,7 +3,7 @@
 #include "pooling.h"
 #include "conv_op.h"
 
-void Pooling::forward(xt::xarray<float> input, bool training)
+void Pooling::forward(xt::xarray<float> input, bool training __attribute__((unused)))
 {
     this->input = input;
 	int outputShape = this->output.shape()[0];
@@ -18,7 +18,7 @@ void Pooling::forward(xt::xarray<float> input, bool training)
     }
 }
 
-xt::xarray<float> Pooling::backward(xt::xarray<float> cost, float learningRate)
+xt::xarray<float> Pooling::backward(xt::xarray<float> cost __attribute__((unused)))
 {
     std::cout << "Pooling backward" << std::endl;
 	return 0;

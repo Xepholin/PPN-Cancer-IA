@@ -119,19 +119,14 @@ class Dense : public ILayer
             }
         }
 
-        ~Dense()    {
-            delete this->activation;
-        }
+        ~Dense() = default;
 
         virtual void forward(xt::xarray<float> input, bool training = true) override;
 
-        virtual xt::xarray<float> backward(
-				xt::xarray<float> gradient,
-				float learningRate);
+        virtual xt::xarray<float> backward(xt::xarray<float> gradient);
                 
         xt::xarray<float> oldbackward(
-				xt::xarray<float> gradient,
-				float learningRate);
+				xt::xarray<float> gradient);
 
 		void norm();
 

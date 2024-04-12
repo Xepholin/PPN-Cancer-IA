@@ -182,7 +182,8 @@ std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> loadingSets(std::s
 
 void display_network(NeuralNetwork nn)
 {
-	for (int i = 0; i < nn.nn.size(); ++i)
+	int nnSize = nn.nn.size();
+	for (int i = 0; i < nnSize; ++i)
 	{
 		std::cout << nn.nn[i]->name << std::endl;
 		if (Convolution *conv = dynamic_cast<Convolution *>(nn.nn[i]))

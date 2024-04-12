@@ -2,12 +2,12 @@
 
 #include "relu.h"
 
-void ReLu::forward(xt::xarray<float> input, bool training)
+void ReLu::forward(xt::xarray<float> input, bool training __attribute__((unused)))
 {
     this->output = xt::where(input <= 0, 0.0, input);
 }
 
-xt::xarray<float> ReLu::backward(xt::xarray<float> cost, float learningRate)
+xt::xarray<float> ReLu::backward(xt::xarray<float> cost __attribute__((unused)))
 {
     std::cout << "ReLu backward" << std::endl;
     return 0;

@@ -52,9 +52,7 @@ void Dense::forward(xt::xarray<float> input, bool training)
 	// std::cout << std::endl;
 }
 
-xt::xarray<float> Dense::backward(
-	xt::xarray<float> gradient,
-	float learningRate)
+xt::xarray<float> Dense::backward(xt::xarray<float> gradient)
 {
 
 	vsMul(this->outputShape, gradient.data(), bnOutput.data(), bnOutput.data());
@@ -87,9 +85,7 @@ xt::xarray<float> Dense::backward(
 	return inputGradient;
 }
 
-xt::xarray<float> Dense::oldbackward(
-	xt::xarray<float> gradient,
-	float learningRate)
+xt::xarray<float> Dense::oldbackward(xt::xarray<float> gradient)
 {
 
 	for (int i = 0; i < outputShape; ++i)
