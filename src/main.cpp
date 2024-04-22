@@ -71,46 +71,54 @@ NeuralNetwork CNN11(std::tuple<int, int, int> inputShape, std::string name, floa
 	int inputShapeTotal = std::get<0>(inputShape) * std::get<1>(inputShape) * std::get<2>(inputShape); 
 	NeuralNetwork model = NeuralNetwork(name, learningRate, lossType, batchSize, validSplit, shuffle);
 
-	Dense *dense1 = new Dense(inputShapeTotal, 64, relu, 20, false, true);
-	Dense *dense2 = new Dense(dense1->outputShape, 64, relu, 20, false, false);
-	Dense *dense3 = new Dense(dense2->outputShape, 64, relu, 20, false, false);
+	Dense *dense1 = new Dense(inputShapeTotal, 256, relu, 20, false, true);
+	Dense *dense2 = new Dense(dense1->outputShape, 256, relu, 20, false, false);
+	Dense *dense3 = new Dense(dense2->outputShape, 128, relu, 20, false, false);
+	Dense *dense4 = new Dense(dense3->outputShape, 128, relu, 20, false, false);
+	Dense *dense5 = new Dense(dense4->outputShape, 64, relu, 20, false, false);
+	Dense *dense6 = new Dense(dense5->outputShape, 32, relu, 20, false, false);
+	Dense *dense7 = new Dense(dense6->outputShape, 16, relu, 20, false, false);
 
 	// ------------------------------------------------------------------------------
 
-	Output *output = new Output(dense3->outputShape, 2, softmax);
+	Output *output = new Output(dense7->outputShape, 2, softmax);
 
 	// ------------------------------------------------------------------------------
 
 	model.add(dense1);
 	model.add(dense2);
 	model.add(dense3);
+	model.add(dense4);
+	model.add(dense5);
+	model.add(dense6);
+	model.add(dense7);
 	model.add(output);
 
 	return model;
 }
 
 int main() {
-	xt::random::seed(time(nullptr));
+	// xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo2", 0.001, cross_entropy, 16, 0.0, true);
+	// NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo2", 0.0001, cross_entropy, 32, 0.0, true);
 
-	// NeuralNetwork nn;
-	// nn.load("../saves/topo1");
+	// // NeuralNetwork nn;
+	// // nn.load("../saves/topo1");
 
-	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
-	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
+	// std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
+	// std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
 
-	if (PNGPBM == 0)	{
-		trainSamples = loadingSets(trainPathPNG, nbImagesTrain);
-		testSamples = loadingSets(evalPathPNG, nbImagesEval);
-	}
-	else	{
-		trainSamples = loadingSets(trainPathPBM, nbImagesTrain);
-		testSamples = loadingSets(evalPathPBM, nbImagesEval);
-	}
+	// if (PNGPBM == 0)	{
+	// 	trainSamples = loadingSets(trainPathPNG, nbImagesTrain);
+	// 	testSamples = loadingSets(evalPathPNG, nbImagesEval);
+	// }
+	// else	{
+	// 	trainSamples = loadingSets(trainPathPBM, nbImagesTrain);
+	// 	testSamples = loadingSets(evalPathPBM, nbImagesEval);
+	// }
 
-	nn.train(trainSamples, testSamples, 100, 5, 0.2);
+	// nn.train(trainSamples, testSamples, 100, 10);
 
 	// std::cout << "Save ?" << std::endl;
 
@@ -126,6 +134,12 @@ int main() {
 	// std::cout << images << '\n' << std::endl;
 	// std::cout << split1 << '\n' << std::endl;
 	// std::cout << split2 << '\n' << std::endl;
+
+	const char *path = "../assets/input.png";
+	Image image = importImage(path);
+	// xt::xarray<float> gray = toGrayScale(image);
+	xt::xarray<float> blur = gaussianBlur(gray, 7);
+	saveGrayToPNG("../../input.png", blur);
 
 	return 0;
 }

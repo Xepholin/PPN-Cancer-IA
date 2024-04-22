@@ -65,7 +65,7 @@ void Image::saveToPNG(const char *outputPath)
     fclose(fp);
 }
 
-std::unique_ptr<Image> pngData(const char *filename)
+Image importImage(const char *filename)
 {
     try
     {
@@ -154,15 +154,13 @@ std::unique_ptr<Image> pngData(const char *filename)
 
         delete[] pointers;
         png_destroy_read_struct(&png, &info, nullptr);
-
-        std::unique_ptr<Image> result = std::make_unique<Image>(image);
-
-        return result;
+		
+		return image;
     }
     catch (const std::runtime_error &e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
-        return nullptr;
+		exit(0);
     }
 }
 
@@ -254,25 +252,6 @@ xt::xarray<float> toGrayScale(Image a)
     return grayMatrice;
 }
 
-xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
-    xt::xarray<float> sobX{{-1, 0, 1},
-                               {-2, 0, 2},
-                               {-1, 0, 1}};
-
-	xt::xarray<float> sobY{{-1, -2, -1},
-							{0, 0, 0},
-							{1, 2, 1}};
-
-	xt::xarray<float> gx = matrixConvolution(grayMatrice, sobX, 1, 0);
-	xt::xarray<float> gy = matrixConvolution(grayMatrice, sobY, 1, 0);
-
-	xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
-
-	xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
-
-	return boolG;
-}
-
 void saveGrayToPNG(const char *outputPath, xt::xarray<uint8_t> grayMatrice)
 {
 
@@ -319,6 +298,48 @@ void saveGrayToPNG(const char *outputPath, xt::xarray<uint8_t> grayMatrice)
     fclose(fp);
 }
 
+xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
+    xt::xarray<float> sobX{{-1, 0, 1},
+                               {-2, 0, 2},
+                               {-1, 0, 1}};
+
+	xt::xarray<float> sobY{{-1, -2, -1},
+							{0, 0, 0},
+							{1, 2, 1}};
+
+	xt::xarray<float> gx = matrixConvolution(grayMatrice, sobX, 1, 0);
+	xt::xarray<float> gy = matrixConvolution(grayMatrice, sobY, 1, 0);
+
+	xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
+
+	xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
+
+	return boolG;
+}
+
+xt::xarray<float> gaussianBlur(xt::xarray<float> image, int radius) {
+	float sigma = std::max((radius / 2.0), 1.0);
+	int filterSize = (2 * radius) + 1;
+	float sum = 0.0;
+	float filterValue = 0.0;
+    
+	xt::xarray<float> gaussianFilter = xt::empty<float>({filterSize, filterSize});
+
+	for (int x = -radius; x <= radius; ++x)	{
+		for (int y = -radius; y <= radius; ++y)	{
+			filterValue = ((1.0 / (2.0 * M_PI * pow(sigma, 2))) * exp(-((pow(x, 2) + pow(y, 2)) / (2.0 * pow(sigma, 2)))));
+			gaussianFilter(x + radius, y + radius) = filterValue;
+			sum += filterValue;
+		}
+	}
+
+	gaussianFilter /= sum;
+
+	xt::xarray<float> blured = matrixConvolution(image, gaussianFilter, 1, 0);
+
+	return blured;
+}
+
 void saveEdgetoPBM(const char *outputPath, const xt::xarray<bool> boolMatrix)
 {
     int width = boolMatrix.shape()[1];
@@ -360,27 +381,18 @@ void generatePBM(const char *src, const char *dest)	{
 
 	if (inputFile.is_open())
 	{
-		// Pass the char* to the pngData function
-		auto result = pngData(src);
+		// Pass the char* to the importImage function
+		Image image = importImage(src);
 
-		if (result)
-		{
-			Image image = *result;
+		xt::xarray<float> grayMatrice = toGrayScale(image);
 
-			xt::xarray<float> grayMatrice = toGrayScale(image);
+		xt::xarray<bool> boolG = toSobel(grayMatrice);
 
-			xt::xarray<bool> boolG = toSobel(grayMatrice);
+		// Remove the ".png" extension and append ".pbm"
+		std::string outputFilePath = dest;
+		outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
 
-			// Remove the ".png" extension and append ".pbm"
-			std::string outputFilePath = dest;
-			outputFilePath.replace(outputFilePath.rfind(".png"), 4, ".pbm");
-
-			saveEdgetoPBM(outputFilePath.c_str(), boolG);
-		}
-	}
-	else
-	{
-		std::cerr << "Error opening file: " << src << std::endl;
+		saveEdgetoPBM(outputFilePath.c_str(), boolG);
 	}
 }
 
@@ -528,8 +540,7 @@ xt::xarray<float> importAllPNG(const char *path, int nbPNG)	{
             // Check for a .png file
             else if (entry.is_regular_file() && entry.path().extension() == ".png")
             {
-				std::unique_ptr<Image> temp = pngData(inputPath.c_str());
-				Image image = *temp;
+				Image image = importImage(inputPath.c_str());
 				
 				xt::view(result, xt::range(position, position + 1), 0, xt::all(), xt::all()) = xt::abs(image.r - 255.0);
 				xt::view(result, xt::range(position, position + 1), 1, xt::all(), xt::all()) = xt::abs(image.g - 255.0);

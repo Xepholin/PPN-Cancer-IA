@@ -10,14 +10,14 @@ class Image
 {
     public:
         // Matrices with size 50x50
-        xt::xarray<uint8_t> r{xt::empty<uint8_t>({PNGDim, PNGDim})};
-        xt::xarray<uint8_t> g{xt::empty<uint8_t>({PNGDim, PNGDim})};
-        xt::xarray<uint8_t> b{xt::empty<uint8_t>({PNGDim, PNGDim})};
+        xt::xarray<uint8_t> r = xt::empty<uint8_t>({PNGDim, PNGDim});
+        xt::xarray<uint8_t> g = xt::empty<uint8_t>({PNGDim, PNGDim});
+        xt::xarray<uint8_t> b = xt::empty<uint8_t>({PNGDim, PNGDim});
         
         void saveToPNG(const char* outputPath);
 };
  
-std::unique_ptr<Image> pngData(const char* filename);
+Image importImage(const char* filename);
 
 Image readByteFile(const char * filename, Image a);
 
@@ -25,6 +25,8 @@ Image readByteFile(const char * filename, Image a);
 xt::xarray<float> toGrayScale(Image a);
 
 xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice);
+
+xt::xarray<float> gaussianBlur(xt::xarray<float> image, int radius);
 
 void saveGrayToPNG(const char* outputPath, xt::xarray<uint8_t> grayMatrice);
 

@@ -84,7 +84,7 @@ void NeuralNetwork::batch(float size) {
 	}
 }
 
-void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience, float threshold) {
+void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> samples, std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> validSamples, int epochs, int patience) {
 	if (batchSize > nbImagesTrain) {
 		perror("BatchSize > totalNumberImage");
 		exit(0);
@@ -225,11 +225,12 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 			count1 = 0;
 		}
 
-		if (std::fabs(actualValidLoss - trainLoss) > std::fabs(meanValidLoss - meanTrainLoss) && std::fabs(actualValidLoss - trainLoss) > threshold) {
+		if (std::fabs(actualValidLoss - trainLoss) > std::fabs(meanValidLoss - meanTrainLoss)) {
 			count2++;
 
 			if (count2 == patience) {
 				std::cout << "Le seuil a été atteint, overfitting?... STOP ?" << std::endl;
+				std::cout << "Epoch: " << savedEpoch << " / Loss: " << this->loss << std::endl;
 
 				if (confirm()) {
 					break;
@@ -244,6 +245,7 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 		if (nbEpoch % epochs == 0) {
 			std::cout << "Le nombre d'époque a été atteint... STOP ?" << std::endl;
+			std::cout << "Epoch: " << savedEpoch << " / Loss: " << this->loss << std::endl;
 
 			if (confirm()) {
 				break;
