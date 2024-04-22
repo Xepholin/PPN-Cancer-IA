@@ -65,6 +65,20 @@ void Image::saveToPNG(const char *outputPath)
     fclose(fp);
 }
 
+xt::xarray<float> Image::toTensor()	{
+	xt::xarray<float> result = xt::empty<uint8_t>({3, PNGDim, PNGDim});
+
+	for (int y = 0; y < PNGDim; ++y)	{
+		for (int x = 0; x < PNGDim; ++x)	{
+			result (0, y, x) = r(y, x);
+			result (1, y, x) = g(y, x);
+			result (2, y, x) = b(y, x);	
+		}
+	}
+
+	return result;
+}
+
 Image importImage(const char *filename)
 {
     try
@@ -225,31 +239,7 @@ Image readByteFile(const char *filename, Image a)
 
 xt::xarray<float> toGrayScale(Image a)
 {
-    xt::xarray<float> grayMatrice{xt::empty<uint8_t>({PNGDim, PNGDim})};
-
-	uint8_t red = 0;
-	// uint8_t green = 0;
-	// uint8_t blue = 0;
-	// uint8_t max_val = 0;
-
-    for (int y = 0; y < PNGDim; ++y)
-    {
-        for (int x = 0; x < PNGDim; ++x)
-        {
-            red = a.r(y, x);
-            // green = a.g(y, x);
-            // blue = a.b(y, x);
-
-			// max_val = std::max({red, green, blue}); 
-
-            // NTSC formula
-            //  uint8_t gray = static_cast<uint8_t>(0.299 * red + 0.587 * green + 0.114 * blue);
-
-            // grayMatrice(y, x) = (red + green + blue) / 3;
-            grayMatrice(y, x) = red;
-        }
-    }
-    return grayMatrice;
+    return xt::view(a.toTensor(), 0);
 }
 
 void saveGrayToPNG(const char *outputPath, xt::xarray<uint8_t> grayMatrice)
@@ -312,7 +302,7 @@ xt::xarray<bool> toSobel(xt::xarray<float> grayMatrice) {
 
 	xt::xarray<float> g = xt::sqrt(gx * gx + gy * gy);
 
-	xt::xarray<bool> boolG = xt::where(g < 128 , false, true);
+	xt::xarray<bool> boolG = xt::where(g < 32 , false, true);
 
 	return boolG;
 }
@@ -385,8 +375,8 @@ void generatePBM(const char *src, const char *dest)	{
 		Image image = importImage(src);
 
 		xt::xarray<float> grayMatrice = toGrayScale(image);
-
-		xt::xarray<bool> boolG = toSobel(grayMatrice);
+		xt::xarray<float> blurMatrice = gaussianBlur(grayMatrice, 6);
+		xt::xarray<bool> boolG = toSobel(blurMatrice);
 
 		// Remove the ".png" extension and append ".pbm"
 		std::string outputFilePath = dest;

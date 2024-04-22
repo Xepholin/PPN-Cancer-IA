@@ -14,11 +14,14 @@ const int nbImagesEval = 7000;
 const int PNGDim = 50;
 const int PBMDim = PNGDim - 2;
 
-const std::string trainPathPNG = "../assets/breast/train";
-const std::string evalPathPNG = "../assets/breast/eval";
+const std::string pathPNG = "../assets/breast/";
+const std::string pathPBM = "../../processed_red_36/";
 
-const std::string trainPathPBM = "../../processed1/train";
-const std::string evalPathPBM = "../../processed1/eval";
+const std::string trainPathPNG = pathPNG + "train";
+const std::string evalPathPNG = pathPNG + "eval";
+
+const std::string trainPathPBM = pathPBM + "train";
+const std::string evalPathPBM = pathPBM + "eval";
 
 const std::string savePath = "../saves";
 

@@ -98,33 +98,33 @@ NeuralNetwork CNN11(std::tuple<int, int, int> inputShape, std::string name, floa
 }
 
 int main() {
-	// xt::random::seed(time(nullptr));
+	xt::random::seed(time(nullptr));
 	// xt::random::seed(42);
 
-	// NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo2", 0.0001, cross_entropy, 32, 0.0, true);
+	NeuralNetwork nn = CNN11(IMAGE_TENSOR_DIM, "topo3", 0.0001, cross_entropy, 32, 0.0, true);
 
-	// // NeuralNetwork nn;
-	// // nn.load("../saves/topo1");
+	// NeuralNetwork nn;
+	// nn.load("../saves/topo1");
 
-	// std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
-	// std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> trainSamples;
+	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> testSamples;
 
-	// if (PNGPBM == 0)	{
-	// 	trainSamples = loadingSets(trainPathPNG, nbImagesTrain);
-	// 	testSamples = loadingSets(evalPathPNG, nbImagesEval);
-	// }
-	// else	{
-	// 	trainSamples = loadingSets(trainPathPBM, nbImagesTrain);
-	// 	testSamples = loadingSets(evalPathPBM, nbImagesEval);
-	// }
+	if (PNGPBM == 0)	{
+		trainSamples = loadingSets(trainPathPNG, nbImagesTrain);
+		testSamples = loadingSets(evalPathPNG, nbImagesEval);
+	}
+	else	{
+		trainSamples = loadingSets(trainPathPBM, nbImagesTrain);
+		testSamples = loadingSets(evalPathPBM, nbImagesEval);
+	}
 
-	// nn.train(trainSamples, testSamples, 100, 10);
+	nn.train(trainSamples, testSamples, 100, 10);
 
-	// std::cout << "Save ?" << std::endl;
+	std::cout << "Save ?" << std::endl;
 
-	// if (confirm())	{
-	// 	nn.save();
-	// }
+	if (confirm())	{
+		nn.save();
+	}
 
 	// xt::xarray<float> images = xt::random::rand<float>({5, 5, 5});
 	
@@ -134,12 +134,6 @@ int main() {
 	// std::cout << images << '\n' << std::endl;
 	// std::cout << split1 << '\n' << std::endl;
 	// std::cout << split2 << '\n' << std::endl;
-
-	const char *path = "../assets/input.png";
-	Image image = importImage(path);
-	// xt::xarray<float> gray = toGrayScale(image);
-	xt::xarray<float> blur = gaussianBlur(gray, 7);
-	saveGrayToPNG("../../input.png", blur);
 
 	return 0;
 }

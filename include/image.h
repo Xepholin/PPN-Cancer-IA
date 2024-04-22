@@ -15,6 +15,7 @@ class Image
         xt::xarray<uint8_t> b = xt::empty<uint8_t>({PNGDim, PNGDim});
         
         void saveToPNG(const char* outputPath);
+		xt::xarray<float> toTensor();
 };
  
 Image importImage(const char* filename);
