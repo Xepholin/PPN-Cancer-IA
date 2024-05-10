@@ -7,8 +7,6 @@
 
 void Convolution::forward(xt::xarray<float> input, bool training __attribute__((unused))) {
 	this->input = input;
-	// std::cout << "input\n" << this->input << '\n' << std::endl;
-	// std::cout << "filters\n" << this->filters << '\n' << std::endl;
 
 	xt::xarray<float> convolution_result;
 	xt::xarray<float> tmpMat;
@@ -35,8 +33,6 @@ void Convolution::forward(xt::xarray<float> input, bool training __attribute__((
 		this->activation->forward(this->output);
 		this->output = this->activation->output;
 	}
-
-	// std::cout << "output\n" << this->output << '\n' << std::endl;
 }
 
 xt::xarray<float> Convolution::backward(xt::xarray<float> cost __attribute__((unused))) {

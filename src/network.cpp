@@ -90,16 +90,6 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 		exit(0);
 	}
 
-	// if (validationSplit != 0.0)	{
-	// 	perror("Pas disponible !");
-	// 	exit(0);
-	// }
-
-	// if (validationSplit != 0.0 && !validSamples.empty()) {
-	// 	perror("Split validation != 0 avec des échantillons de validation");
-	// 	exit(0);
-	// }
-
 	std::random_device rd;
 	float trainLoss = 0.0;
 	float minValidLoss = 1000000.0;
@@ -118,31 +108,6 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> train;
 
 	int trainSize = 0;
-
-	// if (validationSplit != 0.0) {
-	// 	int ratio = nbImagesTrain * validationSplit;
-	// 	int balance = ratio >> 1;
-
-	// 	valid.reserve(ratio);
-	// 	train.reserve(nbImagesTrain - ratio);
-		
-	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> part1(samples.begin(), samples.begin() + balance);
-	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>> part2(samples.end() - balance, samples.end());
-
-	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>>::const_iterator first = samples.begin() + balance;
-	// 	std::vector<std::tuple<xt::xarray<float>, xt::xarray<float>>>::const_iterator last = samples.end() - balance;
-
-	// 	valid.insert(valid.end(), part1.begin(), part1.end());
-	// 	valid.insert(valid.end(), part2.begin(), part2.end());
-
-	// 	std::cout << valid.size() << std::endl;
-	// 	std::cout << valid.capacity() << std::endl;
-
-	// 	train.assign(first, last);
-
-	// 	std::cout << train.size() << std::endl;
-	// 	std::cout << train.capacity() << std::endl;
-	// }
 
 	train = std::move(samples);
 	valid = std::move(validSamples);
@@ -177,7 +142,6 @@ void NeuralNetwork::train(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 			if (i % batchSize == 0 && i != 0) {
 				this->batch((float)batchSize);
-				// std::cout << "loss actuelle: " << loss/(k+1.0) << std::endl;
 			}
 		}
 
@@ -294,10 +258,6 @@ float NeuralNetwork::eval(std::vector<std::tuple<xt::xarray<float>, xt::xarray<f
 
 	return loss;
 }
-
-// void NeuralNetwork::detect(xt::xarray<float> input) {
-
-// }
 
 void NeuralNetwork::load(const std::string path) {
 	std::ifstream inputFile;

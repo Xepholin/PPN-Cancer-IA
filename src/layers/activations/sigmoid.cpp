@@ -15,15 +15,6 @@ xt::xarray<float> Sigmoid::backward(xt::xarray<float> cost __attribute__((unused
 	return 0;
 }
 
-
-// xt::xarray<float> Sigmoid::prime(xt::xarray<float> input) // x
-// {
-
-// 	float sig = 1.0 / (1.0+ std::exp(-x));
-//     return sig *(1-sig);
-// }
-
-
 xt::xarray<float> Sigmoid::prime(xt::xarray<float> input) // x
 {
 

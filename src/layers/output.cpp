@@ -36,17 +36,6 @@ void Output::forward(xt::xarray<float> input, bool training)
 	{
 		this->norm();
 	}
-
-	// std::cout << "Output forward\n" << std::endl;
-	// std::cout << "input:\n" << this->input << std::endl;
-	// std::cout << "weights:\n" << this->weights << std::endl;
-	// std::cout << "bias:\n" << this->bias << std::endl;
-	// std::cout << "output:\n" << this->output << std::endl;
-
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// std::cout << std::endl;
 }
 
 xt::xarray<float> Output::backward(xt::xarray<float> gradient)
@@ -78,62 +67,6 @@ xt::xarray<float> Output::backward(xt::xarray<float> gradient)
 	// Accumulation correcte du gradient d'entrée
 	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
 	cblas_sgemv(CblasRowMajor, CblasNoTrans, this->inputShape, this->outputShape, 1.0f, this->weights.data(), this->outputShape, layerGradient.data(), 1, 0.0f, inputGradient.data(), 1);
-
-	return inputGradient;
-}
-
-xt::xarray<float> Output::oldbackward(xt::xarray<float> gradient)
-{
-
-	for (int i = 0; i < outputShape; ++i)
-	{
-		this->gammasGradient(i) = this->gammasGradient(i) + (gradient(i) * bnOutput(i));
-		this->betasGradient(i) = this->betasGradient(i) + gradient(i);
-	}
-
-	xt::xarray<float> layerGradient = xt::empty<float>({outputShape});
-
-	// Calculer le gradient pour chaque neurone de sortie
-	layerGradient = this->activation->prime(baOutput) * this->gammas * gradient;
-
-	float inputValue = 0.0;
-
-	// Calculer les gradients des poids et des biais
-	for (int i = 0; i < inputShape; ++i)
-	{
-		inputValue = input(i);
-
-		for (int j = 0; j < outputShape; ++j)
-		{
-			this->weightsGradient(i, j) = this->weightsGradient(i, j) + (inputValue * layerGradient(j));
-			// Application du taux d'apprentissage déplacée ici
-		}
-	}
-
-	// Mise à jour des poids et des biais
-	for (int i = 0; i < outputShape; ++i)
-	{
-		this->biasGradient(i) = this->biasGradient(i) + layerGradient(i);
-	}
-
-	xt::xarray<float> inputGradient = xt::empty<float>({inputShape});
-
-	// // Accumulation correcte du gradient d'entrée
-	// for (int i = 0; i < inputShape; ++i) {
-	// 	float sum = 0;
-	// 	for (int j = 0; j < outputShape; ++j) {
-	// 		sum += weights(i, j) * layerGradient(j);
-	// 	}
-	// 	inputGradient(i) = sum;
-	// }
-
-	for (int i = 0; i < inputShape; ++i)
-	{
-		for (int j = 0; j < outputShape; ++j)
-		{
-			inputGradient(i) = weights(i, j) * layerGradient(j);
-		}
-	}
 
 	return inputGradient;
 }
